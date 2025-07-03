@@ -1,53 +1,34 @@
-import * as env from 'env-var'
-import { EnvConfigs } from '@/config/utils/interfaceEnvironments'
+import * as env from "env-var";
+import { EnvConfigs } from "@/config/utils/interfaceEnvironments";
 
-
-const environments : EnvConfigs = {
+const environments: EnvConfigs = {
   development: {
-    type: 'mongodb',
-    url: env
-      .get('MONGODB_URL')
-      .default('test')
-      .asString(),
-    database: env
-      .get('MONGODB_NAME')
-      .default('test')
-      .asString(),
+    type: "mongodb",
+    url: env.get("MONGODB_URL").default("test").asString(),
+    database: env.get("MONGODB_NAME").default("test").asString(),
     extra: {
       ssl: false,
-      authSource: 'test',
+      authSource: "test",
     },
   },
   test: {
-    type: 'mongodb',
-    url: env
-      .get('MONGODB_URL')
-      .default('test')
-      .asString(),
-    database: env
-      .get('MONGODB_NAME')
-      .default('test')
-      .asString(),
+    type: "mongodb",
+    url: env.get("MONGODB_URL").default("test").asString(),
+    database: env.get("MONGODB_NAME").default("test").asString(),
     extra: {
       ssl: false,
-      authSource: 'test',
+      authSource: "test",
     },
   },
-   production: {
-    type: 'mongodb',
-    url: env
-      .get('MONGODB_URL')
-      .default('test')
-      .asString(),
-    database: env
-      .get('MONGODB_NAME')
-      .default('test')
-      .asString(),
+  production: {
+    type: "mongodb",
+    url: env.get("MONGODB_URL").default("test").asString(),
+    database: env.get("MONGODB_NAME").default("test").asString(),
     extra: {
       ssl: true,
-      authSource: 'admin',
+      authSource: "admin",
     },
   },
-}
+};
 
-export default environments[process.env.NODE_ENV || 'development']
+export default environments[process.env.NODE_ENV || "development"];
