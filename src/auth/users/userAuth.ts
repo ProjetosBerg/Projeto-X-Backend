@@ -16,7 +16,7 @@ class UserAuth implements IUserAuth {
    */
   async createUserToken(
     user: IUser
-  ): Promise<{ message: string; token: string; user: IUser }> {
+  ): Promise<{ message: string; token: string | null; user: IUser }> {
     try {
       const payload: ITokenPayload = {
         id: user.id,

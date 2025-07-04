@@ -3,6 +3,8 @@ import { userValidationSchema } from "../validation/userValidationSchema";
 import { RegisterUserUseCaseProtocol } from "../interfaces/registerUserUseCaseProtocol";
 import { UserRepositoryProtocol } from "@/infra/db/interfaces/userRepositoryProtocol";
 import UserAuth from "@/auth/users/userAuth";
+import { ServerError } from "@/data/errors/ServerError";
+import { BusinessRuleError } from "@/data/errors/BusinessRuleError";
 
 export class RegisterUserUseCase implements RegisterUserUseCaseProtocol {
   constructor(
@@ -29,7 +31,7 @@ export class RegisterUserUseCase implements RegisterUserUseCaseProtocol {
       });
 
       if (existingEmailUser) {
-        throw new Error(
+        throw new BusinessRuleError(
           "Já existe um usuário cadastrado com este endereço de email"
         );
       }
@@ -39,7 +41,9 @@ export class RegisterUserUseCase implements RegisterUserUseCaseProtocol {
       });
 
       if (existingLogin) {
-        throw new Error("Já existe um usuário cadastrado com este login");
+        throw new BusinessRuleError(
+          "Já existe um usuário cadastrado com este login"
+        );
       }
 
       const hashedPassword = await this.userAuth.hashPassword(data?.password);
@@ -52,7 +56,7 @@ export class RegisterUserUseCase implements RegisterUserUseCaseProtocol {
       });
 
       if (!newUser || !newUser.id) {
-        throw new Error("Falha ao criar usuário no banco de dados");
+        throw new BusinessRuleError("Falha ao criar usuário no banco de dados");
       }
 
       const { token } = await this.userAuth.createUserToken({
@@ -63,7 +67,9 @@ export class RegisterUserUseCase implements RegisterUserUseCaseProtocol {
       });
 
       if (!token) {
-        throw new Error("Falha ao gerar token de autenticação para o usuário");
+        throw new BusinessRuleError(
+          "Falha ao gerar token de autenticação para o usuário"
+        );
       }
 
       return {
@@ -75,9 +81,13 @@ export class RegisterUserUseCase implements RegisterUserUseCaseProtocol {
         throw error;
       }
 
+      if (error instanceof BusinessRuleError) {
+        throw error;
+      }
+
       const errorMessage =
         error.message || "Erro interno do servidor durante o cadastro";
-      throw new Error(`Falha no cadastro do usuário: ${errorMessage}`);
+      throw new ServerError(`Falha no cadastro do usuário: ${errorMessage}`);
     }
   }
 }

@@ -17,7 +17,7 @@ export interface ITokenPayload {
 export interface IUserAuth {
   createUserToken(
     user: IUser
-  ): Promise<{ message: string; token: string; user: IUser }>;
+  ): Promise<{ message: string; token: string | null; user: IUser }>;
 
   getToken(headers: { authorization?: string }): string | null;
 

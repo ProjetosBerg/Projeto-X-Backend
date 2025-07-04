@@ -1,15 +1,26 @@
-const { createDefaultPreset } = require("ts-jest");
-
-const tsJestTransformCfg = createDefaultPreset().transform;
-
-/** @type {import("jest").Config} **/
 module.exports = {
+  clearMocks: true,
+  coverageDirectory: "coverage",
+  moduleNameMapper: {
+    "@/tests/(.*)": "<rootDir>/tests/$1",
+    "@/(.*)": "<rootDir>/src/$1",
+  },
+  preset: "ts-jest",
   testEnvironment: "node",
+  roots: ["<rootDir>/tests", "<rootDir>/src"],
+  collectCoverageFrom: [
+    "<rootDir>/src/**/*.ts",
+    "!<rootDir>/src/main/**",
+    "!<rootDir>/src/loaders/**",
+  ],
+  coverageProvider: "babel",
   transform: {
-    ...tsJestTransformCfg,
+    ".+\\.ts$": "ts-jest",
   },
-   moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/src/$1',
+  globals: {
+    "ts-jest": {
+      isolatedModules: true,
+    },
   },
-   preset: 'ts-jest',
+  testTimeout: 60000,
 };
