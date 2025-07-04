@@ -14,7 +14,15 @@ export class RegisterUserController implements Controller {
     res: Response<IResponse>
   ): Promise<Response<IResponse>> {
     try {
-      const createUser = await this.createUserService.handle({ ...req.body });
+      const { name, login, email, password, confirmpassword } = req.body;
+      const data = {
+        name,
+        login,
+        email,
+        password,
+        confirmpassword,
+      };
+      const createUser = await this.createUserService.handle({ ...data });
       return res.status(201).json({
         status: ResponseStatus.OK,
         data: createUser,
