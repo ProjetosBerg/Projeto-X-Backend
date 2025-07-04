@@ -3,6 +3,7 @@ import { createConnection, Connection } from "typeorm";
 import postgresDbConfig from "@/config/postgres";
 import mongoDbConfig from "@/config/mongodb";
 import logger from "@/loaders/logger";
+import PostgresEntities from "@/domain/entities/postgres";
 
 class DatabaseHelper {
   private connections: Connection[];
@@ -21,7 +22,9 @@ class DatabaseHelper {
     try {
       const postgresConnection = await createConnection({
         ...this.postgresDbConfig,
-        entities: [...Object.values({})],
+        entities: [...Object.values(PostgresEntities || {})],
+        migrations: ["src/migrations/**/*.ts"],
+
         logging: false,
         maxQueryExecutionTime: 1000,
         name: "default",
@@ -46,7 +49,6 @@ class DatabaseHelper {
         name: "mongodb",
         poolSize: 1000,
       });
-      console.log("chegou auqi");
 
       await mongoConnection.synchronize(false);
 

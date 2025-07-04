@@ -6,7 +6,9 @@
   "scripts": {
     "start": "ts-node-dev --respawn --transpile-only -r tsconfig-paths/register src/server.ts",
     "dev": "ts-node-dev --respawn --transpile-only -r tsconfig-paths/register src/server.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "migration:generate": "npx ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:generate -d src/loaders/dataSource.ts",
+    "migration:run": "npx ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:run -d src/loaders/dataSource.ts"
   },
   "repository": {
     "type": "git",
