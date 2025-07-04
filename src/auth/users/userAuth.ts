@@ -3,8 +3,8 @@ import bcrypt from "bcrypt";
 import { ITokenPayload, IUser, IUserAuth } from "@/auth/interface/IUserAuth";
 
 class UserAuth implements IUserAuth {
-  private readonly JWT_SECRET: string =
-    process.env.JWT_SECRET || "your-secret-key";
+  private readonly JWT_SECRET: string = 
+    process.env.JWT_SECRET ?? (() => { throw new Error('JWT_SECRET environment variable is required') })();
 
   /**
    * Cria um token JWT para um usuário
