@@ -1,5 +1,5 @@
 import { UserModel } from "@/domain/models/postgres/UserModel";
-import { userValidationSchema } from "../validation/userValidationSchema";
+import { registerUserValidationSchema } from "../validation/registerUserValidationSchema";
 import { RegisterUserUseCaseProtocol } from "../interfaces/registerUserUseCaseProtocol";
 import { UserRepositoryProtocol } from "@/infra/db/interfaces/userRepositoryProtocol";
 import UserAuth from "@/auth/users/userAuth";
@@ -25,7 +25,7 @@ export class RegisterUserUseCase implements RegisterUserUseCaseProtocol {
     data: RegisterUserUseCaseProtocol.Params
   ): Promise<RegisterUserUseCaseProtocol.Result | undefined> {
     try {
-      await userValidationSchema.validate(data, { abortEarly: false });
+      await registerUserValidationSchema.validate(data, { abortEarly: false });
 
       const existingEmailUser = await this.userRepository.findOne({
         email: data.email,
