@@ -20,6 +20,8 @@ export class RegisterUserUseCase implements RegisterUserUseCaseProtocol {
    * @param {string} data.password - A senha da conta do usuário
    * @param {string} data.confirmpassword - A confirmação da senha do usuário
    * @returns {Promise<RegisterUserUseCaseProtocol.Result | undefined>} O usuário registrado e o token de autenticação
+   * @throws {BusinessRuleError} Se as credenciais forem inválidas
+   * @throws {ServerError} Se ocorrer um erro ao registrar o usuário
    */
   async handle(
     data: RegisterUserUseCaseProtocol.Params
