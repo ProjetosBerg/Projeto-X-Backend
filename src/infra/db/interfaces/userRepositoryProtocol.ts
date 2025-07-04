@@ -13,11 +13,13 @@ export namespace UserRepositoryProtocol {
   export type CreateParams = {
     email: UserModel["email"];
     name: UserModel["name"];
+    login: UserModel["login"];
     password: UserModel["password"];
   };
 
   export type FindOneParams = {
     id?: UserModel["id"];
+    login?: UserModel["login"];
     email?: UserModel["email"];
   };
 }

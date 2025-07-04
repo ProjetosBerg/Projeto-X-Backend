@@ -9,6 +9,7 @@ export interface RegisterUserUseCaseProtocol {
 export namespace RegisterUserUseCaseProtocol {
   export type Params = {
     name: UserModel["name"];
+    login: UserModel["login"];
     email: UserModel["email"];
     password: UserModel["password"];
     confirmpassword: string;

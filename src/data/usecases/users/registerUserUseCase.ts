@@ -24,21 +24,30 @@ export class RegisterUserUseCase implements RegisterUserUseCaseProtocol {
     try {
       await userValidationSchema.validate(data, { abortEarly: false });
 
-      const existingUser = await this.userRepository.findOne({
+      const existingEmailUser = await this.userRepository.findOne({
         email: data.email,
       });
 
-      if (existingUser) {
+      if (existingEmailUser) {
         throw new Error(
           "Já existe um usuário cadastrado com este endereço de email"
         );
       }
 
-      const hashedPassword = await this.userAuth.hashPassword(data.password);
+      const existingLogin = await this.userRepository.findOne({
+        login: data.login,
+      });
+
+      if (existingLogin) {
+        throw new Error("Já existe um usuário cadastrado com este login");
+      }
+
+      const hashedPassword = await this.userAuth.hashPassword(data?.password);
 
       const newUser: UserModel | undefined = await this.userRepository.create({
-        name: data.name,
-        email: data.email,
+        name: data?.name,
+        login: data?.login,
+        email: data?.email,
         password: hashedPassword,
       });
 
@@ -47,9 +56,10 @@ export class RegisterUserUseCase implements RegisterUserUseCaseProtocol {
       }
 
       const { token } = await this.userAuth.createUserToken({
-        id: newUser.id,
-        name: newUser.name,
-        email: newUser.email,
+        id: newUser?.id,
+        login: newUser?.login,
+        name: newUser?.name,
+        email: newUser?.email,
       });
 
       if (!token) {

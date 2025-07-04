@@ -1,12 +1,14 @@
 export interface IUser {
   id: string;
   name: string;
+  login: string;
   email: string;
 }
 
 export interface ITokenPayload {
   id: string;
   name: string;
+  login: string;
   email: string;
   iat?: number;
   exp?: number;
@@ -15,7 +17,7 @@ export interface ITokenPayload {
 export interface IUserAuth {
   createUserToken(
     user: IUser
-  ): Promise<{ message: string; token: string; userId: string }>;
+  ): Promise<{ message: string; token: string; user: IUser }>;
 
   getToken(headers: { authorization?: string }): string | null;
 

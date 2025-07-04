@@ -12,15 +12,16 @@ class UserAuth implements IUserAuth {
    * @param {string} user.id - Identificador único do usuário
    * @param {string} user.name - Nome do usuário
    * @param {string} user.email - Endereço de e-mail do usuário
-   * @returns {Promise<{ message: string; token: string; userId: string }>} Mensagem de autenticação, token e ID do usuário
+   * @returns {Promise<{ message: string; token: string; user: IUser}>} Mensagem de autenticação, token e ID do usuário
    */
   async createUserToken(
     user: IUser
-  ): Promise<{ message: string; token: string; userId: string }> {
+  ): Promise<{ message: string; token: string; user: IUser }> {
     try {
       const payload: ITokenPayload = {
         id: user.id,
         name: user.name,
+        login: user.login,
         email: user.email,
       };
 
@@ -28,7 +29,12 @@ class UserAuth implements IUserAuth {
       return {
         message: "Você está autenticado",
         token,
-        userId: user.id,
+        user: {
+          id: user.id,
+          name: user.name,
+          login: user.login,
+          email: user.email,
+        },
       };
     } catch (error) {
       const errorMessage =
@@ -63,6 +69,7 @@ class UserAuth implements IUserAuth {
       return {
         id: decoded.id,
         name: decoded.name,
+        login: decoded.login,
         email: decoded.email,
       };
     } catch (error) {

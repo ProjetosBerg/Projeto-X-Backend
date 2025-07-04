@@ -1,6 +1,7 @@
 export type UserModel = {
   id?: string;
   name: string;
+  login: string;
   email: string;
   password: string;
   created_at?: Date;
