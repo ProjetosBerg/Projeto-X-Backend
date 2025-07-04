@@ -2,10 +2,10 @@ import { Request, Response } from "express";
 import { ValidationError } from "yup";
 import { IResponse, ResponseStatus, getError } from "@/utils/service";
 import { Controller } from "@/presentation/protocols/controller";
-import { RegisterUserCase } from "@/data/usecases/users/registerUserUseCase";
+import { RegisterUserUseCase } from "@/data/usecases/users/registerUserUseCase";
 
 export class RegisterUserController implements Controller {
-  constructor(private readonly createUserService: RegisterUserCase) {
+  constructor(private readonly createUserService: RegisterUserUseCase) {
     this.createUserService = createUserService;
   }
 
@@ -14,10 +14,10 @@ export class RegisterUserController implements Controller {
     res: Response<IResponse>
   ): Promise<Response<IResponse>> {
     try {
-      const message = await this.createUserService.handle({});
+      const createUser = await this.createUserService.handle({ ...req.body });
       return res.status(201).json({
         status: ResponseStatus.OK,
-        data: message,
+        data: createUser,
       });
     } catch (error) {
       if (error instanceof ValidationError) {

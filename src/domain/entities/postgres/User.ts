@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from "uuid";
 
 @Entity("users")
 export class User extends BaseEntity {
-  @PrimaryGeneratedColumn({ name: "id" })
+  @PrimaryGeneratedColumn("uuid")
   id: string = uuidv4();
 
   @Column({ name: "name" })

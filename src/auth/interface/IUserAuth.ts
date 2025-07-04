@@ -2,7 +2,6 @@ export interface IUser {
   id: string;
   name: string;
   email: string;
-  password: string;
 }
 
 export interface ITokenPayload {
@@ -23,4 +22,8 @@ export interface IUserAuth {
   getUserByToken(token: string): Promise<ITokenPayload | null>;
 
   checkToken(token: string): Promise<boolean>;
+
+  hashPassword(password: string): Promise<string>;
+
+  comparePassword(password: string, hashedPassword: string): Promise<boolean>;
 }
