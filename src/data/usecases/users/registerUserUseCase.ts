@@ -15,6 +15,7 @@ export class RegisterUserUseCase implements RegisterUserUseCaseProtocol {
    * Realiza o cadastro de um usuário com os dados fornecidos
    * @param {RegisterUserUseCaseProtocol.Params} data - Os dados de registro do usuário
    * @param {string} data.name - O nome do usuário
+   * @param {string} data.login - O login do usuário
    * @param {string} data.email - O endereço de email do usuário
    * @param {string} data.password - A senha da conta do usuário
    * @param {string} data.confirmpassword - A confirmação da senha do usuário
