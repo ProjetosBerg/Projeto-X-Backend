@@ -5,8 +5,11 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   BaseEntity,
+  BeforeInsert,
+  BeforeUpdate
 } from "typeorm";
 import { v4 as uuidv4 } from "uuid";
+import bcrypt from "bcrypt";
 
 @Entity("users")
 export class User extends BaseEntity {
@@ -31,4 +34,14 @@ export class User extends BaseEntity {
     onUpdate: "CURRENT_TIMESTAMP",
   })
   updated_at!: Date;
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  async hashPassword() {
+    // Only hash the password if it has been modified (or is new)
+    if (this.password && this.password.substring(0, 4) !== "$2b$") {
+      const salt = await bcrypt.genSalt(10);
+      this.password = await bcrypt.hash(this.password, salt);
+    }
+  }
 }
