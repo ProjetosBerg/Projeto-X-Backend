@@ -7,6 +7,7 @@
     "start": "ts-node-dev --respawn --transpile-only -r tsconfig-paths/register src/server.ts",
     "dev": "ts-node-dev --respawn --transpile-only -r tsconfig-paths/register src/server.ts",
     "test": "tsc --skipLibCheck --noEmit && jest --passWithNoTests --runInBand",
+    "test:all": "npm test",
     "migration:generate": "npx ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:generate -d src/loaders/dataSource.ts",
     "migration:run": "npx ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:run -d src/loaders/dataSource.ts"
   },
