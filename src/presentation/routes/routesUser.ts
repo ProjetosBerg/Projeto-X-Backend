@@ -1,3 +1,4 @@
+import { makeFindQuestionsUserControllerFactory } from "@/main/factories/controllers/findQuestionsUserControllerFactory";
 import { makeForgotPasswordUserControllerFactory } from "@/main/factories/controllers/forgotPasswordUserControllerFactory";
 import { makeLoginUserControllerFactory } from "@/main/factories/controllers/loginUserControllerFactory";
 import { makeRegisterUserControllerFactory } from "@/main/factories/controllers/registerUserControllerFactory";
@@ -14,5 +15,9 @@ export const routesUser = (router: Router) => {
 
   router.patch("/user/forgot-password", (req, res) => {
     makeForgotPasswordUserControllerFactory().handle(req, res);
+  });
+
+  router.get("/user/find-questions", (req, res) => {
+    makeFindQuestionsUserControllerFactory().handle(req, res);
   });
 };
