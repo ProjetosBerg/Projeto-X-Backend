@@ -1,3 +1,4 @@
+import { makeEditUserByIdControllerFactory } from "@/main/factories/controllers/editUserControllerFactory";
 import { makeFindQuestionsUserControllerFactory } from "@/main/factories/controllers/findQuestionsUserControllerFactory";
 import { makeFindUserByIdControllerFactory } from "@/main/factories/controllers/findUserControllerFactory";
 import { makeForgotPasswordUserControllerFactory } from "@/main/factories/controllers/forgotPasswordUserControllerFactory";
@@ -26,5 +27,9 @@ export const routesUser = (router: Router) => {
 
   router.get(`/user/find-user/:id`, (req, res) => {
     makeFindUserByIdControllerFactory().handle(req, res);
+  });
+
+  router.patch(`/user/edit/:id`, (req, res) => {
+    makeEditUserByIdControllerFactory().handle(req, res);
   });
 };

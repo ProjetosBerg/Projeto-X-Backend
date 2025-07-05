@@ -11,6 +11,9 @@ export interface UserRepositoryProtocol {
   updatePassword(
     data: UserRepositoryProtocol.UpdatePasswordParams
   ): Promise<UserModel | undefined>;
+  updateUser(
+    data: UserRepositoryProtocol.UpdateUserParams
+  ): Promise<UserModel | undefined>;
 }
 
 export namespace UserRepositoryProtocol {
@@ -34,5 +37,15 @@ export namespace UserRepositoryProtocol {
   export type UpdatePasswordParams = {
     id: UserModel["id"];
     password: UserModel["password"];
+  };
+
+  export type UpdateUserParams = {
+    id: UserModel["id"];
+    name?: UserModel["name"];
+    email?: UserModel["email"];
+    securityQuestions?: Array<{
+      question: SecurityQuestionModel["question"];
+      answer: SecurityQuestionModel["answer"];
+    }>;
   };
 }

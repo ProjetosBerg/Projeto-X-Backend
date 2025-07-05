@@ -91,4 +91,46 @@ export class UserRepository implements UserRepositoryProtocol {
       return null;
     }
   }
+
+  /**
+   * Fazer o update do usuário
+   * @param {UserRepositoryProtocol.UpdateUserParams} data - Os critérios de atualização
+   * @param {string} [data.id] - ID do usuário
+   * @param {string} [data.login] - Login do usuário (opcional)
+   * @param {string} [data.email] - E-mail do usuário (opcional)
+   * @param {Array<{ question: string; answer: string }>} [data.securityQuestions] - Lista de questões de segurança (opcional)
+   * @returns {Promise<UserModel | null>} O usuário encontrado ou null
+   */
+
+  async updateUser(
+    data: UserRepositoryProtocol.UpdateUserParams
+  ): Promise<UserModel | undefined> {
+    try {
+      const repository = getRepository(User);
+      const securityQuestionRepository = getRepository(SecurityQuestion);
+      const user = await repository.findOne({
+        where: { id: data.id },
+        relations: ["security_questions"],
+      });
+      if (!user) {
+        throw new NotFoundError("Usuário não encontrado");
+      }
+
+      if (data.name) user.name = data.name;
+      if (data.email) user.email = data.email;
+      if (data.securityQuestions) {
+        user.security_questions = data.securityQuestions.map((sq) =>
+          securityQuestionRepository.create({
+            question: String(sq.question),
+            answer: String(sq.answer),
+          })
+        );
+      }
+
+      const updatedUser = await repository.save(user);
+      return updatedUser;
+    } catch (error: any) {
+      throw new Error(`Erro ao atualizar usuário: ${error.message}`);
+    }
+  }
 }
