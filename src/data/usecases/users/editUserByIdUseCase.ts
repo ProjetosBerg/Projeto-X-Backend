@@ -2,7 +2,7 @@ import { UserRepositoryProtocol } from "@/infra/db/interfaces/userRepositoryProt
 import { ServerError } from "@/data/errors/ServerError";
 import { BusinessRuleError } from "@/data/errors/BusinessRuleError";
 import { NotFoundError } from "@/data/errors/NotFoundError";
-import { EditUserByIdUseCaseProtocol } from "../interfaces/editUserByIdUseCaseProtocol";
+import { EditUserByIdUseCaseProtocol } from "../interfaces/users/editUserByIdUseCaseProtocol";
 import { editUserByIdValidationSchema } from "../validation/users/editUserByIdValidationSchema";
 
 export class EditUserByIdUseCase implements EditUserByIdUseCaseProtocol {

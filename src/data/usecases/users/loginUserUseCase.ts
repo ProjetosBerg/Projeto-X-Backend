@@ -3,7 +3,7 @@ import { UserRepositoryProtocol } from "@/infra/db/interfaces/userRepositoryProt
 import UserAuth from "@/auth/users/userAuth";
 import { ServerError } from "@/data/errors/ServerError";
 import { BusinessRuleError } from "@/data/errors/BusinessRuleError";
-import { LoginUserUseCaseProtocol } from "@/data/usecases/interfaces/loginUserUseCaseProtocol";
+import { LoginUserUseCaseProtocol } from "@/data/usecases/interfaces/users/loginUserUseCaseProtocol";
 import { loginUserValidationSchema } from "@/data/usecases/validation/users/loginUserValidationSchema";
 import { NotFoundError } from "@/data/errors/NotFoundError";
 

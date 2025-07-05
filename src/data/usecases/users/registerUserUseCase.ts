@@ -1,7 +1,7 @@
 import { UserModel } from "@/domain/models/postgres/UserModel";
 import { SecurityQuestionModel } from "@/domain/models/postgres/SecurityQuestionModel";
 import { registerUserValidationSchema } from "../validation/users/registerUserValidationSchema";
-import { RegisterUserUseCaseProtocol } from "../interfaces/registerUserUseCaseProtocol";
+import { RegisterUserUseCaseProtocol } from "../interfaces/users/registerUserUseCaseProtocol";
 import { UserRepositoryProtocol } from "@/infra/db/interfaces/userRepositoryProtocol";
 import UserAuth from "@/auth/users/userAuth";
 import { ServerError } from "@/data/errors/ServerError";

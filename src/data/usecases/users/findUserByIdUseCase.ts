@@ -2,7 +2,7 @@ import { UserRepositoryProtocol } from "@/infra/db/interfaces/userRepositoryProt
 import { ServerError } from "@/data/errors/ServerError";
 import { BusinessRuleError } from "@/data/errors/BusinessRuleError";
 import { NotFoundError } from "@/data/errors/NotFoundError";
-import { FindUserByIdUseCaseProtocol } from "../interfaces/findUserByIdUseCaseProtocol";
+import { FindUserByIdUseCaseProtocol } from "../interfaces/users/findUserByIdUseCaseProtocol";
 import { findUserByIdValidationSchema } from "../validation/users/findUserByIdValidationSchema";
 
 export class FindUserByIdUseCase implements FindUserByIdUseCaseProtocol {

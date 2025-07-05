@@ -2,7 +2,7 @@ import { UserRepositoryProtocol } from "@/infra/db/interfaces/userRepositoryProt
 import { ServerError } from "@/data/errors/ServerError";
 import { BusinessRuleError } from "@/data/errors/BusinessRuleError";
 import { NotFoundError } from "@/data/errors/NotFoundError";
-import { DeleteUserByIdUseCaseProtocol } from "../interfaces/deleteUserByIdUseCaseProtocol";
+import { DeleteUserByIdUseCaseProtocol } from "../interfaces/users/deleteUserByIdUseCaseProtocol";
 import { deleteUserByIdValidationSchema } from "../validation/users/deleteUserByIdValidationSchema";
 
 export class DeleteUserByIdUseCase implements DeleteUserByIdUseCaseProtocol {

@@ -4,7 +4,7 @@ import UserAuth from "@/auth/users/userAuth";
 import { ServerError } from "@/data/errors/ServerError";
 import { BusinessRuleError } from "@/data/errors/BusinessRuleError";
 import { NotFoundError } from "@/data/errors/NotFoundError";
-import { ForgotPasswordUserUseCaseProtocol } from "../interfaces/forgotPasswordUseCaseProtocol";
+import { ForgotPasswordUserUseCaseProtocol } from "../interfaces/users/forgotPasswordUseCaseProtocol";
 import { forgotPasswordUserValidationSchema } from "../validation/users/forgotPasswordUserValidationSchema";
 
 export class ForgotPasswordUserUseCase
