@@ -19,7 +19,10 @@ export const forgotPasswordUserValidationSchema = yup.object().shape({
   confirmNewPassword: yup
     .string()
     .required("Confirmação de senha é obrigatória")
-    .oneOf([yup.ref("newPassword")], "Senhas diferentes"),
+    .oneOf(
+      [yup.ref("newPassword")],
+      "A nova senha e a confirmação não coincidem"
+    ),
 
   securityQuestions: yup
     .array()
