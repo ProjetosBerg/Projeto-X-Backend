@@ -5,7 +5,7 @@ import { ServerError } from "@/data/errors/ServerError";
 import { BusinessRuleError } from "@/data/errors/BusinessRuleError";
 import { NotFoundError } from "@/data/errors/NotFoundError";
 import { ForgotPasswordUserUseCaseProtocol } from "../interfaces/forgotPasswordUseCaseProtocol";
-import { forgotPasswordUserValidationSchema } from "../validation/forgotPasswordUserValidationSchema";
+import { forgotPasswordUserValidationSchema } from "../validation/users/forgotPasswordUserValidationSchema";
 
 export class ForgotPasswordUserUseCase
   implements ForgotPasswordUserUseCaseProtocol

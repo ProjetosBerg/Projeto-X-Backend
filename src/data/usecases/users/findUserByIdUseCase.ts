@@ -3,7 +3,7 @@ import { ServerError } from "@/data/errors/ServerError";
 import { BusinessRuleError } from "@/data/errors/BusinessRuleError";
 import { NotFoundError } from "@/data/errors/NotFoundError";
 import { FindUserByIdUseCaseProtocol } from "../interfaces/findUserByIdUseCaseProtocol";
-import { findUserByIdValidationSchema } from "../validation/findUserByIdValidationSchema";
+import { findUserByIdValidationSchema } from "../validation/users/findUserByIdValidationSchema";
 
 export class FindUserByIdUseCase implements FindUserByIdUseCaseProtocol {
   constructor(private readonly userRepository: UserRepositoryProtocol) {}

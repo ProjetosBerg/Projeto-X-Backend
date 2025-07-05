@@ -3,7 +3,7 @@ import { ServerError } from "@/data/errors/ServerError";
 import { BusinessRuleError } from "@/data/errors/BusinessRuleError";
 import { NotFoundError } from "@/data/errors/NotFoundError";
 import { DeleteUserByIdUseCaseProtocol } from "../interfaces/deleteUserByIdUseCaseProtocol";
-import { deleteUserByIdValidationSchema } from "../validation/deleteUserByIdValidationSchema copy";
+import { deleteUserByIdValidationSchema } from "../validation/users/deleteUserByIdValidationSchema";
 
 export class DeleteUserByIdUseCase implements DeleteUserByIdUseCaseProtocol {
   constructor(private readonly userRepository: UserRepositoryProtocol) {}

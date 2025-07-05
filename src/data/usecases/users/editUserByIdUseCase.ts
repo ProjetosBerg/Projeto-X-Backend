@@ -3,7 +3,7 @@ import { ServerError } from "@/data/errors/ServerError";
 import { BusinessRuleError } from "@/data/errors/BusinessRuleError";
 import { NotFoundError } from "@/data/errors/NotFoundError";
 import { EditUserByIdUseCaseProtocol } from "../interfaces/editUserByIdUseCaseProtocol";
-import { editUserByIdValidationSchema } from "../validation/editUserByIdValidationSchema";
+import { editUserByIdValidationSchema } from "../validation/users/editUserByIdValidationSchema";
 
 export class EditUserByIdUseCase implements EditUserByIdUseCaseProtocol {
   constructor(private readonly userRepository: UserRepositoryProtocol) {}

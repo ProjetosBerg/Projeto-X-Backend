@@ -4,7 +4,7 @@ import UserAuth from "@/auth/users/userAuth";
 import { ServerError } from "@/data/errors/ServerError";
 import { BusinessRuleError } from "@/data/errors/BusinessRuleError";
 import { LoginUserUseCaseProtocol } from "@/data/usecases/interfaces/loginUserUseCaseProtocol";
-import { loginUserValidationSchema } from "@/data/usecases/validation/loginUserValidationSchema";
+import { loginUserValidationSchema } from "@/data/usecases/validation/users/loginUserValidationSchema";
 import { NotFoundError } from "@/data/errors/NotFoundError";
 
 export class LoginUserUseCase implements LoginUserUseCaseProtocol {

@@ -3,7 +3,7 @@ import { ServerError } from "@/data/errors/ServerError";
 import { BusinessRuleError } from "@/data/errors/BusinessRuleError";
 import { NotFoundError } from "@/data/errors/NotFoundError";
 import { FindQuestionsUserUseCaseProtocol } from "../interfaces/findQuestionsUserUseCaseProtocol";
-import { findQuestionsUserValidationSchema } from "../validation/findQuestionsUserValidationSchema";
+import { findQuestionsUserValidationSchema } from "../validation/users/findQuestionsUserValidationSchema";
 
 export class FindQuestionsUserUseCase
   implements FindQuestionsUserUseCaseProtocol
