@@ -40,6 +40,7 @@ export const registerUserValidationSchema = yup.object().shape({
   securityQuestions: yup
     .array()
     .required("Perguntas de segurança é obrigatórias")
+    .min(1, "Pelo menos uma questão de segurança é necessária")
     .of(
       yup.object().shape({
         question: yup.string().required("Pergunta de segurança é obrigatória"),

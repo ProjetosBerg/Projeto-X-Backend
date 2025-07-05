@@ -64,6 +64,10 @@ describe("RegisterUserUseCase", () => {
       email: mockUser.email,
       password: mockUser.password,
       confirmpassword: mockUser.password,
+      securityQuestions: mockUser.security_questions.map((sq) => ({
+        question: sq.question,
+        answer: sq.answer,
+      })),
     };
 
     const result = await sut.handle(input);
@@ -87,6 +91,7 @@ describe("RegisterUserUseCase", () => {
       login: input.login,
       email: input.email,
       password: "hashed_password",
+      securityQuestions: input.securityQuestions,
     });
     expect(
       userAuthRepositoryRepositorySpy.createUserToken
@@ -107,6 +112,7 @@ describe("RegisterUserUseCase", () => {
       email: mockUser.email,
       password: mockUser.password,
       confirmpassword: mockUser.password,
+      securityQuestions: mockUser.security_questions,
     };
 
     userRepositoryRepositorySpy.findOne.mockResolvedValueOnce(mockUser);
@@ -129,6 +135,7 @@ describe("RegisterUserUseCase", () => {
       email: mockUser.email,
       password: mockUser.password,
       confirmpassword: mockUser.password,
+      securityQuestions: mockUser.security_questions,
     };
 
     userRepositoryRepositorySpy.findOne
@@ -157,6 +164,7 @@ describe("RegisterUserUseCase", () => {
       email: mockUser.email,
       password: mockUser.password,
       confirmpassword: mockUser.password,
+      securityQuestions: mockUser.security_questions,
     };
 
     userRepositoryRepositorySpy.create.mockResolvedValueOnce(undefined);
@@ -172,6 +180,7 @@ describe("RegisterUserUseCase", () => {
       login: input.login,
       email: input.email,
       password: "hashed_password",
+      securityQuestions: input.securityQuestions,
     });
   });
 
@@ -184,6 +193,7 @@ describe("RegisterUserUseCase", () => {
       email: mockUser.email,
       password: mockUser.password,
       confirmpassword: mockUser.password,
+      securityQuestions: mockUser.security_questions,
     };
 
     userAuthRepositoryRepositorySpy.createUserToken.mockResolvedValueOnce({
