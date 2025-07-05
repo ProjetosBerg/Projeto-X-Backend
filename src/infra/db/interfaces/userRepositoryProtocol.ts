@@ -8,6 +8,9 @@ export interface UserRepositoryProtocol {
   findOne(
     data: UserRepositoryProtocol.FindOneParams
   ): Promise<UserModel | null>;
+  updatePassword(
+    data: UserRepositoryProtocol.UpdatePasswordParams
+  ): Promise<UserModel | undefined>;
 }
 
 export namespace UserRepositoryProtocol {
@@ -26,5 +29,10 @@ export namespace UserRepositoryProtocol {
     id?: UserModel["id"];
     login?: UserModel["login"];
     email?: UserModel["email"];
+  };
+
+  export type UpdatePasswordParams = {
+    id: UserModel["id"];
+    password: UserModel["password"];
   };
 }

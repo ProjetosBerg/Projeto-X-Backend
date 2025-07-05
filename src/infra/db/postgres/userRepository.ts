@@ -1,9 +1,9 @@
 import { UserModel } from "@/domain/models/postgres/UserModel";
-import { SecurityQuestionModel } from "@/domain/models/postgres/SecurityQuestionModel";
 import { User } from "@/domain/entities/postgres/User";
 import { SecurityQuestion } from "@/domain/entities/postgres/SecurityQuestion";
 import { getRepository } from "typeorm";
 import { UserRepositoryProtocol } from "../interfaces/userRepositoryProtocol";
+import { NotFoundError } from "@/data/errors/NotFoundError";
 
 export class UserRepository implements UserRepositoryProtocol {
   constructor() {}
@@ -46,6 +46,30 @@ export class UserRepository implements UserRepositoryProtocol {
   }
 
   /**
+   * Atualiza a senha de um usuário no banco de dados
+   * @param {UserRepositoryProtocol.UpdateParams} data - Os dados para atualização
+   * @param {string} data.id - ID do usuário
+   * @param {string} data.password - Nova senha criptografada
+   * @returns {Promise<UserModel | undefined>} O usuário atualizado
+   */
+  async updatePassword(
+    data: UserRepositoryProtocol.UpdatePasswordParams
+  ): Promise<UserModel | undefined> {
+    try {
+      const repository = getRepository(User);
+      const user = await repository.findOne({ where: { id: data.id } });
+      if (!user) {
+        throw new NotFoundError("Usuário não encontrado");
+      }
+      user.password = data.password;
+      const updatedUser = await repository.save(user);
+      return updatedUser;
+    } catch (error: any) {
+      throw new Error(`Erro ao atualizar usuário: ${error.message}`);
+    }
+  }
+
+  /**
    * Busca um usuário por ID ou e-mail
    * @param {UserRepositoryProtocol.FindOneParams} data - Os critérios de busca
    * @param {string} [data.id] - ID do usuário (opcional)
@@ -60,6 +84,7 @@ export class UserRepository implements UserRepositoryProtocol {
       const repository = getRepository(User);
       const user = await repository.findOne({
         where: data,
+        relations: ["security_questions"],
       });
       return user;
     } catch (error) {
