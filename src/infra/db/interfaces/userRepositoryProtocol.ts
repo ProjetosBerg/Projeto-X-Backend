@@ -1,4 +1,5 @@
 import { UserModel } from "@/domain/models/postgres/UserModel";
+import { SecurityQuestionModel } from "@/domain/models/postgres/SecurityQuestionModel";
 
 export interface UserRepositoryProtocol {
   create(
@@ -15,6 +16,10 @@ export namespace UserRepositoryProtocol {
     name: UserModel["name"];
     login: UserModel["login"];
     password: UserModel["password"];
+    securityQuestions: Array<{
+      question: SecurityQuestionModel["question"];
+      answer: SecurityQuestionModel["answer"];
+    }>;
   };
 
   export type FindOneParams = {

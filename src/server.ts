@@ -3,6 +3,7 @@ import express from "express";
 import env from "env-var";
 import router from "./routes";
 import databaseHelper from "@/loaders/database";
+import logger from "@/loaders/logger";
 
 const app = express();
 dotenv.config();
@@ -18,5 +19,5 @@ databaseHelper.initConnections();
 
 app.use("/api", router);
 app.listen(port, () => {
-  console.log(`Servidor rodando na porta ${port} - Ambiente: ${NODE_ENV}`);
+  logger.info(`Servidor rodando na porta ${port} - Ambiente: ${NODE_ENV}`);
 });

@@ -1,4 +1,5 @@
 import { UserModel } from "@/domain/models/postgres/UserModel";
+import { SecurityQuestionModel } from "@/domain/models/postgres/SecurityQuestionModel";
 
 export interface RegisterUserUseCaseProtocol {
   handle(
@@ -13,6 +14,10 @@ export namespace RegisterUserUseCaseProtocol {
     email: UserModel["email"];
     password: UserModel["password"];
     confirmpassword: string;
+    securityQuestions: Array<{
+      question: SecurityQuestionModel["question"];
+      answer: SecurityQuestionModel["answer"];
+    }>;
   };
   export type Result = {
     user: UserModel;

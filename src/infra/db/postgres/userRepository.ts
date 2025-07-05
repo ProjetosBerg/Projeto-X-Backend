@@ -1,5 +1,7 @@
 import { UserModel } from "@/domain/models/postgres/UserModel";
+import { SecurityQuestionModel } from "@/domain/models/postgres/SecurityQuestionModel";
 import { User } from "@/domain/entities/postgres/User";
+import { SecurityQuestion } from "@/domain/entities/postgres/SecurityQuestion";
 import { getRepository } from "typeorm";
 import { UserRepositoryProtocol } from "../interfaces/userRepositoryProtocol";
 
@@ -7,12 +9,13 @@ export class UserRepository implements UserRepositoryProtocol {
   constructor() {}
 
   /**
-   * Cria um novo usuário no banco de dados
+   * Cria um novo usuário no banco de dados com questões de segurança
    * @param {UserRepositoryProtocol.CreateParams} user - Os dados do usuário a serem criados
    * @param {string} user.name - Nome do usuário
    * @param {string} user.login - Login do usuário
    * @param {string} user.email - Endereço de e-mail do usuário
    * @param {string} user.password - Senha criptografada do usuário
+   * @param {Array<{ question: string; answer: string }>} user.securityQuestions - Lista de questões de segurança
    * @returns {Promise<UserModel | undefined>} O usuário criado
    */
   async create(
@@ -20,12 +23,19 @@ export class UserRepository implements UserRepositoryProtocol {
   ): Promise<UserModel | undefined> {
     try {
       const repository = getRepository(User);
+      const securityQuestionRepository = getRepository(SecurityQuestion);
 
       const newUser = repository.create({
-        name: user?.name,
-        login: user?.login,
-        email: user?.email,
-        password: user?.password,
+        name: user.name,
+        login: user.login,
+        email: user.email,
+        password: user.password,
+        security_questions: user?.securityQuestions.map((sq) =>
+          securityQuestionRepository.create({
+            question: sq.question as string,
+            answer: sq.answer as string,
+          })
+        ),
       });
 
       const savedUser = await repository.save(newUser);
@@ -48,7 +58,9 @@ export class UserRepository implements UserRepositoryProtocol {
   ): Promise<UserModel | null> {
     try {
       const repository = getRepository(User);
-      const user = await repository.findOne({ where: data });
+      const user = await repository.findOne({
+        where: data,
+      });
       return user;
     } catch (error) {
       return null;

@@ -14,13 +14,21 @@ export class RegisterUserController implements Controller {
     res: Response<IResponse>
   ): Promise<Response<IResponse>> {
     try {
-      const { name, login, email, password, confirmpassword } = req.body;
+      const {
+        name,
+        login,
+        email,
+        password,
+        confirmpassword,
+        securityQuestions,
+      } = req.body;
       const data = {
         name,
         login,
         email,
         password,
         confirmpassword,
+        securityQuestions,
       };
       const createUser = await this.createUserService.handle({ ...data });
       return res.status(201).json({

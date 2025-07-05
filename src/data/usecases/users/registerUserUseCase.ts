@@ -1,4 +1,5 @@
 import { UserModel } from "@/domain/models/postgres/UserModel";
+import { SecurityQuestionModel } from "@/domain/models/postgres/SecurityQuestionModel";
 import { registerUserValidationSchema } from "../validation/registerUserValidationSchema";
 import { RegisterUserUseCaseProtocol } from "../interfaces/registerUserUseCaseProtocol";
 import { UserRepositoryProtocol } from "@/infra/db/interfaces/userRepositoryProtocol";
@@ -11,16 +12,18 @@ export class RegisterUserUseCase implements RegisterUserUseCaseProtocol {
     private readonly userRepository: UserRepositoryProtocol,
     private readonly userAuth: UserAuth
   ) {}
+
   /**
-   * Realiza o cadastro de um usuário com os dados fornecidos
+   * Realiza o cadastro de um usuário com os dados fornecidos, incluindo questões de segurança
    * @param {RegisterUserUseCaseProtocol.Params} data - Os dados de registro do usuário
    * @param {string} data.name - O nome do usuário
    * @param {string} data.login - O login do usuário
    * @param {string} data.email - O endereço de email do usuário
    * @param {string} data.password - A senha da conta do usuário
    * @param {string} data.confirmpassword - A confirmação da senha do usuário
+   * @param {Array<{ question: string; answer: string }>} data.securityQuestions - Lista de questões de segurança
    * @returns {Promise<RegisterUserUseCaseProtocol.Result | undefined>} O usuário registrado e o token de autenticação
-   * @throws {BusinessRuleError} Se as credenciais forem inválidas
+   * @throws {BusinessRuleError} Se as credenciais forem inválidas ou as questões de segurança forem insuficientes
    * @throws {ServerError} Se ocorrer um erro ao registrar o usuário
    */
   async handle(
@@ -49,6 +52,12 @@ export class RegisterUserUseCase implements RegisterUserUseCaseProtocol {
         );
       }
 
+      if (!data.securityQuestions || data.securityQuestions.length === 0) {
+        throw new BusinessRuleError(
+          "É necessário fornecer pelo menos uma questão de segurança"
+        );
+      }
+
       const hashedPassword = await this.userAuth.hashPassword(data?.password);
 
       const newUser: UserModel | undefined = await this.userRepository.create({
@@ -56,6 +65,7 @@ export class RegisterUserUseCase implements RegisterUserUseCaseProtocol {
         login: data?.login,
         email: data?.email,
         password: hashedPassword,
+        securityQuestions: data?.securityQuestions,
       });
 
       if (!newUser || !newUser.id) {
