@@ -1,3 +1,4 @@
+import { makeLoginUserControllerFactory } from "@/main/factories/controllers/loginUserControllerFactory";
 import { makeRegisterUserControllerFactory } from "@/main/factories/controllers/registerUserControllerFactory";
 import { Router } from "express";
 
@@ -7,6 +8,6 @@ export const routesUser = (router: Router) => {
   });
 
   router.post("/user/login", (req, res) => {
-    res.status(200).json({ message: "Login realizado com sucesso" });
+    makeLoginUserControllerFactory().handle(req, res);
   });
 };
