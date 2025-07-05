@@ -133,4 +133,24 @@ export class UserRepository implements UserRepositoryProtocol {
       throw new Error(`Erro ao atualizar usuário: ${error.message}`);
     }
   }
+
+  /**
+   * Deleta um usuário do banco de dados pelo ID
+   * @param {UserRepositoryProtocol.DeleteUserParams} data - Os dados para deleção
+   * @returns {Promise<void>}
+   */
+  async deleteUser(
+    data: UserRepositoryProtocol.DeleteUserParams
+  ): Promise<void> {
+    try {
+      const repository = getRepository(User);
+      const user = await repository.findOne({ where: { id: data.id } });
+      if (!user) {
+        throw new NotFoundError("Usuário não encontrado");
+      }
+      await repository.remove(user);
+    } catch (error: any) {
+      throw new Error(`Erro ao deletar usuário: ${error.message}`);
+    }
+  }
 }

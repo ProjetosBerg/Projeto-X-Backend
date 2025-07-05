@@ -7,6 +7,7 @@ import { makeLoginUserControllerFactory } from "@/main/factories/controllers/log
 import { makeRegisterUserControllerFactory } from "@/main/factories/controllers/registerUserControllerFactory";
 import { makeGetLoginMiddleware } from "@/main/factories/middleware/getLogin";
 import { adapterMiddleware } from "@/utils/adapterMiddleware";
+import { makeDeleteUserByIdControllerFactory } from "@/main/factories/controllers/deleteUserControllerFactory";
 
 export const routesUser = (router: Router) => {
   router.get("/user/find-questions", (req: Request, res: Response) => {
@@ -38,6 +39,14 @@ export const routesUser = (router: Router) => {
     adapterMiddleware(makeGetLoginMiddleware()),
     (req: Request, res: Response) => {
       makeEditUserByIdControllerFactory().handle(req, res);
+    }
+  );
+
+  router.delete(
+    "/user/delete/:id",
+    adapterMiddleware(makeGetLoginMiddleware()),
+    (req: Request, res: Response) => {
+      makeDeleteUserByIdControllerFactory().handle(req, res);
     }
   );
 };

@@ -14,6 +14,7 @@ export interface UserRepositoryProtocol {
   updateUser(
     data: UserRepositoryProtocol.UpdateUserParams
   ): Promise<UserModel | undefined>;
+  deleteUser(data: UserRepositoryProtocol.DeleteUserParams): Promise<void>;
 }
 
 export namespace UserRepositoryProtocol {
@@ -47,5 +48,9 @@ export namespace UserRepositoryProtocol {
       question: SecurityQuestionModel["question"];
       answer: SecurityQuestionModel["answer"];
     }>;
+  };
+
+  export type DeleteUserParams = {
+    id: UserModel["id"];
   };
 }
