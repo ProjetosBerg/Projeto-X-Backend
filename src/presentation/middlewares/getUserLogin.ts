@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import { Middleware } from "../protocols/middleware";
 
 export type JwtPayload = {
+  id: string;
   login: string;
   name: string;
   email: string;
@@ -35,6 +36,7 @@ export class GetUserLogin implements Middleware {
         return res.status(401).json({ message: "Token não encontrado" });
       }
       const user = {
+        id: verified.id,
         login: verified.login,
         name: verified.name,
         email: verified.email,
