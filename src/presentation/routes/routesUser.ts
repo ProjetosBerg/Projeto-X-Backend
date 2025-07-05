@@ -13,6 +13,14 @@ export const routesUser = (router: Router) => {
     makeFindQuestionsUserControllerFactory().handle(req, res);
   });
 
+  router.get(
+    "/user/find-user/:id",
+    adapterMiddleware(makeGetLoginMiddleware()),
+    (req: Request, res: Response) => {
+      makeFindUserByIdControllerFactory().handle(req, res);
+    }
+  );
+
   router.post("/user/register", (req: Request, res: Response) => {
     makeRegisterUserControllerFactory().handle(req, res);
   });
@@ -24,14 +32,6 @@ export const routesUser = (router: Router) => {
   router.patch("/user/forgot-password", (req: Request, res: Response) => {
     makeForgotPasswordUserControllerFactory().handle(req, res);
   });
-
-  router.get(
-    "/user/find-user/:id",
-    adapterMiddleware(makeGetLoginMiddleware()),
-    (req: Request, res: Response) => {
-      makeFindUserByIdControllerFactory().handle(req, res);
-    }
-  );
 
   router.patch(
     "/user/edit/:id",
