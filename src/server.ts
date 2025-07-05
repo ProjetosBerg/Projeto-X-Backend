@@ -19,5 +19,5 @@ databaseHelper.initConnections();
 
 app.use("/api", router);
 app.listen(port, () => {
-  logger.info(`Servidor rodando na porta ${port} - Ambiente: ${NODE_ENV}`);
+  logger.info(`Servidor rodando na porta ${port} - Ambiente: ${NODE_ENV} 🚀`);
 });
