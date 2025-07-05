@@ -325,6 +325,36 @@ export const userDocs = () => {
      *         description: Não autorizado
      *       404:
      *         description: Usuário não encontrado
+      * /api/user/delete/{id}:
+     *   delete:
+     *     summary: Deletar usuário por ID
+     *     tags: [Users]
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: ID do usuário
+     *     responses:
+     *       200:
+     *         description: Usuário deletado com sucesso
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 message:
+     *                   type: string
+     *                   example: Usuário deletado com sucesso
+     *       401:
+     *         description: Não autorizado
+     *       404:
+     *         description: Usuário não encontrado
+     *       500:
+     *         description: Erro interno do servidor
      */
   `;
 };
