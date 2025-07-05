@@ -1,4 +1,3 @@
-import { RegisterUserUseCase } from "@/data/usecases/users/registerUserUseCase";
 import { UserRepositoryProtocol } from "@/infra/db/interfaces/userRepositoryProtocol";
 import UserAuth from "@/auth/users/userAuth";
 import { mockUser } from "@/tests/unit/mocks/user/mockUser";
