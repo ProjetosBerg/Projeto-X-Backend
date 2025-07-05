@@ -9,6 +9,7 @@ export const makeUserRepositoryRepository =
   (): jest.Mocked<UserRepositoryProtocol> => ({
     create: jest.fn().mockResolvedValue(mockUser),
     findOne: jest.fn().mockResolvedValue(null),
+    ...({} as any),
   });
 
 export const makeUserAuthRepositoryRepository = (): jest.Mocked<UserAuth> => {
