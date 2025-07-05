@@ -36,4 +36,14 @@ export const registerUserValidationSchema = yup.object().shape({
     .string()
     .required("Confirmação de senha é obrigatória")
     .oneOf([yup.ref("password")], "Senhas diferentes"),
+
+  securityQuestions: yup
+    .array()
+    .required("Perguntas de segurança é obrigatórias")
+    .of(
+      yup.object().shape({
+        question: yup.string().required("Pergunta de segurança é obrigatória"),
+        answer: yup.string().required("Resposta de segurança é obrigatória"),
+      })
+    ),
 });

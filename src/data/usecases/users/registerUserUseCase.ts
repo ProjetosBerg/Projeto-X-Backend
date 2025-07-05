@@ -52,12 +52,6 @@ export class RegisterUserUseCase implements RegisterUserUseCaseProtocol {
         );
       }
 
-      if (!data.securityQuestions || data.securityQuestions.length === 0) {
-        throw new BusinessRuleError(
-          "É necessário fornecer pelo menos uma questão de segurança"
-        );
-      }
-
       const hashedPassword = await this.userAuth.hashPassword(data?.password);
 
       const newUser: UserModel | undefined = await this.userRepository.create({
