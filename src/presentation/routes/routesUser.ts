@@ -1,5 +1,5 @@
 import { makeFindQuestionsUserControllerFactory } from "@/main/factories/controllers/findQuestionsUserControllerFactory";
-import { makeFindUserControllerFactory } from "@/main/factories/controllers/findUserControllerFactory";
+import { makeFindUserByIdControllerFactory } from "@/main/factories/controllers/findUserControllerFactory";
 import { makeForgotPasswordUserControllerFactory } from "@/main/factories/controllers/forgotPasswordUserControllerFactory";
 import { makeLoginUserControllerFactory } from "@/main/factories/controllers/loginUserControllerFactory";
 import { makeRegisterUserControllerFactory } from "@/main/factories/controllers/registerUserControllerFactory";
@@ -25,6 +25,6 @@ export const routesUser = (router: Router) => {
   // TODO  colocar middware de autenticação nessas rotas
 
   router.get(`/user/find-user/:id`, (req, res) => {
-    makeFindUserControllerFactory().handle(req, res);
+    makeFindUserByIdControllerFactory().handle(req, res);
   });
 };
