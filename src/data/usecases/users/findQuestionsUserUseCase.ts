@@ -14,7 +14,6 @@ export class FindQuestionsUserUseCase
     data: FindQuestionsUserUseCaseProtocol.Params
   ): Promise<FindQuestionsUserUseCaseProtocol.Result> {
     try {
-      // Validar os dados de entrada
       await findQuestionsUserValidationSchema.validate(data, {
         abortEarly: false,
       });
