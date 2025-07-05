@@ -4,6 +4,8 @@ import env from "env-var";
 import router from "./routes";
 import databaseHelper from "@/loaders/database";
 import logger from "@/loaders/logger";
+import swaggerUi from "swagger-ui-express";
+import { swaggerSpec } from "@/config/swagger";
 
 const app = express();
 dotenv.config();
@@ -16,6 +18,9 @@ app.use(express.urlencoded({ extended: true }));
 
 // Iniciar conexões com o banco de dados
 databaseHelper.initConnections();
+
+// Documentação da API
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use("/api", router);
 app.listen(port, () => {
