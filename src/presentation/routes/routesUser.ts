@@ -4,32 +4,40 @@ import { makeFindUserByIdControllerFactory } from "@/main/factories/controllers/
 import { makeForgotPasswordUserControllerFactory } from "@/main/factories/controllers/forgotPasswordUserControllerFactory";
 import { makeLoginUserControllerFactory } from "@/main/factories/controllers/loginUserControllerFactory";
 import { makeRegisterUserControllerFactory } from "@/main/factories/controllers/registerUserControllerFactory";
-import { Router } from "express";
+import { Router, Request, Response } from "express";
+import { makeGetLoginMiddleware } from "@/main/factories/middleware/getLogin";
+import { adapterMiddleware } from "@/utils/adapterMiddleware";
 
 export const routesUser = (router: Router) => {
   router.get("/user/find-questions", (req, res) => {
     makeFindQuestionsUserControllerFactory().handle(req, res);
   });
 
-  router.post("/user/register", (req, res) => {
+  router.post("/user/register", (req: Request, res: Response) => {
     makeRegisterUserControllerFactory().handle(req, res);
   });
 
-  router.post("/user/login", (req, res) => {
+  router.post("/user/login", (req: Request, res: Response) => {
     makeLoginUserControllerFactory().handle(req, res);
   });
 
-  router.patch("/user/forgot-password", (req, res) => {
+  router.patch("/user/forgot-password", (req: Request, res: Response) => {
     makeForgotPasswordUserControllerFactory().handle(req, res);
   });
 
-  // TODO  colocar middware de autenticação nessas rotas
+  router.get(
+    `/user/find-user/:id`,
+    adapterMiddleware(makeGetLoginMiddleware()),
+    (req: Request, res: Response) => {
+      makeFindUserByIdControllerFactory().handle(req, res);
+    }
+  );
 
-  router.get(`/user/find-user/:id`, (req, res) => {
-    makeFindUserByIdControllerFactory().handle(req, res);
-  });
-
-  router.patch(`/user/edit/:id`, (req, res) => {
-    makeEditUserByIdControllerFactory().handle(req, res);
-  });
+  router.patch(
+    `/user/edit/:id`,
+    adapterMiddleware(makeGetLoginMiddleware()),
+    (req: Request, res: Response) => {
+      makeEditUserByIdControllerFactory().handle(req, res);
+    }
+  );
 };
