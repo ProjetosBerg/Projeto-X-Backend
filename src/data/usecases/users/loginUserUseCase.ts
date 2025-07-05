@@ -17,7 +17,6 @@ export class LoginUserUseCase implements LoginUserUseCaseProtocol {
    * Autentica um usuário e gera um token JWT após um login bem-sucedido
    * @param {LoginUserUseCaseProtocol.Params} data - As credenciais de login
    * @param {string} [data.login] - O login do usuário (opcional se o email for fornecido)
-   * @param {string} [data.email] - O email do usuário (opcional se o login for fornecido)
    * @param {string} data.password - A senha do usuário
    * @returns {Promise<LoginUserUseCaseProtocol.Result>} Resultado da autenticação com o token e os dados do usuário
    * @throws {BusinessRuleError} Se as credenciais forem inválidas
@@ -33,7 +32,6 @@ export class LoginUserUseCase implements LoginUserUseCaseProtocol {
 
       const user = await this.userRepository.findOne({
         login: data.login,
-        email: data.email,
       });
 
       if (!user) {

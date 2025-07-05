@@ -14,10 +14,9 @@ export class LoginUserController implements Controller {
     res: Response<IResponse>
   ): Promise<Response<IResponse>> {
     try {
-      const { login, email, password } = req.body;
+      const { login, password } = req.body;
       const data = {
         login,
-        email,
         password,
       };
       const result = await this.loginUserService.handle({ ...data });

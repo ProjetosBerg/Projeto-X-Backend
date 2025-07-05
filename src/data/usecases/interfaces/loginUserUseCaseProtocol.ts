@@ -9,7 +9,6 @@ export interface LoginUserUseCaseProtocol {
 export namespace LoginUserUseCaseProtocol {
   export type Params = {
     login: UserModel["login"];
-    email: UserModel["email"];
     password: UserModel["password"];
   };
   export type Result = {
