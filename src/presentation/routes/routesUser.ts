@@ -1,13 +1,13 @@
 import { Router, Request, Response } from "express";
-import { makeEditUserByIdControllerFactory } from "@/main/factories/controllers/editUserControllerFactory";
-import { makeFindQuestionsUserControllerFactory } from "@/main/factories/controllers/findQuestionsUserControllerFactory";
-import { makeFindUserByIdControllerFactory } from "@/main/factories/controllers/findUserControllerFactory";
-import { makeForgotPasswordUserControllerFactory } from "@/main/factories/controllers/forgotPasswordUserControllerFactory";
-import { makeLoginUserControllerFactory } from "@/main/factories/controllers/loginUserControllerFactory";
-import { makeRegisterUserControllerFactory } from "@/main/factories/controllers/registerUserControllerFactory";
+import { makeEditUserByIdControllerFactory } from "@/main/factories/controllers/user/editUserControllerFactory";
+import { makeFindQuestionsUserControllerFactory } from "@/main/factories/controllers/user/findQuestionsUserControllerFactory";
+import { makeFindUserByIdControllerFactory } from "@/main/factories/controllers/user/findUserControllerFactory";
+import { makeForgotPasswordUserControllerFactory } from "@/main/factories/controllers/user/forgotPasswordUserControllerFactory";
+import { makeLoginUserControllerFactory } from "@/main/factories/controllers/user/loginUserControllerFactory";
+import { makeRegisterUserControllerFactory } from "@/main/factories/controllers/user/registerUserControllerFactory";
 import { makeGetLoginMiddleware } from "@/main/factories/middleware/getLogin";
 import { adapterMiddleware } from "@/utils/adapterMiddleware";
-import { makeDeleteUserByIdControllerFactory } from "@/main/factories/controllers/deleteUserControllerFactory";
+import { makeDeleteUserByIdControllerFactory } from "@/main/factories/controllers/user/deleteUserControllerFactory";
 
 export const routesUser = (router: Router) => {
   router.get("/user/find-questions", (req: Request, res: Response) => {
