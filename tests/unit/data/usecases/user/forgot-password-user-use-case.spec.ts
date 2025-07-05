@@ -8,7 +8,6 @@ import { ValidationError } from "yup";
 
 export const makeUserRepositoryRepository =
   (): jest.Mocked<UserRepositoryProtocol> => ({
-    create: jest.fn().mockResolvedValue(mockUser),
     findOne: jest.fn().mockResolvedValue(null),
     updatePassword: jest.fn().mockResolvedValue(mockUser),
     ...({} as any),
