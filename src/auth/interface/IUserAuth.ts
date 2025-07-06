@@ -27,5 +27,9 @@ export interface IUserAuth {
 
   hashPassword(password: string): Promise<string>;
 
+  hashSecurityAnswer(answer: string): Promise<string>;
+
   comparePassword(password: string, hashedPassword: string): Promise<boolean>;
+
+  compareSecurityAnswer(answer: string, hashedAnswer: string): Promise<boolean>;
 }

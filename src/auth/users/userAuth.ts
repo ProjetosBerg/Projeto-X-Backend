@@ -102,6 +102,16 @@ class UserAuth implements IUserAuth {
   }
 
   /**
+   * Gera o hash de uma resposta de questão de segurança utilizando bcrypt
+   * @param {string} answer - A resposta da questão de segurança
+   * @returns {Promise<string>} A resposta criptografada (hash)
+   */
+  async hashSecurityAnswer(answer: string): Promise<string> {
+    const saltRounds = 10;
+    return await bcrypt.hash(answer, saltRounds);
+  }
+
+  /**
    * Compara uma senha em texto plano com uma senha criptografada
    * @param {string} password - A senha
    * @param {string} hashedPassword - A senha criptografada para comparação
@@ -112,6 +122,13 @@ class UserAuth implements IUserAuth {
     hashedPassword: string
   ): Promise<boolean> {
     return await bcrypt.compare(password, hashedPassword);
+  }
+
+  async compareSecurityAnswer(
+    answer: string,
+    hashedAnswer: string
+  ): Promise<boolean> {
+    return await bcrypt.compare(answer, hashedAnswer);
   }
 }
 

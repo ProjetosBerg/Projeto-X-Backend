@@ -54,12 +54,21 @@ export class RegisterUserUseCase implements RegisterUserUseCaseProtocol {
 
       const hashedPassword = await this.userAuth.hashPassword(data?.password);
 
+      const hashedSecurityQuestions = await Promise.all(
+        data.securityQuestions.map(async (question) => ({
+          question: question.question,
+          answer: await this.userAuth.hashSecurityAnswer(
+            String(question.answer)
+          ),
+        }))
+      );
+
       const newUser: UserModel | undefined = await this.userRepository.create({
         name: data?.name,
         login: data?.login,
         email: data?.email,
         password: hashedPassword,
-        securityQuestions: data?.securityQuestions,
+        securityQuestions: hashedSecurityQuestions,
       });
 
       if (!newUser || !newUser.id) {

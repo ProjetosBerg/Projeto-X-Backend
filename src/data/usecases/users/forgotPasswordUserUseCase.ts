@@ -57,7 +57,14 @@ export class ForgotPasswordUserUseCase
         const stored = user.security_questions.find(
           (q) => q.question === provided.question
         );
-        if (!stored || stored.answer !== provided.answer) {
+        if (!stored) {
+          throw new BusinessRuleError("Questão de segurança não encontrada");
+        }
+        const isValidAnswer = await this.userAuth.compareSecurityAnswer(
+          String(provided.answer),
+          String(stored.answer)
+        );
+        if (!isValidAnswer) {
           throw new BusinessRuleError("Resposta de segurança inválida");
         }
       }

@@ -4,6 +4,7 @@ import { mockUser } from "@/tests/unit/mocks/user/mockUser";
 import { BusinessRuleError } from "@/data/errors/BusinessRuleError";
 import { NotFoundError } from "@/data/errors/NotFoundError";
 import { ValidationError } from "yup";
+import { makeUserAuthRepositoryRepository } from "./edit-user-by-id-use-case.spec";
 
 export const makeUserRepositoryRepository =
   (): jest.Mocked<UserRepositoryProtocol> => ({
@@ -13,11 +14,13 @@ export const makeUserRepositoryRepository =
 
 const makeSut = () => {
   const userRepositoryRepositorySpy = makeUserRepositoryRepository();
+  const userAuthRepositoryRepositorySpy = makeUserAuthRepositoryRepository();
   const sut = new FindUserByIdUseCase(userRepositoryRepositorySpy);
 
   return {
     sut,
     userRepositoryRepositorySpy,
+    userAuthRepositoryRepositorySpy,
   };
 };
 
@@ -26,17 +29,51 @@ describe("FindUserByIdUseCase", () => {
     jest.clearAllMocks();
   });
 
-  test("should return user with security questions for valid id", async () => {
-    const { sut, userRepositoryRepositorySpy } = makeSut();
-    userRepositoryRepositorySpy.findOne.mockResolvedValue(mockUser);
+  test("should return user with only security questions for valid id", async () => {
+    const {
+      sut,
+      userRepositoryRepositorySpy,
+      userAuthRepositoryRepositorySpy,
+    } = makeSut();
+    userRepositoryRepositorySpy.findOne.mockResolvedValue({
+      ...mockUser,
+      security_questions: [
+        {
+          id: "question_id",
+          question: "What is your pet's name?",
+          answer: "hashed_answer",
+        },
+        {
+          id: "question_id",
+          question: "What is your favorite color?",
+          answer: "hashed_answer",
+        },
+      ],
+    });
 
     const result = await sut.handle({ id: mockUser.id });
 
-    expect(result).toEqual({ user: mockUser });
+    expect(result).toEqual({
+      user: {
+        id: mockUser.id,
+        name: mockUser.name,
+        login: mockUser.login,
+        email: mockUser.email,
+        created_at: mockUser.created_at,
+        updated_at: mockUser.updated_at,
+        security_questions: [
+          { question: "What is your pet's name?" },
+          { question: "What is your favorite color?" },
+        ],
+      },
+    });
     expect(userRepositoryRepositorySpy.findOne).toHaveBeenCalledWith({
       id: mockUser.id,
     });
     expect(userRepositoryRepositorySpy.findOne).toHaveBeenCalledTimes(1);
+    expect(
+      userAuthRepositoryRepositorySpy.comparePassword
+    ).not.toHaveBeenCalled();
   });
 
   test("should throw NotFoundError if user not found", async () => {

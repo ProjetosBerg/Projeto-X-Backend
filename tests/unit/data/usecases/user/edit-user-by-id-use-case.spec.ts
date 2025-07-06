@@ -5,6 +5,7 @@ import { BusinessRuleError } from "@/data/errors/BusinessRuleError";
 import { NotFoundError } from "@/data/errors/NotFoundError";
 import { ValidationError } from "yup";
 import { faker } from "@faker-js/faker";
+import UserAuth from "@/auth/users/userAuth";
 
 export const makeUserRepositoryRepository =
   (): jest.Mocked<UserRepositoryProtocol> => ({
@@ -13,13 +14,40 @@ export const makeUserRepositoryRepository =
     ...({} as any),
   });
 
+export const makeUserAuthRepositoryRepository = (): jest.Mocked<UserAuth> => {
+  const userAuth = new UserAuth() as jest.Mocked<UserAuth>;
+  userAuth.hashPassword = jest.fn().mockResolvedValue("hashed_password");
+  userAuth.hashSecurityAnswer = jest.fn().mockResolvedValue("hashed_answer");
+  userAuth.comparePassword = jest.fn().mockResolvedValue(true);
+  userAuth.checkToken = jest.fn().mockResolvedValue(true);
+  userAuth.getToken = jest.fn().mockReturnValue("valid_token");
+  userAuth.getUserByToken = jest.fn().mockResolvedValue({
+    id: mockUser.id,
+    name: mockUser.name,
+    login: mockUser.login,
+    email: mockUser.email,
+  });
+  userAuth.createUserToken = jest.fn().mockResolvedValue({
+    message: "Token created successfully",
+    token: "valid_token",
+    user: mockUser,
+  });
+  return userAuth;
+};
+
 const makeSut = () => {
   const userRepositoryRepositorySpy = makeUserRepositoryRepository();
-  const sut = new EditUserByIdUseCase(userRepositoryRepositorySpy);
+  const userAuthRepositoryRepositorySpy = makeUserAuthRepositoryRepository();
+
+  const sut = new EditUserByIdUseCase(
+    userRepositoryRepositorySpy,
+    userAuthRepositoryRepositorySpy
+  );
 
   return {
     sut,
     userRepositoryRepositorySpy,
+    userAuthRepositoryRepositorySpy,
   };
 };
 
@@ -29,7 +57,11 @@ describe("EditUserByIdUseCase", () => {
   });
 
   test("should update user successfully with all fields", async () => {
-    const { sut, userRepositoryRepositorySpy } = makeSut();
+    const {
+      sut,
+      userRepositoryRepositorySpy,
+      userAuthRepositoryRepositorySpy,
+    } = makeSut();
     userRepositoryRepositorySpy.findOne
       .mockResolvedValueOnce(mockUser)
       .mockResolvedValueOnce(null);
@@ -61,20 +93,32 @@ describe("EditUserByIdUseCase", () => {
     expect(userRepositoryRepositorySpy.findOne).toHaveBeenCalledWith({
       email: input.email,
     });
+    expect(
+      userAuthRepositoryRepositorySpy.hashSecurityAnswer
+    ).toHaveBeenCalledTimes(input.securityQuestions.length);
+    input.securityQuestions.forEach((question, index) => {
+      expect(
+        userAuthRepositoryRepositorySpy.hashSecurityAnswer
+      ).toHaveBeenNthCalledWith(index + 1, question.answer);
+    });
     expect(userRepositoryRepositorySpy.updateUser).toHaveBeenCalledWith({
       id: input.id,
       name: input.name,
       email: input.email,
       securityQuestions: input.securityQuestions.map((sq) => ({
         question: sq.question,
-        answer: sq.answer,
+        answer: "hashed_answer",
       })),
     });
     expect(userRepositoryRepositorySpy.findOne).toHaveBeenCalledTimes(2);
   });
 
   test("should update user successfully with partial fields", async () => {
-    const { sut, userRepositoryRepositorySpy } = makeSut();
+    const {
+      sut,
+      userRepositoryRepositorySpy,
+      userAuthRepositoryRepositorySpy,
+    } = makeSut();
     userRepositoryRepositorySpy.findOne.mockResolvedValueOnce(mockUser);
 
     const input = {
@@ -88,6 +132,9 @@ describe("EditUserByIdUseCase", () => {
     expect(userRepositoryRepositorySpy.findOne).toHaveBeenCalledWith({
       id: input.id,
     });
+    expect(
+      userAuthRepositoryRepositorySpy.hashSecurityAnswer
+    ).not.toHaveBeenCalled();
     expect(userRepositoryRepositorySpy.updateUser).toHaveBeenCalledWith({
       id: input.id,
       name: input.name,
@@ -96,7 +143,11 @@ describe("EditUserByIdUseCase", () => {
   });
 
   test("should throw NotFoundError if user not found", async () => {
-    const { sut, userRepositoryRepositorySpy } = makeSut();
+    const {
+      sut,
+      userRepositoryRepositorySpy,
+      userAuthRepositoryRepositorySpy,
+    } = makeSut();
     userRepositoryRepositorySpy.findOne.mockResolvedValueOnce(null);
 
     const input = {
@@ -110,11 +161,18 @@ describe("EditUserByIdUseCase", () => {
     expect(userRepositoryRepositorySpy.findOne).toHaveBeenCalledWith({
       id: input.id,
     });
+    expect(
+      userAuthRepositoryRepositorySpy.hashSecurityAnswer
+    ).not.toHaveBeenCalled();
     expect(userRepositoryRepositorySpy.findOne).toHaveBeenCalledTimes(1);
   });
 
   test("should throw BusinessRuleError if email is already in use", async () => {
-    const { sut, userRepositoryRepositorySpy } = makeSut();
+    const {
+      sut,
+      userRepositoryRepositorySpy,
+      userAuthRepositoryRepositorySpy,
+    } = makeSut();
     userRepositoryRepositorySpy.findOne
       .mockResolvedValueOnce(mockUser)
       .mockResolvedValueOnce({ ...mockUser, id: "different_id" });
@@ -133,17 +191,31 @@ describe("EditUserByIdUseCase", () => {
     expect(userRepositoryRepositorySpy.findOne).toHaveBeenCalledWith({
       email: input.email,
     });
+    expect(
+      userAuthRepositoryRepositorySpy.hashSecurityAnswer
+    ).not.toHaveBeenCalled();
     expect(userRepositoryRepositorySpy.findOne).toHaveBeenCalledTimes(2);
   });
 
   test("should throw BusinessRuleError if update fails", async () => {
-    const { sut, userRepositoryRepositorySpy } = makeSut();
+    const {
+      sut,
+      userRepositoryRepositorySpy,
+      userAuthRepositoryRepositorySpy,
+    } = makeSut();
     userRepositoryRepositorySpy.findOne.mockResolvedValueOnce(mockUser);
     userRepositoryRepositorySpy.updateUser.mockResolvedValue(undefined);
 
     const input = {
       id: mockUser.id,
       name: "New Name",
+      securityQuestions: [
+        {
+          id: faker.string.uuid(),
+          question: "Nova pergunta de segurança?",
+          answer: "Yes",
+        },
+      ],
     };
 
     await expect(sut.handle(input)).rejects.toThrow(
@@ -152,23 +224,42 @@ describe("EditUserByIdUseCase", () => {
     expect(userRepositoryRepositorySpy.findOne).toHaveBeenCalledWith({
       id: input.id,
     });
+    expect(
+      userAuthRepositoryRepositorySpy.hashSecurityAnswer
+    ).toHaveBeenCalledTimes(input.securityQuestions.length);
+    input.securityQuestions.forEach((question, index) => {
+      expect(
+        userAuthRepositoryRepositorySpy.hashSecurityAnswer
+      ).toHaveBeenNthCalledWith(index + 1, question.answer);
+    });
     expect(userRepositoryRepositorySpy.updateUser).toHaveBeenCalledWith({
       id: input.id,
       name: input.name,
+      securityQuestions: input.securityQuestions.map((sq) => ({
+        question: sq.question,
+        answer: "hashed_answer",
+      })),
     });
   });
 
   test("should throw ValidationError if input is invalid", async () => {
-    const { sut, userRepositoryRepositorySpy } = makeSut();
+    const {
+      sut,
+      userRepositoryRepositorySpy,
+      userAuthRepositoryRepositorySpy,
+    } = makeSut();
 
     const input = {
       id: "",
       name: "",
       email: "invalid-email",
-      security_questions: [{}],
+      securityQuestions: [],
     };
 
     await expect(sut.handle(input)).rejects.toThrow(ValidationError);
     expect(userRepositoryRepositorySpy.findOne).not.toHaveBeenCalled();
+    expect(
+      userAuthRepositoryRepositorySpy.hashSecurityAnswer
+    ).not.toHaveBeenCalled();
   });
 });

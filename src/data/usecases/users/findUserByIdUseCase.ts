@@ -36,7 +36,17 @@ export class FindUserByIdUseCase implements FindUserByIdUseCaseProtocol {
           "Nenhuma questão de segurança registrada para este usuário"
         );
       }
-      return { user };
+
+      const returnUser = {
+        ...user,
+        id: user.id!,
+        security_questions: user.security_questions.map((q) => ({
+          question: String(q.question),
+        })),
+        password: undefined,
+      };
+
+      return { user: returnUser };
     } catch (error: any) {
       if (error.name === "ValidationError") {
         throw error;

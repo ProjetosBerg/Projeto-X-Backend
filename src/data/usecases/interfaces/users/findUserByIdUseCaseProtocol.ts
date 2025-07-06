@@ -1,4 +1,3 @@
-import { SecurityQuestionModel } from "@/domain/models/postgres/SecurityQuestionModel";
 import { UserModel } from "@/domain/models/postgres/UserModel";
 
 export interface FindUserByIdUseCaseProtocol {
@@ -12,6 +11,8 @@ export namespace FindUserByIdUseCaseProtocol {
     id: UserModel["id"];
   };
   export type Result = {
-    user: UserModel;
+    user: Omit<UserModel, "security_questions" | "password"> & {
+      security_questions: Array<{ question: string }>;
+    };
   };
 }

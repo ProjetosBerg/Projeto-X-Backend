@@ -4,9 +4,13 @@ import { BusinessRuleError } from "@/data/errors/BusinessRuleError";
 import { NotFoundError } from "@/data/errors/NotFoundError";
 import { EditUserByIdUseCaseProtocol } from "../interfaces/users/editUserByIdUseCaseProtocol";
 import { editUserByIdValidationSchema } from "../validation/users/editUserByIdValidationSchema";
+import UserAuth from "@/auth/users/userAuth";
 
 export class EditUserByIdUseCase implements EditUserByIdUseCaseProtocol {
-  constructor(private readonly userRepository: UserRepositoryProtocol) {}
+  constructor(
+    private readonly userRepository: UserRepositoryProtocol,
+    private readonly userAuth: UserAuth
+  ) {}
 
   /**
    * Edita os dados de um usuário específico pelo seu ID
@@ -43,14 +47,20 @@ export class EditUserByIdUseCase implements EditUserByIdUseCaseProtocol {
         }
       }
 
+      const hashedSecurityQuestions = data?.securityQuestions
+        ? await Promise.all(
+            data.securityQuestions.map(async (sq) => ({
+              question: sq.question,
+              answer: await this.userAuth.hashSecurityAnswer(String(sq.answer)),
+            }))
+          )
+        : undefined;
+
       const updatedUser = await this.userRepository.updateUser({
         id: data?.id,
         name: data?.name,
         email: data?.email,
-        securityQuestions: data?.securityQuestions?.map((sq) => ({
-          question: sq.question,
-          answer: sq.answer,
-        })),
+        securityQuestions: hashedSecurityQuestions,
       });
 
       if (!updatedUser) {

@@ -15,6 +15,7 @@ export const makeUserRepositoryRepository =
 export const makeUserAuthRepositoryRepository = (): jest.Mocked<UserAuth> => {
   const userAuth = new UserAuth() as jest.Mocked<UserAuth>;
   userAuth.hashPassword = jest.fn().mockResolvedValue("hashed_password");
+  userAuth.hashSecurityAnswer = jest.fn().mockResolvedValue("hashed_answer");
   userAuth.comparePassword = jest.fn().mockResolvedValue(true);
   userAuth.checkToken = jest.fn().mockResolvedValue(true);
   userAuth.getToken = jest.fn().mockReturnValue("valid_token");
@@ -87,12 +88,23 @@ describe("RegisterUserUseCase", () => {
     expect(userAuthRepositoryRepositorySpy.hashPassword).toHaveBeenCalledWith(
       input.password
     );
+    expect(
+      userAuthRepositoryRepositorySpy.hashSecurityAnswer
+    ).toHaveBeenCalledTimes(input.securityQuestions.length);
+    input.securityQuestions.forEach((question, index) => {
+      expect(
+        userAuthRepositoryRepositorySpy.hashSecurityAnswer
+      ).toHaveBeenNthCalledWith(index + 1, question.answer);
+    });
     expect(userRepositoryRepositorySpy.create).toHaveBeenCalledWith({
       name: input.name,
       login: input.login,
       email: input.email,
       password: "hashed_password",
-      securityQuestions: input.securityQuestions,
+      securityQuestions: input.securityQuestions.map((q) => ({
+        question: q.question,
+        answer: "hashed_answer",
+      })),
     });
     expect(
       userAuthRepositoryRepositorySpy.createUserToken
@@ -176,12 +188,23 @@ describe("RegisterUserUseCase", () => {
     expect(userAuthRepositoryRepositorySpy.hashPassword).toHaveBeenCalledWith(
       input.password
     );
+    expect(
+      userAuthRepositoryRepositorySpy.hashSecurityAnswer
+    ).toHaveBeenCalledTimes(input.securityQuestions.length);
+    input.securityQuestions.forEach((question, index) => {
+      expect(
+        userAuthRepositoryRepositorySpy.hashSecurityAnswer
+      ).toHaveBeenNthCalledWith(index + 1, question.answer);
+    });
     expect(userRepositoryRepositorySpy.create).toHaveBeenCalledWith({
       name: input.name,
       login: input.login,
       email: input.email,
       password: "hashed_password",
-      securityQuestions: input.securityQuestions,
+      securityQuestions: input.securityQuestions.map((q) => ({
+        question: q.question,
+        answer: "hashed_answer",
+      })),
     });
   });
 
@@ -208,6 +231,14 @@ describe("RegisterUserUseCase", () => {
         "Falha ao gerar token de autenticação para o usuário"
       )
     );
+    expect(
+      userAuthRepositoryRepositorySpy.hashSecurityAnswer
+    ).toHaveBeenCalledTimes(input.securityQuestions.length);
+    input.securityQuestions.forEach((question, index) => {
+      expect(
+        userAuthRepositoryRepositorySpy.hashSecurityAnswer
+      ).toHaveBeenNthCalledWith(index + 1, question.answer);
+    });
     expect(
       userAuthRepositoryRepositorySpy.createUserToken
     ).toHaveBeenCalledWith({
