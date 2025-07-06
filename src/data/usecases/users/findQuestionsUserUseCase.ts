@@ -5,6 +5,16 @@ import { NotFoundError } from "@/data/errors/NotFoundError";
 import { FindQuestionsUserUseCaseProtocol } from "../interfaces/users/findQuestionsUserUseCaseProtocol";
 import { findQuestionsUserValidationSchema } from "../validation/users/findQuestionsUserValidationSchema";
 
+/**
+ * Busca as perguntas de segurança de um usuário específico pelo seu login
+ * @param {FindQuestionsUserUseCaseProtocol.Params} data - Os dados necessários para buscar as perguntas de segurança
+ * @param {string} data.login - O login do usuário para buscar as perguntas de segurança
+ * @returns {Promise<FindQuestionsUserUseCaseProtocol.Result>} Array com as perguntas de segurança do usuário
+ * @throws {ValidationError} Se os dados fornecidos não passarem na validação
+ * @throws {NotFoundError} Se o usuário não for encontrado
+ * @throws {BusinessRuleError} Se o usuário não possuir perguntas de segurança registradas
+ * @throws {ServerError} Se ocorrer um erro inesperado durante a busca
+ */
 export class FindQuestionsUserUseCase
   implements FindQuestionsUserUseCaseProtocol
 {

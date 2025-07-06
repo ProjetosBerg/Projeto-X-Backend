@@ -8,6 +8,16 @@ import { findUserByIdValidationSchema } from "../validation/users/findUserByIdVa
 export class FindUserByIdUseCase implements FindUserByIdUseCaseProtocol {
   constructor(private readonly userRepository: UserRepositoryProtocol) {}
 
+  /**
+   * Busca um usuário específico pelo seu ID e verifica se possui perguntas de segurança
+   * @param {FindUserByIdUseCaseProtocol.Params} data - Os dados necessários para buscar o usuário
+   * @param {string} data.id - O ID do usuário a ser buscado
+   * @returns {Promise<FindUserByIdUseCaseProtocol.Result>} Os dados completos do usuário encontrado
+   * @throws {ValidationError} Se os dados fornecidos não passarem na validação
+   * @throws {NotFoundError} Se o usuário não for encontrado
+   * @throws {BusinessRuleError} Se o usuário não possuir perguntas de segurança registradas
+   * @throws {ServerError} Se ocorrer um erro inesperado durante a busca
+   */
   async handle(
     data: FindUserByIdUseCaseProtocol.Params
   ): Promise<FindUserByIdUseCaseProtocol.Result> {

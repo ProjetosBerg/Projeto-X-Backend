@@ -8,6 +8,19 @@ import { editUserByIdValidationSchema } from "../validation/users/editUserByIdVa
 export class EditUserByIdUseCase implements EditUserByIdUseCaseProtocol {
   constructor(private readonly userRepository: UserRepositoryProtocol) {}
 
+  /**
+   * Edita os dados de um usuário específico pelo seu ID
+   * @param {EditUserByIdUseCaseProtocol.Params} data - Os dados do usuário a serem atualizados
+   * @param {string} data.id - O ID do usuário a ser editado
+   * @param {string} [data.name] - O novo nome do usuário (opcional)
+   * @param {string} [data.email] - O novo email do usuário (opcional)
+   * @param {SecurityQuestionModel[]} [data.securityQuestions] - As novas perguntas de segurança (opcional)
+   * @returns {Promise<EditUserByIdUseCaseProtocol.Result>} Os dados atualizados do usuário
+   * @throws {ValidationError} Se os dados fornecidos não passarem na validação
+   * @throws {NotFoundError} Se o usuário não for encontrado
+   * @throws {BusinessRuleError} Se o email fornecido já estiver em uso por outro usuário ou se houver falha na atualização
+   * @throws {ServerError} Se ocorrer um erro inesperado durante a edição
+   */
   async handle(
     data: EditUserByIdUseCaseProtocol.Params
   ): Promise<EditUserByIdUseCaseProtocol.Result> {

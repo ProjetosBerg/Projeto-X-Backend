@@ -5,6 +5,17 @@ import { RecordTypesRepositoryProtocol } from "@/infra/db/interfaces/recordTypes
 import { RecordTypeModel } from "@/domain/models/postgres/RecordTypesModel";
 import { createRecordTypeValidationSchema } from "@/data/usecases/validation/recordTypes/createRecordTypeValidationSchema";
 
+/**
+ * Cria um novo tipo de registro para um usuário específico
+ * @param {CreateRecordTypeUseCaseProtocol.Params} data - Os dados do tipo de registro a ser criado
+ * @param {string} data.userId - O ID do usuário proprietário do tipo de registro
+ * @param {string} data.name - O nome do tipo de registro
+ * @param {string} data.icone - O ícone do tipo de registro
+ * @returns {Promise<RecordTypeModel>} O tipo de registro criado
+ * @throws {ValidationError} Se os dados fornecidos não passarem na validação
+ * @throws {BusinessRuleError} Se já existir um tipo de registro com o mesmo nome para o usuário
+ * @throws {ServerError} Se ocorrer um erro inesperado durante a criação
+ */
 export class CreateRecordTypeUseCase
   implements CreateRecordTypeUseCaseProtocol
 {

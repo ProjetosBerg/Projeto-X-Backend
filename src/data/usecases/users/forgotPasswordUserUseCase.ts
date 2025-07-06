@@ -15,6 +15,19 @@ export class ForgotPasswordUserUseCase
     private readonly userAuth: UserAuth
   ) {}
 
+  /**
+   * Redefine a senha de um usuário através da validação das perguntas de segurança
+   * @param {ForgotPasswordUserUseCaseProtocol.Params} data - Os dados necessários para redefinir a senha
+   * @param {string} data.login - O login do usuário que deseja redefinir a senha
+   * @param {string} data.newPassword - A nova senha a ser definida
+   * @param {string} data.confirmNewPassword - A confirmação da nova senha
+   * @param {Array<{question: string, answer: string}>} data.securityQuestions - As perguntas de segurança com suas respectivas respostas
+   * @returns {Promise<ForgotPasswordUserUseCaseProtocol.Result>} Mensagem de confirmação da redefinição da senha
+   * @throws {ValidationError} Se os dados fornecidos não passarem na validação
+   * @throws {NotFoundError} Se o usuário não for encontrado
+   * @throws {BusinessRuleError} Se o usuário não possuir perguntas de segurança, se o número de questões não corresponder, se as respostas estiverem incorretas ou se houver falha na atualização
+   * @throws {ServerError} Se ocorrer um erro inesperado durante a redefinição
+   */
   async handle(
     data: ForgotPasswordUserUseCaseProtocol.Params
   ): Promise<ForgotPasswordUserUseCaseProtocol.Result> {

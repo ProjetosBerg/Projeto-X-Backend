@@ -8,6 +8,16 @@ import { deleteUserByIdValidationSchema } from "../validation/users/deleteUserBy
 export class DeleteUserByIdUseCase implements DeleteUserByIdUseCaseProtocol {
   constructor(private readonly userRepository: UserRepositoryProtocol) {}
 
+  /**
+   * Deleta um usuário específico pelo seu ID
+   * @param {DeleteUserByIdUseCaseProtocol.Params} data - Os dados necessários para deletar o usuário
+   * @param {string} data.id - O ID do usuário a ser deletado
+   * @returns {Promise<DeleteUserByIdUseCaseProtocol.Result>} Mensagem de confirmação da exclusão
+   * @throws {ValidationError} Se os dados fornecidos não passarem na validação
+   * @throws {NotFoundError} Se o usuário não for encontrado
+   * @throws {BusinessRuleError} Se houver violação de regra de negócio
+   * @throws {ServerError} Se ocorrer um erro inesperado durante a exclusão
+   */
   async handle(
     data: DeleteUserByIdUseCaseProtocol.Params
   ): Promise<DeleteUserByIdUseCaseProtocol.Result> {
