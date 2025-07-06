@@ -14,6 +14,9 @@ export interface RecordTypesRepositoryProtocol {
   findByIdRecordType(
     data: RecordTypesRepositoryProtocol.FindByIdRecordTypeParams
   ): Promise<RecordTypeModel | null>;
+  updateRecordTypes(
+    data: RecordTypesRepositoryProtocol.UpdateRecordTypes
+  ): Promise<RecordTypeModel>;
 }
 
 export namespace RecordTypesRepositoryProtocol {
@@ -35,5 +38,12 @@ export namespace RecordTypesRepositoryProtocol {
   export type FindByIdRecordTypeParams = {
     id: RecordTypeModel["id"];
     userId: RecordTypeModel["user_id"];
+  };
+
+  export type UpdateRecordTypes = {
+    id: RecordTypeModel["id"];
+    userId: RecordTypeModel["user_id"];
+    name: RecordTypeModel["name"];
+    icone: RecordTypeModel["icone"];
   };
 }

@@ -1,4 +1,5 @@
 import { makeCreateRecordTypesControllerFactory } from "@/main/factories/controllers/recordTypes/createRecordTypesControllerFactory";
+import { makeEditRecordTypesControllerFactory } from "@/main/factories/controllers/recordTypes/editRecordTypesControllerFactory";
 import { makeGetByIdRecordTypesControllerFactory } from "@/main/factories/controllers/recordTypes/getByIdRecordTypesControllerFactory";
 import { makeGetByUserIdRecordTypesControllerFactory } from "@/main/factories/controllers/recordTypes/getByUserIdRecordTypesControllerFactory";
 import { makeGetLoginMiddleware } from "@/main/factories/middleware/getLogin";
@@ -26,6 +27,14 @@ export const routesRecordTypes = (router: Router) => {
     adapterMiddleware(makeGetLoginMiddleware()),
     (req: Request, res: Response) => {
       makeCreateRecordTypesControllerFactory().handle(req, res);
+    }
+  );
+
+  router.patch(
+    "/record-types/edit/:id",
+    adapterMiddleware(makeGetLoginMiddleware()),
+    (req: Request, res: Response) => {
+      makeEditRecordTypesControllerFactory().handle(req, res);
     }
   );
 };
