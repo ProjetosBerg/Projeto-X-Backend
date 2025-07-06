@@ -18,12 +18,12 @@ export class GetByUserIdRecordTypesController implements Controller {
     res: Response<IResponse>
   ): Promise<Response<IResponse>> {
     try {
-      const createRecordUser = await this.getByUserIdRecordTypesService.handle({
+      const result = await this.getByUserIdRecordTypesService.handle({
         userId: req.user!.id,
       });
-      return res.status(201).json({
+      return res.status(200).json({
         status: ResponseStatus.OK,
-        data: createRecordUser,
+        data: result,
       });
     } catch (error) {
       if (error instanceof ValidationError) {
