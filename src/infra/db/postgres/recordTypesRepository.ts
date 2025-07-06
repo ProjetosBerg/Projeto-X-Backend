@@ -1,6 +1,4 @@
-import { User } from "@/domain/entities/postgres/User";
 import { RecordTypeModel } from "@/domain/models/postgres/RecordTypesModel";
-import { AppDataSource } from "@/loaders/dataSource";
 import { getRepository, Repository } from "typeorm";
 import { RecordTypesRepositoryProtocol } from "../interfaces/recordTypesRepositoryProtocol";
 import { RecordTypes } from "@/domain/entities/postgres/RecordTypes";
