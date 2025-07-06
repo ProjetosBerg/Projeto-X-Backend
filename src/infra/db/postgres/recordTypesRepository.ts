@@ -75,4 +75,24 @@ export class RecordTypeRepository implements RecordTypesRepositoryProtocol {
       updated_at: recordType.updated_at,
     }));
   }
+
+  async findByIdRecordType(
+    data: RecordTypesRepositoryProtocol.FindByIdRecordTypeParams
+  ): Promise<RecordTypeModel | null> {
+    const recordType = await this.repository.findOne({
+      where: { id: data.id, user_id: { id: data.userId } },
+      relations: ["user_id"],
+    });
+
+    if (!recordType) return null;
+
+    return {
+      id: recordType.id,
+      user_id: recordType.user_id?.id,
+      name: recordType.name,
+      icone: recordType.icone,
+      created_at: recordType.created_at,
+      updated_at: recordType.updated_at,
+    };
+  }
 }
