@@ -37,7 +37,6 @@ export class GetByUserIdRecordTypeUseCase
         userId: data?.userId,
       });
 
-      console.log("recordTypes", recordTypes);
       if (recordTypes?.length === 0) {
         throw new BusinessRuleError(
           "Nenhum tipo de registro encontrado para este usuário"
