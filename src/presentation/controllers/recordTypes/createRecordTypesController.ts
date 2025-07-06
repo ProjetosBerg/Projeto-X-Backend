@@ -30,6 +30,7 @@ export class CreateRecordTypesController implements Controller {
       return res.status(201).json({
         status: ResponseStatus.OK,
         data: createRecordUser,
+        message: "Tipo de registro criado com sucesso",
       });
     } catch (error) {
       if (error instanceof ValidationError) {

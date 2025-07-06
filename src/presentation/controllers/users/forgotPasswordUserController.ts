@@ -29,6 +29,7 @@ export class ForgotPasswordController implements Controller {
       return res.status(200).json({
         status: ResponseStatus.OK,
         data: result,
+        message: "Senha alterada com sucesso",
       });
     } catch (error) {
       if (error instanceof ValidationError) {

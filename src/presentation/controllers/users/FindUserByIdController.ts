@@ -35,6 +35,7 @@ export class FindUserByIdController implements Controller {
       return res.status(200).json({
         status: ResponseStatus.OK,
         data: result,
+        message: "Usuário obtido com sucesso",
       });
     } catch (error) {
       if (error instanceof ValidationError) {

@@ -24,6 +24,7 @@ export class GetByUserIdRecordTypesController implements Controller {
       return res.status(200).json({
         status: ResponseStatus.OK,
         data: result,
+        message: "Tipos de registros obtidos com sucesso",
       });
     } catch (error) {
       if (error instanceof ValidationError) {

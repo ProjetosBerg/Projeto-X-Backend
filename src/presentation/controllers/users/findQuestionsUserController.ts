@@ -26,6 +26,7 @@ export class FindQuestionsController implements Controller {
       return res.status(200).json({
         status: ResponseStatus.OK,
         data: result,
+        message: "Perguntas obtidas com sucesso",
       });
     } catch (error) {
       if (error instanceof ValidationError) {

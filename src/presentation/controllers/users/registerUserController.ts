@@ -34,6 +34,7 @@ export class RegisterUserController implements Controller {
       return res.status(201).json({
         status: ResponseStatus.OK,
         data: createUser,
+        message: "Usuário criado com sucesso",
       });
     } catch (error) {
       if (error instanceof ValidationError) {

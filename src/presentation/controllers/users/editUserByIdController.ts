@@ -43,6 +43,7 @@ export class EditUserByIdController implements Controller {
       return res.status(200).json({
         status: ResponseStatus.OK,
         data: result,
+        message: "Usuário editado com sucesso",
       });
     } catch (error) {
       if (error instanceof ValidationError) {

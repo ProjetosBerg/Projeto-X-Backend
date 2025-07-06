@@ -36,6 +36,7 @@ export class DeleteUserByIdController implements Controller {
       return res.status(200).json({
         status: ResponseStatus.OK,
         data: result,
+        message: "Usuário deletado com sucesso",
       });
     } catch (error) {
       if (error instanceof ValidationError) {

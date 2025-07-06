@@ -23,6 +23,7 @@ export class LoginUserController implements Controller {
       return res.status(200).json({
         status: ResponseStatus.OK,
         data: result,
+        message: "Usuário logado com sucesso",
       });
     } catch (error) {
       if (error instanceof ValidationError) {
