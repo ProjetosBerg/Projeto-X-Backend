@@ -3,12 +3,14 @@ import { ValidationError } from "yup";
 import { IResponse, ResponseStatus, getError } from "@/utils/service";
 import { Controller } from "@/presentation/protocols/controller";
 import { CreateRecordTypeUseCase } from "@/data/usecases/recordTypes/createRecordTypesUseCase";
+import { checkUserAuthorization } from "@/presentation/validation/ValidateUser";
+import { GetByUserIdRecordTypeUseCase } from "@/data/usecases/recordTypes/getByUserIdRecordTypesUseCase";
 
-export class CreateRecordTypesController implements Controller {
+export class GetByUserIdRecordTypesController implements Controller {
   constructor(
-    private readonly createRecordTypesService: CreateRecordTypeUseCase
+    private readonly getByUserIdRecordTypesService: GetByUserIdRecordTypeUseCase
   ) {
-    this.createRecordTypesService = createRecordTypesService;
+    this.getByUserIdRecordTypesService = getByUserIdRecordTypesService;
   }
 
   async handle(
@@ -16,15 +18,7 @@ export class CreateRecordTypesController implements Controller {
     res: Response<IResponse>
   ): Promise<Response<IResponse>> {
     try {
-      const { name, icone } = req.body;
-
-      const data = {
-        name,
-        icone,
-      };
-
-      const createRecordUser = await this.createRecordTypesService.handle({
-        ...data,
+      const createRecordUser = await this.getByUserIdRecordTypesService.handle({
         userId: req.user!.id,
       });
       return res.status(201).json({

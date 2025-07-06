@@ -57,4 +57,22 @@ export class RecordTypeRepository implements RecordTypesRepositoryProtocol {
       user_id: recordType?.user_id.id,
     };
   }
+
+  async findByUserId(
+    data: RecordTypesRepositoryProtocol.FindByUserIdParams
+  ): Promise<RecordTypeModel[]> {
+    const recordTypes = await this.repository.find({
+      where: { user_id: { id: data?.userId } },
+      relations: ["user_id"],
+    });
+
+    return recordTypes.map((recordType) => ({
+      id: recordType.id,
+      user_id: recordType.user_id.id,
+      name: recordType.name,
+      icone: recordType.icone,
+      created_at: recordType.created_at,
+      updated_at: recordType.updated_at,
+    }));
+  }
 }
