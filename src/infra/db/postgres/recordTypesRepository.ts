@@ -11,9 +11,17 @@ export class RecordTypeRepository implements RecordTypesRepositoryProtocol {
   constructor() {
     this.repository = getRepository(RecordTypes);
   }
-
+  /**
+   * Cria um novo tipo de registro no banco de dados
+   * @param {RecordTypesRepositoryProtocol.CreateRecordTypesParams} data - Os dados do tipo de registro a ser criado
+   * @param {string} data.user_id - O ID do usuário proprietário do tipo de registro
+   * @param {string} data.name - O nome do tipo de registro
+   * @param {string} data.icone - O ícone do tipo de registro
+   * @returns {Promise<RecordTypeModel>} O tipo de registro criado com os dados normalizados
+   * @throws {Error} Se ocorrer um erro durante a criação no banco de dados
+   */
   async create(
-    data: RecordTypesRepositoryProtocol.CreateRecordTypes
+    data: RecordTypesRepositoryProtocol.CreateRecordTypesParams
   ): Promise<RecordTypeModel> {
     const recordType = this.repository.create({
       user_id: { id: data.user_id },
@@ -24,10 +32,18 @@ export class RecordTypeRepository implements RecordTypesRepositoryProtocol {
     const savedRecordType = await this.repository.save(recordType);
     return {
       ...savedRecordType,
-      user_id: savedRecordType.user_id.id,
+      user_id: savedRecordType?.user_id.id,
     };
   }
 
+  /**
+   * Busca um tipo de registro pelo nome e ID do usuário
+   * @param {RecordTypesRepositoryProtocol.FindByNameAndUserIdParams} data - Os dados para buscar o tipo de registro
+   * @param {string} data.name - O nome do tipo de registro a ser buscado
+   * @param {string} data.user_id - O ID do usuário proprietário do tipo de registro
+   * @returns {Promise<RecordTypeModel | null>} O tipo de registro encontrado com dados normalizados ou null se não encontrado
+   * @throws {Error} Se ocorrer um erro durante a busca no banco de dados
+   */
   async findByNameAndUserId(
     data: RecordTypesRepositoryProtocol.FindByNameAndUserIdParams
   ): Promise<RecordTypeModel | null> {
@@ -40,7 +56,7 @@ export class RecordTypeRepository implements RecordTypesRepositoryProtocol {
 
     return {
       ...recordType,
-      user_id: recordType.user_id.id,
+      user_id: recordType?.user_id.id,
     };
   }
 }

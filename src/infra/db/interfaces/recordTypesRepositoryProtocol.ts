@@ -2,7 +2,7 @@ import { RecordTypeModel } from "@/domain/models/postgres/RecordTypesModel";
 
 export interface RecordTypesRepositoryProtocol {
   create(
-    data: RecordTypesRepositoryProtocol.CreateRecordTypes
+    data: RecordTypesRepositoryProtocol.CreateRecordTypesParams
   ): Promise<RecordTypeModel>;
   findByNameAndUserId(
     data: RecordTypesRepositoryProtocol.FindByNameAndUserIdParams
@@ -15,7 +15,7 @@ export namespace RecordTypesRepositoryProtocol {
     user_id: RecordTypeModel["user_id"];
   };
 
-  export type CreateRecordTypes = {
+  export type CreateRecordTypesParams = {
     name: RecordTypeModel["name"];
     user_id: RecordTypeModel["user_id"];
     icone: RecordTypeModel["icone"];
