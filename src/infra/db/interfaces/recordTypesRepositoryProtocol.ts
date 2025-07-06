@@ -17,6 +17,10 @@ export interface RecordTypesRepositoryProtocol {
   updateRecordTypes(
     data: RecordTypesRepositoryProtocol.UpdateRecordTypes
   ): Promise<RecordTypeModel>;
+
+  deleteRecordTypes(
+    data: RecordTypesRepositoryProtocol.DeleteRecordTypesParams
+  ): Promise<void>;
 }
 
 export namespace RecordTypesRepositoryProtocol {
@@ -45,5 +49,10 @@ export namespace RecordTypesRepositoryProtocol {
     userId: RecordTypeModel["user_id"];
     name: RecordTypeModel["name"];
     icone: RecordTypeModel["icone"];
+  };
+
+  export type DeleteRecordTypesParams = {
+    id: RecordTypeModel["id"];
+    userId: RecordTypeModel["user_id"];
   };
 }

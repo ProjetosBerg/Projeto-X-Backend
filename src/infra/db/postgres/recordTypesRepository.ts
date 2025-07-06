@@ -125,4 +125,23 @@ export class RecordTypeRepository implements RecordTypesRepositoryProtocol {
       updated_at: updatedRecordType.updated_at,
     };
   }
+
+  async deleteRecordTypes(
+    data: RecordTypesRepositoryProtocol.DeleteRecordTypesParams
+  ): Promise<void> {
+    const recordType = await this.repository.findOne({
+      where: { id: data.id, user_id: { id: data.userId } },
+    });
+
+    if (!recordType) {
+      throw new BusinessRuleError(
+        `Nenhum tipo de registro encontrado com o ID ${data.id} para este usuário`
+      );
+    }
+
+    await this.repository.delete({
+      id: data.id,
+      user_id: { id: data.userId },
+    });
+  }
 }
