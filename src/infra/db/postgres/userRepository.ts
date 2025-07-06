@@ -62,6 +62,8 @@ export class UserRepository implements UserRepositoryProtocol {
         throw new NotFoundError("Usuário não encontrado");
       }
       user.password = data.password;
+
+      user.updated_at = new Date();
       const updatedUser = await repository.save(user);
       return updatedUser;
     } catch (error: any) {
@@ -126,6 +128,7 @@ export class UserRepository implements UserRepositoryProtocol {
           })
         );
       }
+      user.updated_at = new Date();
 
       const updatedUser = await repository.save(user);
       return updatedUser;
