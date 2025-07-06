@@ -59,6 +59,14 @@ export class RecordTypeRepository implements RecordTypesRepositoryProtocol {
     };
   }
 
+  /**
+   * Busca todos os tipos de registros de um usuário específico
+   * @param {RecordTypesRepositoryProtocol.FindByUserIdParams} data - Os dados contendo o ID do usuário
+   * @param {string} data.userId - O ID do usuário proprietário dos tipos de registro
+   * @returns {Promise<RecordTypeModel[]>} Um array com os tipos de registros do usuário com os dados normalizados
+   * @throws {Error} Se ocorrer um erro durante a busca no banco de dados
+   */
+
   async findByUserId(
     data: RecordTypesRepositoryProtocol.FindByUserIdParams
   ): Promise<RecordTypeModel[]> {
@@ -77,6 +85,14 @@ export class RecordTypeRepository implements RecordTypesRepositoryProtocol {
     }));
   }
 
+  /**
+   * Busca um tipo de registro pelo ID e ID do usuário
+   * @param {RecordTypesRepositoryProtocol.FindByIdRecordTypeParams} data - Os dados contendo o ID do tipo de registro e do usuário
+   * @param {number} data.id - O ID do tipo de registro a ser buscado
+   * @param {string} data.userId - O ID do usuário proprietário do tipo de registro
+   * @returns {Promise<RecordTypeModel | null>} O tipo de registro encontrado com dados normalizados ou null se não encontrado
+   * @throws {Error} Se ocorrer um erro durante a busca no banco de dados
+   */
   async findByIdRecordType(
     data: RecordTypesRepositoryProtocol.FindByIdRecordTypeParams
   ): Promise<RecordTypeModel | null> {
@@ -97,6 +113,17 @@ export class RecordTypeRepository implements RecordTypesRepositoryProtocol {
     };
   }
 
+  /**
+   * Atualiza um tipo de registro existente para um usuário
+   * @param {RecordTypesRepositoryProtocol.UpdateRecordTypes} data - Os dados contendo as informações do tipo de registro a ser atualizado
+   * @param {number} data.id - O ID do tipo de registro
+   * @param {string} data.userId - O ID do usuário proprietário
+   * @param {string} data.name - O novo nome do tipo de registro (opcional)
+   * @param {string} data.icone - O novo ícone do tipo de registro (opcional)
+   * @returns {Promise<RecordTypeModel>} O tipo de registro atualizado com os dados normalizados
+   * @throws {BusinessRuleError} Se o tipo de registro não for encontrado
+   * @throws {Error} Se ocorrer um erro durante a atualização
+   */
   async updateRecordTypes(
     data: RecordTypesRepositoryProtocol.UpdateRecordTypes
   ): Promise<RecordTypeModel> {
@@ -125,6 +152,16 @@ export class RecordTypeRepository implements RecordTypesRepositoryProtocol {
       updated_at: updatedRecordType.updated_at,
     };
   }
+
+  /**
+   * Exclui um tipo de registro de um usuário
+   * @param {RecordTypesRepositoryProtocol.DeleteRecordTypesParams} data - Os dados contendo o ID do tipo de registro e o ID do usuário
+   * @param {number} data.id - O ID do tipo de registro a ser excluído
+   * @param {string} data.userId - O ID do usuário proprietário do tipo de registro
+   * @returns {Promise<void>} Uma promessa resolvida quando o tipo de registro for excluído
+   * @throws {BusinessRuleError} Se o tipo de registro não for encontrado
+   * @throws {Error} Se ocorrer um erro durante a exclusão
+   */
 
   async deleteRecordTypes(
     data: RecordTypesRepositoryProtocol.DeleteRecordTypesParams
