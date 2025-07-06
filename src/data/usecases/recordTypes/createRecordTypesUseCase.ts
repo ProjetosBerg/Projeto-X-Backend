@@ -34,7 +34,7 @@ export class CreateRecordTypeUseCase
       const existingRecordType =
         await this.recordTypeRepository.findByNameAndUserId({
           name: data?.name,
-          user_id: data?.userId,
+          userId: data?.userId,
         });
       if (existingRecordType) {
         throw new BusinessRuleError(
@@ -43,7 +43,7 @@ export class CreateRecordTypeUseCase
       }
 
       const recordType = {
-        user_id: data?.userId,
+        userId: data?.userId,
         name: data?.name,
         icone: data?.icone,
       };

@@ -19,12 +19,12 @@ export interface RecordTypesRepositoryProtocol {
 export namespace RecordTypesRepositoryProtocol {
   export type FindByNameAndUserIdParams = {
     name: RecordTypeModel["name"];
-    user_id: RecordTypeModel["user_id"];
+    userId: RecordTypeModel["user_id"];
   };
 
   export type CreateRecordTypesParams = {
     name: RecordTypeModel["name"];
-    user_id: RecordTypeModel["user_id"];
+    userId: RecordTypeModel["user_id"];
     icone: RecordTypeModel["icone"];
   };
 

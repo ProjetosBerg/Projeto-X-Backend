@@ -43,13 +43,13 @@ describe("CreateRecordTypeUseCase", () => {
     expect(result).toEqual(mockRecordType);
     expect(recordTypeRepositorySpy.findByNameAndUserId).toHaveBeenCalledWith({
       name: mockRecordType.name,
-      user_id: mockRecordType.user_id,
+      userId: mockRecordType.user_id,
     });
     expect(recordTypeRepositorySpy.findByNameAndUserId).toHaveBeenCalledTimes(
       1
     );
     expect(recordTypeRepositorySpy.create).toHaveBeenCalledWith({
-      user_id: mockRecordType.user_id,
+      userId: mockRecordType.user_id,
       name: mockRecordType.name,
       icone: mockRecordType.icone,
     });
@@ -123,7 +123,7 @@ describe("CreateRecordTypeUseCase", () => {
     );
     expect(recordTypeRepositorySpy.findByNameAndUserId).toHaveBeenCalledWith({
       name: mockRecordType.name,
-      user_id: mockRecordType.user_id,
+      userId: mockRecordType.user_id,
     });
     expect(recordTypeRepositorySpy.findByNameAndUserId).toHaveBeenCalledTimes(
       1
@@ -148,7 +148,7 @@ describe("CreateRecordTypeUseCase", () => {
     );
     expect(recordTypeRepositorySpy.findByNameAndUserId).toHaveBeenCalledWith({
       name: mockRecordType.name,
-      user_id: mockRecordType.user_id,
+      userId: mockRecordType.user_id,
     });
     expect(recordTypeRepositorySpy.findByNameAndUserId).toHaveBeenCalledTimes(
       1
