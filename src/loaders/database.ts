@@ -4,6 +4,7 @@ import postgresDbConfig from "@/config/postgres";
 import mongoDbConfig from "@/config/mongodb";
 import logger from "@/loaders/logger";
 import PostgresEntities from "@/domain/entities/postgres";
+import MongodbSchemas from "@/domain/entities/mongo";
 
 class DatabaseHelper {
   private connections: Connection[];
@@ -42,7 +43,7 @@ class DatabaseHelper {
     try {
       const mongoConnection = await createConnection({
         ...this.mongoDgConfig,
-        entities: [...Object.values({})],
+        entities: [...Object.values(MongodbSchemas || {})],
         useUnifiedTopology: true,
         logging: false,
         maxQueryExecutionTime: 10000,

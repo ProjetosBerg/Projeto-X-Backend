@@ -9,6 +9,9 @@ import {
 } from "typeorm";
 import { v4 as uuidv4 } from "uuid";
 import { SecurityQuestion } from "./SecurityQuestion";
+import { Category } from "./Category";
+import { MonthlyRecord } from "./MonthlyRecord";
+import { Transaction } from "./Transaction";
 
 @Entity("users")
 export class User extends BaseEntity {
@@ -31,6 +34,17 @@ export class User extends BaseEntity {
     cascade: true,
   })
   security_questions!: SecurityQuestion[];
+
+  @OneToMany(() => Category, (category) => category.user, { cascade: true })
+  categories!: Category[];
+
+  @OneToMany(() => MonthlyRecord, (record) => record.user, { cascade: true })
+  monthly_records!: MonthlyRecord[];
+
+  @OneToMany(() => Transaction, (transaction) => transaction.user, {
+    cascade: true,
+  })
+  transactions!: Transaction[];
 
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   created_at!: Date;
