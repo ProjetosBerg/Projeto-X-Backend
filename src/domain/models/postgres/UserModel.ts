@@ -9,7 +9,7 @@ export type UserModel = {
   login: string;
   email: string;
   password: string;
-  security_questions?: SecurityQuestionModel[];
+  security_questions: SecurityQuestionModel[];
   categories?: CategoryModel[];
   monthly_records?: MonthlyRecordModel[];
   transactions?: TransactionModel[];

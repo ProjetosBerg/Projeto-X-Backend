@@ -1,0 +1,68 @@
+import { Repository, getRepository } from "typeorm";
+import { Category } from "@/domain/entities/postgres/Category";
+import { CategoryModel } from "@/domain/models/postgres/CategoryModel";
+import { User } from "@/domain/entities/postgres/User";
+import { RecordTypes } from "@/domain/entities/postgres/RecordTypes";
+import { CategoryRepositoryProtocol } from "../interfaces/categoryRepositoryProtocol";
+
+export class CategoryRepository implements CategoryRepositoryProtocol {
+  private repository: Repository<Category>;
+
+  constructor() {
+    this.repository = getRepository(Category);
+  }
+
+  async create(
+    data: CategoryRepositoryProtocol.CreateCategory
+  ): Promise<CategoryModel> {
+    const category = this.repository.create({
+      name: data.name,
+      description: data.description,
+      type: data.type,
+      record_type: { id: data.recordTypeId } as RecordTypes,
+      user: { id: data.userId } as User,
+    });
+
+    const savedCategory = await this.repository.save(category);
+    return {
+      id: savedCategory.id,
+      name: savedCategory.name,
+      description: savedCategory.description,
+      type: savedCategory.type,
+      record_type_id: savedCategory.record_type.id,
+      user_id: savedCategory.user.id,
+      monthly_records: savedCategory?.monthly_records || [],
+      transactions: savedCategory?.transactions || [],
+      created_at: savedCategory.created_at,
+      updated_at: savedCategory.updated_at,
+    };
+  }
+
+  async findByNameAndUserId(
+    data: CategoryRepositoryProtocol.FindByNameAndUserIdParams
+  ): Promise<CategoryModel | null> {
+    const category = await this.repository.findOne({
+      where: {
+        name: data.name,
+        user: { id: data.userId },
+        record_type: { id: data.recordTypeId },
+      },
+      relations: ["user", "record_type", "monthly_records", "transactions"],
+    });
+
+    if (!category) return null;
+
+    return {
+      id: category.id,
+      name: category.name,
+      description: category.description,
+      type: category.type,
+      record_type_id: category.record_type.id,
+      user_id: category.user.id,
+      monthly_records: category.monthly_records || [],
+      transactions: category.transactions || [],
+      created_at: category.created_at,
+      updated_at: category.updated_at,
+    };
+  }
+}

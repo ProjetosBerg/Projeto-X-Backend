@@ -1,18 +1,20 @@
 import { CategoryModel } from "./CategoryModel";
 import { UserModel } from "./UserModel";
-import { TransactionModel } from "./TransactionModel";
+import { MonthlyRecord } from "@/domain/entities/postgres/MonthlyRecord";
+import { Transaction } from "@/domain/entities/postgres/Transaction";
 
-export type MonthlyRecordModel = {
-  id?: string;
-  title: string;
-  description?: string;
-  goal: string;
-  initial_balance?: number;
-  month: number;
-  year: number;
-  category_id: CategoryModel["id"];
-  user_id: UserModel["id"];
-  transactions?: TransactionModel[];
-  created_at?: Date;
-  updated_at?: Date;
-};
+export interface MonthlyRecordModel extends MonthlyRecord {
+  id: MonthlyRecord["id"];
+  title: MonthlyRecord["title"];
+  description: MonthlyRecord["description"];
+  goal: MonthlyRecord["goal"];
+  initial_balance: MonthlyRecord["initial_balance"];
+  month: MonthlyRecord["month"];
+  year: MonthlyRecord["year"];
+  category_id?: CategoryModel["id"];
+  user_id?: UserModel["id"];
+  created_at: MonthlyRecord["created_at"];
+  updated_at: MonthlyRecord["updated_at"];
+  category: MonthlyRecord["category"];
+  transactions: Transaction[];
+}

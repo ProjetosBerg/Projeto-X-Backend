@@ -1,16 +1,17 @@
 import { MonthlyRecordModel } from "./MonthlyRecordModel";
 import { CategoryModel } from "./CategoryModel";
 import { UserModel } from "./UserModel";
+import { Transaction } from "@/domain/entities/postgres/Transaction";
 
-export type TransactionModel = {
-  id?: string;
-  title: string;
-  description?: string;
-  amount?: number;
-  transaction_date: Date;
-  monthly_record_id: MonthlyRecordModel["id"];
-  category_id: CategoryModel["id"];
-  user_id: UserModel["id"];
-  created_at?: Date;
-  updated_at?: Date;
-};
+export interface TransactionModel extends Transaction {
+  id: Transaction["id"];
+  title: Transaction["title"];
+  description: Transaction["description"];
+  amount: Transaction["amount"];
+  transaction_date: Transaction["transaction_date"];
+  monthly_record_id?: MonthlyRecordModel["id"];
+  category_id?: CategoryModel["id"];
+  user_id?: UserModel["id"];
+  created_at: Transaction["created_at"];
+  updated_at: Transaction["updated_at"];
+}
