@@ -65,4 +65,13 @@ export class CategoryRepository implements CategoryRepositoryProtocol {
       updated_at: category.updated_at,
     };
   }
+
+  async findByUserId(
+    data: CategoryRepositoryProtocol.FindByUserIdParams
+  ): Promise<Category[]> {
+    return await this.repository.find({
+      where: { user: { id: data.userId } },
+      relations: ["record_type", "user"],
+    });
+  }
 }
