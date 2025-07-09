@@ -16,12 +16,12 @@ export class GetByUserIdCategoryController implements Controller {
     res: Response<IResponse>
   ): Promise<Response<IResponse>> {
     try {
-      const createCategory = await this.getByUserIdCategoryService.handle({
+      const result = await this.getByUserIdCategoryService.handle({
         userId: req.user!.id,
       });
       return res.status(200).json({
         status: ResponseStatus.OK,
-        data: createCategory,
+        data: result,
         message: "Categorias obtidas com sucesso",
       });
     } catch (error) {
