@@ -1,4 +1,4 @@
-import { makeCreateCategoryControllerFactory } from "@/main/factories/controllers/category/createRecordTypesControllerFactory";
+import { makeCreateCategoryControllerFactory } from "@/main/factories/controllers/category/createCategoryControllerFactory";
 import { makeGetByUserIdCategoryControllerFactory } from "@/main/factories/controllers/category/getByUserIdCategoryControllerFactory";
 import { makeGetByIdCategoryControllerFactory } from "@/main/factories/controllers/category/getByIdCategoryControllerFactory";
 import { makeGetLoginMiddleware } from "@/main/factories/middleware/getLogin";
