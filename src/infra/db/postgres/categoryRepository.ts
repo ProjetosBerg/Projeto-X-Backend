@@ -4,6 +4,7 @@ import { CategoryModel } from "@/domain/models/postgres/CategoryModel";
 import { User } from "@/domain/entities/postgres/User";
 import { RecordTypes } from "@/domain/entities/postgres/RecordTypes";
 import { CategoryRepositoryProtocol } from "../interfaces/categoryRepositoryProtocol";
+import { NotFoundError } from "@/data/errors/NotFoundError";
 
 export class CategoryRepository implements CategoryRepositoryProtocol {
   private repository: Repository<Category>;
@@ -100,5 +101,27 @@ export class CategoryRepository implements CategoryRepositoryProtocol {
       created_at: category.created_at,
       updated_at: category.updated_at,
     };
+  }
+
+  async deleteCategory(
+    data: CategoryRepositoryProtocol.DeleteCategoryParams
+  ): Promise<void> {
+    const category = await this.repository.findOne({
+      where: {
+        id: data.id,
+        user: { id: data.userId },
+      },
+    });
+
+    if (!category) {
+      throw new NotFoundError(
+        `Categoria com ID ${data.id} não encontrada para este usuário`
+      );
+    }
+
+    await this.repository.delete({
+      id: data.id,
+      user: { id: data.userId },
+    });
   }
 }

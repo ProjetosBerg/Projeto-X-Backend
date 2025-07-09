@@ -13,6 +13,9 @@ export interface CategoryRepositoryProtocol {
   findByIdAndUserId(
     data: CategoryRepositoryProtocol.FindByIdAndUserIdParams
   ): Promise<CategoryModel | null>;
+  deleteCategory(
+    data: CategoryRepositoryProtocol.DeleteCategoryParams
+  ): Promise<void>;
 }
 
 export namespace CategoryRepositoryProtocol {
@@ -35,6 +38,10 @@ export namespace CategoryRepositoryProtocol {
   };
 
   export type FindByIdAndUserIdParams = {
+    id: CategoryModel["id"];
+    userId: CategoryModel["user_id"];
+  };
+  export type DeleteCategoryParams = {
     id: CategoryModel["id"];
     userId: CategoryModel["user_id"];
   };
