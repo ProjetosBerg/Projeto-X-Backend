@@ -8,18 +8,19 @@ import { getByIdCategoryValidationSchema } from "../validation/category/getByIdC
 import { GetByIdCategoryUseCaseProtocol } from "../interfaces/category/getByIdCategoryUseCaseProtocol";
 
 /**
- * Retrieves a category by ID for a specific user
+ * Recupera uma categoria pelo ID para um usuário específico
  *
- * @param {GetByIdCategoryUseCaseProtocol.Params} data - The input data containing the category ID and user ID
- * @param {string} data.id - The ID of the category to retrieve
- * @param {string} data.userId - The ID of the user who owns the category
+ * @param {GetByIdCategoryUseCaseProtocol.Params} data - Os dados de entrada contendo o ID da categoria e o ID do usuário
+ * @param {string} data.categoryId - O ID da categoria a ser recuperada
+ * @param {string} data.userId - O ID do usuário proprietário da categoria
  *
- * @returns {Promise<CategoryModel>} The retrieved category
+ * @returns {Promise<CategoryModel>} A categoria recuperada
  *
- * @throws {ValidationError} If the provided id or userId is invalid
- * @throws {NotFoundError} If the user or category is not found
- * @throws {ServerError} If an unexpected error occurs during retrieval
+ * @throws {ValidationError} Se o id ou userId fornecido for inválido
+ * @throws {NotFoundError} Se o usuário ou a categoria não forem encontrados
+ * @throws {ServerError} Se ocorrer um erro inesperado durante a recuperação
  */
+
 export class GetByIdCategoryUseCase implements GetByIdCategoryUseCaseProtocol {
   constructor(
     private readonly categoryRepository: CategoryRepositoryProtocol,
