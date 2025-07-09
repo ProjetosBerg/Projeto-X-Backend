@@ -1,8 +1,6 @@
-import { GetByUserIdCategoryController } from "@/presentation/controllers/category/getByUserIdCategoryController";
-import { makeGetByUserIdCategoryUseCaseFactory } from "../../usecase/category/getByIdCategoryUseCaseFactory";
+import { GetByIdCategoryController } from "@/presentation/controllers/category/getByIdCategoryController";
+import { makeGetByIdCategoryUseCaseFactory } from "@/main/factories/usecase/category/getByIdCategoryUseCaseFactory";
 
-export const makeGetByUserIdCategoryControllerFactory = () => {
-  return new GetByUserIdCategoryController(
-    makeGetByUserIdCategoryUseCaseFactory()
-  );
+export const makeGetByIdCategoryControllerFactory = () => {
+  return new GetByIdCategoryController(makeGetByIdCategoryUseCaseFactory());
 };

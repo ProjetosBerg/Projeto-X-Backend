@@ -10,6 +10,9 @@ export interface CategoryRepositoryProtocol {
   findByUserId(
     data: CategoryRepositoryProtocol.FindByUserIdParams
   ): Promise<CategoryModel[]>;
+  findByIdAndUserId(
+    data: CategoryRepositoryProtocol.FindByIdAndUserIdParams
+  ): Promise<CategoryModel | null>;
 }
 
 export namespace CategoryRepositoryProtocol {
@@ -28,6 +31,11 @@ export namespace CategoryRepositoryProtocol {
   };
 
   export type FindByUserIdParams = {
+    userId: CategoryModel["user_id"];
+  };
+
+  export type FindByIdAndUserIdParams = {
+    id: CategoryModel["id"];
     userId: CategoryModel["user_id"];
   };
 }

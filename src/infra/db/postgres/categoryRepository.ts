@@ -74,4 +74,31 @@ export class CategoryRepository implements CategoryRepositoryProtocol {
       relations: ["record_type", "user"],
     });
   }
+
+  async findByIdAndUserId(
+    data: CategoryRepositoryProtocol.FindByIdAndUserIdParams
+  ): Promise<CategoryModel | null> {
+    const category = await this.repository.findOne({
+      where: {
+        id: data.id,
+        user: { id: data.userId },
+      },
+      relations: ["user", "record_type", "monthly_records", "transactions"],
+    });
+
+    if (!category) return null;
+
+    return {
+      id: category.id,
+      name: category.name,
+      description: category.description,
+      type: category.type,
+      record_type_id: category.record_type.id,
+      user_id: category.user.id,
+      monthly_records: category.monthly_records || [],
+      transactions: category.transactions || [],
+      created_at: category.created_at,
+      updated_at: category.updated_at,
+    };
+  }
 }
