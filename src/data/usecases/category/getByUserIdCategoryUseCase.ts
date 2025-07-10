@@ -7,6 +7,19 @@ import { GetByUserIdCategoryUseCaseProtocol } from "@/data/usecases/interfaces/c
 import { NotFoundError } from "@/data/errors/NotFoundError";
 import { getByUserIdCategoryValidationSchema } from "@/data/usecases/validation/category/getByUserIdCategoryValidationSchema";
 
+/**
+ * Recupera todas as categorias pelo UserId para um usuário específico
+ *
+ * @param {GetByIdCategoryUseCaseProtocol.Params} data - Os dados de entrada contendo  ID do usuário
+ * @param {string} data.userId - O ID do usuário proprietário da categoria
+ *
+ * @returns {Promise<CategoryModel>} A categoria recuperada
+ *
+ * @throws {ValidationError} Se o id ou userId fornecido for inválido
+ * @throws {NotFoundError} Se o usuário ou a categoria não forem encontrados
+ * @throws {ServerError} Se ocorrer um erro inesperado durante a recuperação
+ */
+
 export class GetByUserIdCategoryUseCase
   implements GetByUserIdCategoryUseCaseProtocol
 {

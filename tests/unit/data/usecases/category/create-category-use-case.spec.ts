@@ -5,7 +5,7 @@ import { mockCategory } from "@/tests/unit/mocks/category/mockCategory";
 import { ValidationError } from "yup";
 import { CategoryRepositoryProtocol } from "@/infra/db/interfaces/categoryRepositoryProtocol";
 import { mockRecordType } from "@/tests/unit/mocks/recordTypes/mockRecordTypes";
-import { CreateCategoryUseCase } from "@/data/usecases/category/createCategory";
+import { CreateCategoryUseCase } from "@/data/usecases/category/createCategoryUseCase";
 
 export const makeCategoryRepository =
   (): jest.Mocked<CategoryRepositoryProtocol> => ({

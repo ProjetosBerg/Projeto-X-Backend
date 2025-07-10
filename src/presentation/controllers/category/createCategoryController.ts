@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { ValidationError } from "yup";
 import { IResponse, ResponseStatus, getError } from "@/utils/service";
 import { Controller } from "@/presentation/protocols/controller";
-import { CreateCategoryUseCase } from "@/data/usecases/category/createCategory";
+import { CreateCategoryUseCase } from "@/data/usecases/category/createCategoryUseCase";
 
 export class CreateCategoryController implements Controller {
   constructor(private readonly createCategoryService: CreateCategoryUseCase) {
