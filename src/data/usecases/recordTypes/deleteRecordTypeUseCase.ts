@@ -8,7 +8,7 @@ import { DeleteRecordTypeUseCaseProtocol } from "@/data/usecases/interfaces/reco
  * Exclui um tipo de registro de um usuário específico
  *
  * @param {DeleteRecordTypeUseCaseProtocol.Params} data - Os dados de entrada contendo o ID do tipo de registro e o ID do usuário
- * @param {number} data.id - O ID do tipo de registro a ser excluído
+ * @param {number} data.recordTypeId - O ID do tipo de registro a ser excluído
  * @param {string} data.userId - O ID do usuário proprietário do tipo de registro
  *
  * @returns {Promise<void>} Uma promessa que é resolvida quando o tipo de registro é excluído

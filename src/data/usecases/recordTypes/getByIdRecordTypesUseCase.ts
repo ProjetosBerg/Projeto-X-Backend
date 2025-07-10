@@ -6,18 +6,19 @@ import { RecordTypeModel } from "@/domain/models/postgres/RecordTypesModel";
 import { getByIdRecordTypeValidationSchema } from "@/data/usecases/validation/recordTypes/getByIdRecordTypeValidationSchema";
 
 /**
- * Retrieves a single record type by its ID for a specific user
+ * Recupera um tipo de registro pelo seu ID para um usuário específico
  *
- * @param {GetByIdRecordTypeUseCaseProtocol.Params} data - The input data containing the record type ID and user ID
- * @param {number} data.id - The ID of the record type to retrieve
- * @param {string} data.user_id - The ID of the user who owns the record type
+ * @param {GetByIdRecordTypeUseCaseProtocol.Params} data - Os dados de entrada contendo o ID do tipo de registro e o ID do usuário
+ * @param {number} data.recordTypeId - O ID do tipo de registro a ser recuperado
+ * @param {string} data.user_id - O ID do usuário proprietário do tipo de registro
  *
- * @returns {Promise<RecordTypeModel>} A promise that returns the record type
+ * @returns {Promise<RecordTypeModel>} Uma promessa que retorna o tipo de registro
  *
- * @throws {ValidationError} If the provided id or user_id is invalid
- * @throws {BusinessRuleError} If no record type is found for the given ID and user
- * @throws {ServerError} If an unexpected error occurs during retrieval
+ * @throws {ValidationError} Se o id ou user_id fornecido for inválido
+ * @throws {BusinessRuleError} Se nenhum tipo de registro for encontrado para o ID e usuário informados
+ * @throws {ServerError} Se ocorrer um erro inesperado durante a recuperação
  */
+
 export class GetByIdRecordTypeUseCase
   implements GetByIdRecordTypeUseCaseProtocol
 {

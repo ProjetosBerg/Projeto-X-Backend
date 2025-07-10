@@ -9,7 +9,7 @@ import { editRecordTypeValidationSchema } from "@/data/usecases/validation/recor
  * Atualiza um tipo de registro existente para um usuário específico
  *
  * @param {EditRecordTypeUseCaseProtocol.Params} data - Os dados de entrada contendo as informações do tipo de registro
- * @param {number} data.id - O ID do tipo de registro que será atualizado
+ * @param {number} data.recordTypeId - O ID do tipo de registro que será atualizado
  * @param {string} data.userId - O ID do usuário proprietário do tipo de registro
  * @param {string} data.name - O novo nome do tipo de registro
  * @param {string} data.icone - O novo ícone do tipo de registro
