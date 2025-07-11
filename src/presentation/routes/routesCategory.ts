@@ -5,6 +5,7 @@ import { makeGetLoginMiddleware } from "@/main/factories/middleware/getLogin";
 import { adapterMiddleware } from "@/utils/adapterMiddleware";
 import { Router, Request, Response } from "express";
 import { makeDeleteCategoryControllerFactory } from "@/main/factories/controllers/category/deleteCategoryControllerFactory";
+import { makeEditCategoryControllerFactory } from "@/main/factories/controllers/category/editCategoryControllerFactory";
 
 export const routesCategory = (router: Router) => {
   router.get(
@@ -27,6 +28,14 @@ export const routesCategory = (router: Router) => {
     adapterMiddleware(makeGetLoginMiddleware()),
     (req: Request, res: Response) => {
       makeCreateCategoryControllerFactory().handle(req, res);
+    }
+  );
+
+  router.patch(
+    "/category/edit/:id",
+    adapterMiddleware(makeGetLoginMiddleware()),
+    (req: Request, res: Response) => {
+      makeEditCategoryControllerFactory().handle(req, res);
     }
   );
 

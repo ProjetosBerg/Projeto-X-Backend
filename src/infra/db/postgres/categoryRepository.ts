@@ -124,4 +124,42 @@ export class CategoryRepository implements CategoryRepositoryProtocol {
       user: { id: data.userId },
     });
   }
+  async updateCategory(
+    data: CategoryRepositoryProtocol.UpdateCategoryParams
+  ): Promise<CategoryModel> {
+    const category = await this.repository.findOne({
+      where: {
+        id: data.id,
+        user: { id: data.userId },
+      },
+      relations: ["user", "record_type", "monthly_records", "transactions"],
+    });
+
+    if (!category) {
+      throw new NotFoundError(
+        `Categoria com ID ${data.id} não encontrada para este usuário`
+      );
+    }
+
+    if (data.name) category.name = data.name;
+    if (data.description) category.description = data.description || "";
+    if (data.type) category.type = data.type;
+    if (data.recordTypeId)
+      category.record_type = { id: data.recordTypeId } as RecordTypes;
+    category.updated_at = new Date();
+
+    const updatedCategory = await this.repository.save(category);
+    return {
+      id: updatedCategory.id,
+      name: updatedCategory.name,
+      description: updatedCategory.description,
+      type: updatedCategory.type,
+      record_type_id: updatedCategory.record_type.id,
+      user_id: updatedCategory.user.id,
+      monthly_records: updatedCategory.monthly_records || [],
+      transactions: updatedCategory.transactions || [],
+      created_at: updatedCategory.created_at,
+      updated_at: updatedCategory.updated_at,
+    };
+  }
 }

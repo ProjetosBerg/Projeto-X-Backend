@@ -16,6 +16,9 @@ export interface CategoryRepositoryProtocol {
   deleteCategory(
     data: CategoryRepositoryProtocol.DeleteCategoryParams
   ): Promise<void>;
+  updateCategory(
+    data: CategoryRepositoryProtocol.UpdateCategoryParams
+  ): Promise<CategoryModel>;
 }
 
 export namespace CategoryRepositoryProtocol {
@@ -44,5 +47,14 @@ export namespace CategoryRepositoryProtocol {
   export type DeleteCategoryParams = {
     id: CategoryModel["id"];
     userId: CategoryModel["user_id"];
+  };
+
+  export type UpdateCategoryParams = {
+    id: string;
+    name?: string;
+    description?: string;
+    type?: string;
+    recordTypeId: number;
+    userId: string;
   };
 }
