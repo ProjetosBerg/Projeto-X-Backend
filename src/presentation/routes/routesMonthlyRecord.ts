@@ -1,3 +1,4 @@
+import { makeCreateMonthlyRecordControllerFactory } from "@/main/factories/controllers/monthlyRecord/createMonthlyRecordControllerFactory";
 import { makeGetLoginMiddleware } from "@/main/factories/middleware/getLogin";
 import { adapterMiddleware } from "@/utils/adapterMiddleware";
 import { Router, Request, Response } from "express";
@@ -17,7 +18,9 @@ export const routesMonthlyRecord = (router: Router) => {
   router.post(
     "/monthly-record/create",
     adapterMiddleware(makeGetLoginMiddleware()),
-    (req: Request, res: Response) => {}
+    (req: Request, res: Response) => {
+      makeCreateMonthlyRecordControllerFactory().handle(req, res);
+    }
   );
 
   router.patch(

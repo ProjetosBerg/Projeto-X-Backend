@@ -18,3 +18,8 @@ export interface MonthlyRecordModel extends MonthlyRecord {
   category: MonthlyRecord["category"];
   transactions: Transaction[];
 }
+
+export type MonthlyRecordMock = Omit<
+  MonthlyRecordModel,
+  "save" | "remove" | "hasId" | "softRemove" | "recover" | "user" | "reload"
+>;

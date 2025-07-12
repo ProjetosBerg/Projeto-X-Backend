@@ -12,7 +12,7 @@ import {
 import { Category } from "./Category";
 import { User } from "./User";
 import { Transaction } from "./Transaction";
-
+// TODO: adicionar status
 @Entity("monthly_records")
 export class MonthlyRecord extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
