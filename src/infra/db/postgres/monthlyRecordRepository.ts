@@ -80,4 +80,20 @@ export class MonthlyRecordRepository
       updated_at: record.updated_at,
     }));
   }
+
+  async findByIdAndUserId(
+    data: MonthlyRecordRepositoryProtocol.FindByIdAndUserIdParams
+  ): Promise<MonthlyRecordMock | null> {
+    const monthlyRecord = await this.repository.findOne({
+      where: {
+        id: data.id,
+        user: { id: data.userId },
+      },
+      relations: ["category", "transactions"],
+    });
+
+    if (!monthlyRecord) return null;
+
+    return monthlyRecord;
+  }
 }

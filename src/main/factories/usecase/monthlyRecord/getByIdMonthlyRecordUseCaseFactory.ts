@@ -1,10 +1,10 @@
-// import { GetByIdCategoryUseCase } from "@/data/usecases/category/getByIdCategoryUseCase";
-// import { CategoryRepository } from "@/infra/db/postgres/categoryRepository";
-// import { UserRepository } from "@/infra/db/postgres/userRepository";
+import { GetByIdMonthlyRecordUseCase } from "@/data/usecases/monthlyRecord/getByIdMonthlyRecordUseCase";
+import { UserRepository } from "@/infra/db/postgres/userRepository";
+import { MonthlyRecordRepository } from "@/infra/db/postgres/monthlyRecordRepository";
 
-// export const makeGetByIdMonthlyRecordUseCaseFactory = () => {
-//   return new GetByIdMonthlyRecordUseCase(
-//     new CategoryRepository(),
-//     new UserRepository()
-//   );
-// };
+export const makeGetByIdMonthlyRecordUseCaseFactory = () => {
+  return new GetByIdMonthlyRecordUseCase(
+    new MonthlyRecordRepository(),
+    new UserRepository()
+  );
+};

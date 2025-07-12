@@ -1,9 +1,8 @@
-// import { GetByIdCategoryController } from "@/presentation/controllers/category/getByIdCategoryController";
-// import { makeGetByIdCategoryUseCaseFactory } from "@/main/factories/usecase/category/getByIdCategoryUseCaseFactory";
-// import { GetByIdMonthlyRecordController } from "@/presentation/controllers/monthlyRecord/getByIdMonthlyRecordController";
+import { GetByIdMonthlyRecordController } from "@/presentation/controllers/monthlyRecord/getByIdMonthlyRecordController";
+import { makeGetByIdMonthlyRecordUseCaseFactory } from "../../usecase/monthlyRecord/getByIdMonthlyRecordUseCaseFactory";
 
-// export const makeGetByIdMonthlyRecordControllerFactory = () => {
-//   return new GetByIdMonthlyRecordController(
-//     makeGetByIdMonthlyRecordUseCaseFactory()
-//   );
-// };
+export const makeGetByIdMonthlyRecordControllerFactory = () => {
+  return new GetByIdMonthlyRecordController(
+    makeGetByIdMonthlyRecordUseCaseFactory()
+  );
+};

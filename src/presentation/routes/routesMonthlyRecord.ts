@@ -1,4 +1,5 @@
 import { makeCreateMonthlyRecordControllerFactory } from "@/main/factories/controllers/monthlyRecord/createMonthlyRecordControllerFactory";
+import { makeGetByIdMonthlyRecordControllerFactory } from "@/main/factories/controllers/monthlyRecord/getByIdMonthlyRecordControllerFactory";
 import { makeGetByUserIdMonthlyRecordControllerFactory } from "@/main/factories/controllers/monthlyRecord/getByUserIdMonthlyRecordControllerFactory";
 import { makeGetLoginMiddleware } from "@/main/factories/middleware/getLogin";
 import { adapterMiddleware } from "@/utils/adapterMiddleware";
@@ -16,7 +17,9 @@ export const routesMonthlyRecord = (router: Router) => {
   router.get(
     "/monthly-record/:id",
     adapterMiddleware(makeGetLoginMiddleware()),
-    (req: Request, res: Response) => {}
+    (req: Request, res: Response) => {
+      makeGetByIdMonthlyRecordControllerFactory().handle(req, res);
+    }
   );
   router.post(
     "/monthly-record/create",
