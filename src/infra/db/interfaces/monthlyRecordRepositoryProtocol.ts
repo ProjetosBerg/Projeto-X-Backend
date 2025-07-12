@@ -10,6 +10,9 @@ export interface MonthlyRecordRepositoryProtocol {
   findOneMonthlyRecord(
     data: MonthlyRecordRepositoryProtocol.FindByUserIdAndCategoryIdAndMonthYearParams
   ): Promise<MonthlyRecordMock | null>;
+  findByUserId(
+    data: MonthlyRecordRepositoryProtocol.FindByUserIdParams
+  ): Promise<MonthlyRecordMock[]>;
 }
 
 export namespace MonthlyRecordRepositoryProtocol {
@@ -29,5 +32,9 @@ export namespace MonthlyRecordRepositoryProtocol {
     categoryId: MonthlyRecordModel["category_id"];
     month: MonthlyRecordModel["month"];
     year: MonthlyRecordModel["year"];
+  };
+  export type FindByUserIdParams = {
+    userId: MonthlyRecordModel["user_id"];
+    categoryId: MonthlyRecordModel["category_id"];
   };
 }

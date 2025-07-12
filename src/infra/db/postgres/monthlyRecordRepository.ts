@@ -52,4 +52,32 @@ export class MonthlyRecordRepository
 
     return monthlyRecord;
   }
+
+  async findByUserId(
+    data: MonthlyRecordRepositoryProtocol.FindByUserIdParams
+  ): Promise<MonthlyRecordMock[]> {
+    const monthlyRecords = await this.repository.find({
+      where: {
+        user: { id: data.userId },
+        category: { id: data.categoryId },
+      },
+      relations: ["user", "category", "transactions"],
+    });
+
+    return monthlyRecords.map((record) => ({
+      id: record.id,
+      title: record.title,
+      description: record.description,
+      goal: record.goal,
+      initial_balance: record.initial_balance,
+      month: record.month,
+      year: record.year,
+      category_id: record.category.id,
+      user_id: record.user.id,
+      category: record.category,
+      transactions: record.transactions || [],
+      created_at: record.created_at,
+      updated_at: record.updated_at,
+    }));
+  }
 }
