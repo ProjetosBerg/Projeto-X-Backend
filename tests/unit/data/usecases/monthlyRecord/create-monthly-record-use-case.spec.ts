@@ -74,6 +74,7 @@ describe("CreateMonthlyRecordUseCase", () => {
       title: mockMonthlyRecord.title,
       description: mockMonthlyRecord.description,
       goal: mockMonthlyRecord.goal,
+      status: mockMonthlyRecord.status,
       initial_balance: mockMonthlyRecord.initial_balance,
       month: mockMonthlyRecord.month,
       year: mockMonthlyRecord.year,
@@ -121,6 +122,7 @@ describe("CreateMonthlyRecordUseCase", () => {
       goal: mockMonthlyRecord.goal,
       initial_balance: mockMonthlyRecord.initial_balance,
       month: mockMonthlyRecord.month,
+      status: mockMonthlyRecord.status,
       year: mockMonthlyRecord.year,
       categoryId: mockMonthlyRecord.category_id,
       userId: mockMonthlyRecord.user_id,
@@ -149,6 +151,7 @@ describe("CreateMonthlyRecordUseCase", () => {
       title: "A",
       description: mockMonthlyRecord.description,
       goal: mockMonthlyRecord.goal,
+      status: mockMonthlyRecord.status,
       initial_balance: mockMonthlyRecord.initial_balance,
       month: mockMonthlyRecord.month,
       year: mockMonthlyRecord.year,
@@ -181,6 +184,7 @@ describe("CreateMonthlyRecordUseCase", () => {
       title: mockMonthlyRecord.title,
       description: mockMonthlyRecord.description,
       goal: "",
+      status: mockMonthlyRecord.status,
       initial_balance: mockMonthlyRecord.initial_balance,
       month: mockMonthlyRecord.month,
       year: mockMonthlyRecord.year,
@@ -191,6 +195,37 @@ describe("CreateMonthlyRecordUseCase", () => {
     await expect(sut.handle(input)).rejects.toThrow(ValidationError);
     await expect(sut.handle(input)).rejects.toMatchObject({
       errors: expect.arrayContaining(["Meta é obrigatória"]),
+    });
+    expect(userRepositorySpy.findOne).not.toHaveBeenCalled();
+    expect(categoryRepositorySpy.findByIdAndUserId).not.toHaveBeenCalled();
+    expect(
+      monthlyRecordRepositorySpy.findOneMonthlyRecord
+    ).not.toHaveBeenCalled();
+    expect(monthlyRecordRepositorySpy.create).not.toHaveBeenCalled();
+  });
+
+  test("should throw ValidationError if status is empty", async () => {
+    const {
+      sut,
+      monthlyRecordRepositorySpy,
+      userRepositorySpy,
+      categoryRepositorySpy,
+    } = makeSut();
+    const input = {
+      title: mockMonthlyRecord.title,
+      description: mockMonthlyRecord.description,
+      goal: mockMonthlyRecord.goal,
+      status: "",
+      initial_balance: mockMonthlyRecord.initial_balance,
+      month: mockMonthlyRecord.month,
+      year: mockMonthlyRecord.year,
+      categoryId: mockMonthlyRecord.category_id,
+      userId: mockMonthlyRecord.user_id,
+    };
+
+    await expect(sut.handle(input)).rejects.toThrow(ValidationError);
+    await expect(sut.handle(input)).rejects.toMatchObject({
+      errors: expect.arrayContaining(["Status é obrigatório"]),
     });
     expect(userRepositorySpy.findOne).not.toHaveBeenCalled();
     expect(categoryRepositorySpy.findByIdAndUserId).not.toHaveBeenCalled();
@@ -212,6 +247,7 @@ describe("CreateMonthlyRecordUseCase", () => {
       description: mockMonthlyRecord.description,
       goal: mockMonthlyRecord.goal,
       initial_balance: mockMonthlyRecord.initial_balance,
+      status: mockMonthlyRecord.status,
       month: 13,
       year: mockMonthlyRecord.year,
       categoryId: mockMonthlyRecord.category_id,
@@ -246,6 +282,7 @@ describe("CreateMonthlyRecordUseCase", () => {
       year: 1999,
       categoryId: mockMonthlyRecord.category_id,
       userId: mockMonthlyRecord.user_id,
+      status: mockMonthlyRecord.status,
     };
 
     await expect(sut.handle(input)).rejects.toThrow(ValidationError);
@@ -271,6 +308,7 @@ describe("CreateMonthlyRecordUseCase", () => {
       title: mockMonthlyRecord.title,
       description: mockMonthlyRecord.description,
       goal: mockMonthlyRecord.goal,
+      status: mockMonthlyRecord.status,
       initial_balance: mockMonthlyRecord.initial_balance,
       month: mockMonthlyRecord.month,
       year: mockMonthlyRecord.year,
@@ -301,6 +339,7 @@ describe("CreateMonthlyRecordUseCase", () => {
       title: mockMonthlyRecord.title,
       description: mockMonthlyRecord.description,
       goal: mockMonthlyRecord.goal,
+      status: mockMonthlyRecord.status,
       initial_balance: mockMonthlyRecord.initial_balance,
       month: mockMonthlyRecord.month,
       year: mockMonthlyRecord.year,
@@ -333,6 +372,7 @@ describe("CreateMonthlyRecordUseCase", () => {
       title: mockMonthlyRecord.title,
       description: mockMonthlyRecord.description,
       goal: mockMonthlyRecord.goal,
+      status: mockMonthlyRecord.status,
       initial_balance: mockMonthlyRecord.initial_balance,
       month: mockMonthlyRecord.month,
       year: mockMonthlyRecord.year,
@@ -368,6 +408,7 @@ describe("CreateMonthlyRecordUseCase", () => {
       title: mockMonthlyRecord.title,
       description: mockMonthlyRecord.description,
       goal: mockMonthlyRecord.goal,
+      status: mockMonthlyRecord.status,
       initial_balance: mockMonthlyRecord.initial_balance,
       month: mockMonthlyRecord.month,
       year: mockMonthlyRecord.year,
@@ -413,6 +454,7 @@ describe("CreateMonthlyRecordUseCase", () => {
       description: mockMonthlyRecord.description,
       goal: mockMonthlyRecord.goal,
       initial_balance: mockMonthlyRecord.initial_balance,
+      status: mockMonthlyRecord.status,
       month: mockMonthlyRecord.month,
       year: mockMonthlyRecord.year,
       categoryId: mockMonthlyRecord.category_id,
@@ -465,6 +507,7 @@ describe("CreateMonthlyRecordUseCase", () => {
       description: mockMonthlyRecord.description,
       goal: mockMonthlyRecord.goal,
       initial_balance: mockMonthlyRecord.initial_balance,
+      status: mockMonthlyRecord.status,
       month: mockMonthlyRecord.month,
       year: mockMonthlyRecord.year,
       categoryId: mockMonthlyRecord.category_id,

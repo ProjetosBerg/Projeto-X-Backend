@@ -8,6 +8,7 @@ export const mockMonthlyRecord: MonthlyRecordMock = {
   title: "Monthly Budget",
   description: "Budget for July 2025",
   goal: "Save $1000",
+  status: "andamento",
   initial_balance: 500,
   month: 7,
   year: 2025,

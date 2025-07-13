@@ -24,6 +24,7 @@ export class CreateMonthlyRecordController implements Controller {
         month,
         year,
         categoryId,
+        status,
       } = req.body;
 
       const data = {
@@ -34,6 +35,7 @@ export class CreateMonthlyRecordController implements Controller {
         month,
         year,
         categoryId,
+        status,
       };
 
       const createMonthlyRecord = await this.createMonthlyRecordService.handle({

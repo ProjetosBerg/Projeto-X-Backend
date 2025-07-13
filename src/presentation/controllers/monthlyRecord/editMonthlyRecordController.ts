@@ -18,7 +18,7 @@ export class EditMonthlyRecordController implements Controller {
   ): Promise<Response<IResponse>> {
     try {
       const { id } = req.params;
-      const { title, description, goal, initial_balance, categoryId } =
+      const { title, description, goal, initial_balance, categoryId, status } =
         req.body;
 
       const data = {
@@ -27,6 +27,7 @@ export class EditMonthlyRecordController implements Controller {
         goal,
         initial_balance,
         categoryId,
+        status,
       };
 
       const result = await this.editeMonthlyRecordService.handle({

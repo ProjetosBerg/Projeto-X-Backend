@@ -18,5 +18,6 @@ export namespace EditMonthlyRecordUseCaseProtocol {
     goal?: MonthlyRecordModel["goal"];
     initial_balance?: MonthlyRecordModel["initial_balance"] | null;
     categoryId?: MonthlyRecordModel["category_id"];
+    status?: MonthlyRecordModel["status"];
   };
 }

@@ -14,6 +14,7 @@ export namespace CreateMonthlyRecordUseCaseProtocol {
     title: MonthlyRecordModel["title"];
     description?: MonthlyRecordModel["description"];
     goal: MonthlyRecordModel["goal"];
+    status: MonthlyRecordModel["status"];
     initial_balance?: MonthlyRecordModel["initial_balance"];
     month: MonthlyRecordModel["month"];
     year: MonthlyRecordModel["year"];

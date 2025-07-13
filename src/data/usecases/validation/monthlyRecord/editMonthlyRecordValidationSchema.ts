@@ -18,6 +18,10 @@ export const editMonthlyRecordValidationSchema = yup.object().shape({
     .string()
     .max(255, "Meta deve ter no máximo 255 caracteres")
     .optional(),
+  status: yup
+    .string()
+    .max(255, "Status deve ter no máximo 255 caracteres")
+    .optional(),
   initial_balance: yup
     .number()
     .transform((value, originalValue) => (originalValue === "" ? null : value))

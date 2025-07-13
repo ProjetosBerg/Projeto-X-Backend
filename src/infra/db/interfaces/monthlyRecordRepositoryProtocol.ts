@@ -34,6 +34,7 @@ export namespace MonthlyRecordRepositoryProtocol {
     year: MonthlyRecordModel["year"];
     categoryId: MonthlyRecordModel["category_id"];
     userId: MonthlyRecordModel["user_id"];
+    status: MonthlyRecordModel["status"];
   };
 
   export type FindByUserIdAndCategoryIdAndMonthYearParams = {
@@ -59,6 +60,7 @@ export namespace MonthlyRecordRepositoryProtocol {
     goal?: MonthlyRecordModel["goal"];
     initial_balance?: MonthlyRecordModel["initial_balance"] | null;
     categoryId?: MonthlyRecordModel["category_id"];
+    status?: MonthlyRecordModel["status"];
   };
   export type DeleteMonthlyRecordParams = {
     id: MonthlyRecordModel["id"];

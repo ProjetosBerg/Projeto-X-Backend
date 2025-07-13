@@ -18,6 +18,7 @@ import { createMonthlyRecordValidationSchema } from "@/data/usecases/validation/
  * @param {string} data.title - O título do registro mensal
  * @param {string} [data.description] - A descrição do registro mensal (opcional)
  * @param {string} data.goal - O objetivo do registro mensal
+ * @param {string} data.status - O status do registro mensal
  * @param {number} [data.initial_balance] - O saldo inicial do registro mensal (opcional)
  * @param {number} data.month - O mês do registro (1 a 12)
  * @param {number} data.year - O ano do registro
@@ -87,6 +88,7 @@ export class CreateMonthlyRecordUseCase
         year: data.year,
         categoryId: data.categoryId,
         userId: data.userId,
+        status: data.status,
       });
 
       return createdMonthlyRecord;

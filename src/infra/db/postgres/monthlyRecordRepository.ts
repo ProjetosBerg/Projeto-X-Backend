@@ -1,10 +1,7 @@
 import { getRepository, Repository } from "typeorm";
 import { MonthlyRecord } from "@/domain/entities/postgres/MonthlyRecord";
 import { MonthlyRecordRepositoryProtocol } from "@/infra/db/interfaces/monthlyRecordRepositoryProtocol";
-import {
-  MonthlyRecordMock,
-  MonthlyRecordModel,
-} from "@/domain/models/postgres/MonthlyRecordModel";
+import { MonthlyRecordMock } from "@/domain/models/postgres/MonthlyRecordModel";
 import { User } from "@/domain/entities/postgres/User";
 import { Category } from "@/domain/entities/postgres/Category";
 import { NotFoundError } from "@/data/errors/NotFoundError";
@@ -28,6 +25,7 @@ export class MonthlyRecordRepository
       initial_balance: data.initial_balance ?? 0,
       month: data.month,
       year: data.year,
+      status: data.status,
       category: { id: data.categoryId } as Category,
       user: { id: data.userId } as User,
     });
@@ -73,6 +71,7 @@ export class MonthlyRecordRepository
       initial_balance: record.initial_balance,
       month: record.month,
       year: record.year,
+      status: record.status,
       category_id: record.category.id,
       user_id: record.user.id,
       category: record.category,
@@ -122,6 +121,7 @@ export class MonthlyRecordRepository
     if (data?.goal) updatedData.goal = data.goal;
     if (data?.initial_balance)
       updatedData.initial_balance = data.initial_balance;
+    if (data?.status) updatedData.status = data.status;
 
     await this.repository.update(
       { id: data.id, user: { id: data.userId } },

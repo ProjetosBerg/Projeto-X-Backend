@@ -97,6 +97,7 @@ export class EditMonthlyRecordUseCase
         goal: data.goal,
         initial_balance: data.initial_balance,
         categoryId: data.categoryId,
+        status: data.status,
       });
 
       return updatedMonthlyRecord;

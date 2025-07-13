@@ -11,6 +11,7 @@ export interface MonthlyRecordModel extends MonthlyRecord {
   initial_balance: MonthlyRecord["initial_balance"];
   month: MonthlyRecord["month"];
   year: MonthlyRecord["year"];
+  status: MonthlyRecord["status"];
   category_id?: CategoryModel["id"];
   user_id?: UserModel["id"];
   created_at: MonthlyRecord["created_at"];

@@ -36,6 +36,9 @@ export class MonthlyRecord extends BaseEntity {
   @Column({ type: "integer" })
   year!: number;
 
+  @Column({ type: "varchar", length: 255 })
+  status!: string;
+
   @ManyToOne(() => Category, (category) => category.id, { nullable: false })
   @JoinColumn({ name: "category_id" })
   category!: Category;
