@@ -21,6 +21,8 @@ export const makeMonthlyRecordRepository =
       ...mockMonthlyRecord,
       title: "Updated Budget",
     }),
+    delete: jest.fn(),
+    ...({} as any),
   });
 export const makeUserRepository = (): jest.Mocked<UserRepositoryProtocol> => ({
   findOne: jest.fn().mockResolvedValue(mockUser),
