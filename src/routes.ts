@@ -3,6 +3,7 @@ import { routesUser } from "./presentation/routes/routesUser";
 import { routesRecordTypes } from "./presentation/routes/routesRecordTypes";
 import { routesCategory } from "./presentation/routes/routesCategory";
 import { routesMonthlyRecord } from "./presentation/routes/routesMonthlyRecord";
+import { routesTransactions } from "./presentation/routes/routesTransactions";
 
 const router = Router();
 
@@ -14,4 +15,5 @@ routesUser(router);
 routesRecordTypes(router);
 routesCategory(router);
 routesMonthlyRecord(router);
+routesTransactions(router);
 export default router;
