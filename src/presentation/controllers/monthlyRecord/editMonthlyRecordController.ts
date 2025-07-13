@@ -7,9 +7,9 @@ import { EditMonthlyRecordUseCase } from "@/data/usecases/monthlyRecord/editMont
 
 export class EditMonthlyRecordController implements Controller {
   constructor(
-    private readonly editeMonthlyRecordService: EditMonthlyRecordUseCase
+    private readonly editMonthlyRecordService: EditMonthlyRecordUseCase
   ) {
-    this.editeMonthlyRecordService = editeMonthlyRecordService;
+    this.editMonthlyRecordService = editMonthlyRecordService;
   }
 
   async handle(
@@ -30,7 +30,7 @@ export class EditMonthlyRecordController implements Controller {
         status,
       };
 
-      const result = await this.editeMonthlyRecordService.handle({
+      const result = await this.editMonthlyRecordService.handle({
         ...data,
         monthlyRecordId: id,
         userId: req.user!.id,
