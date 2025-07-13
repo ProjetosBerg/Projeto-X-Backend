@@ -144,4 +144,25 @@ export class MonthlyRecordRepository
 
     return updatedMonthlyRecord;
   }
+  async delete(
+    data: MonthlyRecordRepositoryProtocol.DeleteMonthlyRecordParams
+  ): Promise<void> {
+    const monthlyRecord = await this.repository.findOne({
+      where: {
+        id: data.id,
+        user: { id: data.userId },
+      },
+    });
+
+    if (!monthlyRecord) {
+      throw new NotFoundError(
+        `Registro mensal com ID ${data.id} não encontrado para este usuário`
+      );
+    }
+
+    await this.repository.delete({
+      id: data.id,
+      user: { id: data.userId },
+    });
+  }
 }

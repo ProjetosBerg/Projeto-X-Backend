@@ -1,4 +1,5 @@
 import { makeCreateMonthlyRecordControllerFactory } from "@/main/factories/controllers/monthlyRecord/createMonthlyRecordControllerFactory";
+import { makeDeleteMonthlyRecordControllerFactory } from "@/main/factories/controllers/monthlyRecord/deleteMonthlyRecordControllerFactory";
 import { makeEditMonthlyRecordControllerFactory } from "@/main/factories/controllers/monthlyRecord/editMonthlyRecordControllerFactory";
 import { makeGetByIdMonthlyRecordControllerFactory } from "@/main/factories/controllers/monthlyRecord/getByIdMonthlyRecordControllerFactory";
 import { makeGetByUserIdMonthlyRecordControllerFactory } from "@/main/factories/controllers/monthlyRecord/getByUserIdMonthlyRecordControllerFactory";
@@ -41,6 +42,8 @@ export const routesMonthlyRecord = (router: Router) => {
   router.delete(
     "/monthly-record/delete/:id",
     adapterMiddleware(makeGetLoginMiddleware()),
-    (req: Request, res: Response) => {}
+    (req: Request, res: Response) => {
+      makeDeleteMonthlyRecordControllerFactory().handle(req, res);
+    }
   );
 };

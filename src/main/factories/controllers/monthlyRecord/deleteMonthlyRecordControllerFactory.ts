@@ -1,9 +1,8 @@
-// import { DeleteCategoryController } from "@/presentation/controllers/category/deleteCategoryController";
-// import { makeDeleteCategoryUseCaseFactory } from "@/main/factories/usecase/category/deleteCategoryUseCaseFactory";
-// import { DeleteMonthlyRecordController } from "@/presentation/controllers/monthlyRecord/deleteMonthlyRecordController";
+import { DeleteMonthlyRecordController } from "@/presentation/controllers/monthlyRecord/deleteMonthlyRecordController";
+import { makeDeleteMonthlyRecordUseCaseFactory } from "../../usecase/monthlyRecord/deleteMonthlyRecordUseCaseFactory";
 
-// export const makeDeleteMonthlyRecordControllerFactory = () => {
-//   return new DeleteMonthlyRecordController(
-//     makeDeleteMonthlyRecordUseCaseFactory()
-//   );
-// };
+export const makeDeleteMonthlyRecordControllerFactory = () => {
+  return new DeleteMonthlyRecordController(
+    makeDeleteMonthlyRecordUseCaseFactory()
+  );
+};

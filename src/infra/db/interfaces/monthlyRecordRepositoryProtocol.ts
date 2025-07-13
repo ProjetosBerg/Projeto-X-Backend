@@ -19,6 +19,9 @@ export interface MonthlyRecordRepositoryProtocol {
   update(
     data: MonthlyRecordRepositoryProtocol.UpdateMonthlyRecord
   ): Promise<MonthlyRecordMock>;
+  delete(
+    data: MonthlyRecordRepositoryProtocol.DeleteMonthlyRecordParams
+  ): Promise<void>;
 }
 
 export namespace MonthlyRecordRepositoryProtocol {
@@ -56,5 +59,9 @@ export namespace MonthlyRecordRepositoryProtocol {
     goal?: MonthlyRecordModel["goal"];
     initial_balance?: MonthlyRecordModel["initial_balance"] | null;
     categoryId?: MonthlyRecordModel["category_id"];
+  };
+  export type DeleteMonthlyRecordParams = {
+    id: MonthlyRecordModel["id"];
+    userId: MonthlyRecordModel["user_id"];
   };
 }
