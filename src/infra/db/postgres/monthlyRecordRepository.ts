@@ -7,6 +7,7 @@ import {
 } from "@/domain/models/postgres/MonthlyRecordModel";
 import { User } from "@/domain/entities/postgres/User";
 import { Category } from "@/domain/entities/postgres/Category";
+import { NotFoundError } from "@/data/errors/NotFoundError";
 
 export class MonthlyRecordRepository
   implements MonthlyRecordRepositoryProtocol
@@ -95,5 +96,52 @@ export class MonthlyRecordRepository
     if (!monthlyRecord) return null;
 
     return monthlyRecord;
+  }
+
+  async update(
+    data: MonthlyRecordRepositoryProtocol.UpdateMonthlyRecord
+  ): Promise<MonthlyRecordMock> {
+    const monthlyRecord = await this.repository.findOne({
+      where: {
+        id: data.id,
+        user: { id: data.userId },
+      },
+      relations: ["user", "category", "transactions"],
+    });
+
+    if (!monthlyRecord) {
+      throw new NotFoundError(
+        `Registro mensal com ID ${data.id} não encontrado para este usuário`
+      );
+    }
+
+    const updatedData: Partial<MonthlyRecord> = {};
+
+    if (data?.title) updatedData.title = data.title;
+    if (data?.description) updatedData.description = data.description;
+    if (data?.goal) updatedData.goal = data.goal;
+    if (data?.initial_balance)
+      updatedData.initial_balance = data.initial_balance;
+
+    await this.repository.update(
+      { id: data.id, user: { id: data.userId } },
+      updatedData
+    );
+
+    const updatedMonthlyRecord = await this.repository.findOne({
+      where: {
+        id: data.id,
+        user: { id: data.userId },
+      },
+      relations: ["category", "transactions"],
+    });
+
+    if (!updatedMonthlyRecord) {
+      throw new NotFoundError(
+        `Registro mensal com ID ${data.id} não encontrado após atualização`
+      );
+    }
+
+    return updatedMonthlyRecord;
   }
 }

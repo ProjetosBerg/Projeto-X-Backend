@@ -1,4 +1,5 @@
 import { makeCreateMonthlyRecordControllerFactory } from "@/main/factories/controllers/monthlyRecord/createMonthlyRecordControllerFactory";
+import { makeEditMonthlyRecordControllerFactory } from "@/main/factories/controllers/monthlyRecord/editMonthlyRecordControllerFactory";
 import { makeGetByIdMonthlyRecordControllerFactory } from "@/main/factories/controllers/monthlyRecord/getByIdMonthlyRecordControllerFactory";
 import { makeGetByUserIdMonthlyRecordControllerFactory } from "@/main/factories/controllers/monthlyRecord/getByUserIdMonthlyRecordControllerFactory";
 import { makeGetLoginMiddleware } from "@/main/factories/middleware/getLogin";
@@ -32,7 +33,9 @@ export const routesMonthlyRecord = (router: Router) => {
   router.patch(
     "/monthly-record/edit/:id",
     adapterMiddleware(makeGetLoginMiddleware()),
-    (req: Request, res: Response) => {}
+    (req: Request, res: Response) => {
+      makeEditMonthlyRecordControllerFactory().handle(req, res);
+    }
   );
 
   router.delete(
