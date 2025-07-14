@@ -15,3 +15,16 @@ export interface TransactionModel extends Transaction {
   created_at: Transaction["created_at"];
   updated_at: Transaction["updated_at"];
 }
+
+export type TransactionModelMock = Omit<
+  TransactionModel,
+  | "save"
+  | "remove"
+  | "hasId"
+  | "softRemove"
+  | "recover"
+  | "user"
+  | "reload"
+  | "category"
+  | "monthly_record"
+>;

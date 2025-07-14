@@ -1,5 +1,22 @@
-// import { TransactionModel } from "@/domain/models/postgres/TransactionModel";
+import {
+  TransactionModel,
+  TransactionModelMock,
+} from "@/domain/models/postgres/TransactionModel";
 
-// export interface TransactionRepositoryProtocol {}
+export interface TransactionRepositoryProtocol {
+  create(
+    data: TransactionRepositoryProtocol.CreateTransactionParams
+  ): Promise<TransactionModelMock>;
+}
 
-// export namespace TransactionRepositoryProtocol {}
+export namespace TransactionRepositoryProtocol {
+  export type CreateTransactionParams = {
+    title: TransactionModel["title"];
+    description?: TransactionModel["description"];
+    amount?: TransactionModel["amount"];
+    transaction_date: TransactionModel["transaction_date"];
+    monthly_record_id: TransactionModel["monthly_record_id"];
+    category_id: TransactionModel["category_id"];
+    user_id: TransactionModel["user_id"];
+  };
+}

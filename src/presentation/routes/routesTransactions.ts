@@ -1,3 +1,4 @@
+import { makeCreateTransactionControllerFactory } from "@/main/factories/controllers/transactions/createTransactionControllerFactory";
 import { makeGetLoginMiddleware } from "@/main/factories/middleware/getLogin";
 import { adapterMiddleware } from "@/utils/adapterMiddleware";
 import { Router, Request, Response } from "express";
@@ -17,7 +18,9 @@ export const routesTransactions = (router: Router) => {
   router.post(
     "/transactions/create",
     adapterMiddleware(makeGetLoginMiddleware()),
-    (req: Request, res: Response) => {}
+    (req: Request, res: Response) => {
+      makeCreateTransactionControllerFactory().handle(req, res);
+    }
   );
 
   router.patch(

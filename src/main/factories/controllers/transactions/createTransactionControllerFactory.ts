@@ -1,8 +1,6 @@
-// import { CreateMonthlyRecordController } from "@/presentation/controllers/monthlyRecord/createMonthlyRecordController";
-// import { makeCreateMonthlyRecordUseCaseFactory } from "../../usecase/monthlyRecord/createMonthlyRecordUseCaseFactory";
+import { CreateTransactionController } from "@/presentation/controllers/transactions/createTransactionController";
+import { makeCreateTransactionUseCaseFactory } from "../../usecase/transactions/createTransactionUseCaseFactory";
 
-// export const makeCreateTransactionControllerFactory = () => {
-//   return new CreateTransactionController(
-//     makeCreateTransactionUseCaseFactory()
-//   );
-// };
+export const makeCreateTransactionControllerFactory = () => {
+  return new CreateTransactionController(makeCreateTransactionUseCaseFactory());
+};
