@@ -82,12 +82,6 @@ export class CreateTransactionUseCase
       const transactionMonth = transactionDate.getMonth() + 1;
       const transactionYear = transactionDate.getFullYear();
 
-      console.log("transactionMonth", transactionMonth);
-      console.log("transactionYear", transactionYear);
-
-      console.log("recordMonth", recordMonth);
-      console.log("recordYear", recordYear);
-
       if (transactionMonth !== recordMonth || transactionYear !== recordYear) {
         throw new BusinessRuleError(
           `A data da transação deve estar dentro do mês ${recordMonth} e ano ${recordYear} do registro mensal`

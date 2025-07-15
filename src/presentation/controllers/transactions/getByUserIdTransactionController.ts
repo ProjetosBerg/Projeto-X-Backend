@@ -17,7 +17,6 @@ export class GetByUserIdTransactionController implements Controller {
   ): Promise<Response<IResponse>> {
     try {
       const { monthlyRecordId } = req.body;
-      console.log("Monthly Record ID:", monthlyRecordId);
       const result = await this.getByUserIdTransactionService.handle({
         monthlyRecordId,
         userId: req.user!.id,

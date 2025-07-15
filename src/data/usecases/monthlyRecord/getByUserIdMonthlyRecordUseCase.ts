@@ -34,12 +34,10 @@ export class GetByUserIdMonthlyRecordUseCase
       await getByUserIdMonthlyRecordValidationSchema.validate(data, {
         abortEarly: false,
       });
-      console.log("chegou auqi");
       const user = await this.userRepository.findOne({ id: data.userId });
       if (!user) {
         throw new NotFoundError(`Usuário com ID ${data.userId} não encontrado`);
       }
-      console.log("chegou auqi 2");
 
       const monthlyRecords = await this.monthlyRecordRepository.findByUserId({
         userId: data.userId,

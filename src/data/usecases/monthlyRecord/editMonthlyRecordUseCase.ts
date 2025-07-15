@@ -55,7 +55,6 @@ export class EditMonthlyRecordUseCase
           id: data.monthlyRecordId,
           userId: data.userId,
         });
-      console.log("monthlyRecord", monthlyRecord);
       if (!monthlyRecord) {
         throw new NotFoundError(
           `Registro mensal com ID ${data.monthlyRecordId} não encontrado para este usuário`
@@ -67,7 +66,6 @@ export class EditMonthlyRecordUseCase
           id: data.categoryId,
           userId: data.userId,
         });
-        console.log("category", category);
         if (!category) {
           throw new NotFoundError(
             `Categoria com ID ${data.categoryId} não encontrada para este usuário`

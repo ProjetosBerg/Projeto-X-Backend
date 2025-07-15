@@ -15,6 +15,7 @@ import { CreateTransactionUseCase } from "@/data/usecases/transactions/createTra
 export const makeTransactionRepository =
   (): jest.Mocked<TransactionRepositoryProtocol> => ({
     create: jest.fn().mockResolvedValue(mockTransaction),
+    ...({} as any),
   });
 
 export const makeUserRepository = (): jest.Mocked<UserRepositoryProtocol> => ({
