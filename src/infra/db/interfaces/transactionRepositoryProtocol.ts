@@ -7,6 +7,9 @@ export interface TransactionRepositoryProtocol {
   create(
     data: TransactionRepositoryProtocol.CreateTransactionParams
   ): Promise<TransactionModelMock>;
+  findByUserIdAndMonthlyRecordId(
+    data: TransactionRepositoryProtocol.FindByUserAndMonthlyRecordIdParams
+  ): Promise<TransactionModelMock[]>;
 }
 
 export namespace TransactionRepositoryProtocol {
@@ -18,5 +21,9 @@ export namespace TransactionRepositoryProtocol {
     monthly_record_id: TransactionModel["monthly_record_id"];
     category_id: TransactionModel["category_id"];
     user_id: TransactionModel["user_id"];
+  };
+  export type FindByUserAndMonthlyRecordIdParams = {
+    userId: TransactionModel["user_id"];
+    monthlyRecordId: TransactionModel["monthly_record_id"];
   };
 }

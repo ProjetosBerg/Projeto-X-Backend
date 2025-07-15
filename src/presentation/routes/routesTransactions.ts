@@ -1,4 +1,5 @@
 import { makeCreateTransactionControllerFactory } from "@/main/factories/controllers/transactions/createTransactionControllerFactory";
+import { makeGetByUserIdTransactionControllerFactory } from "@/main/factories/controllers/transactions/getByUserIdTransactionControllerFactory";
 import { makeGetLoginMiddleware } from "@/main/factories/middleware/getLogin";
 import { adapterMiddleware } from "@/utils/adapterMiddleware";
 import { Router, Request, Response } from "express";
@@ -7,7 +8,9 @@ export const routesTransactions = (router: Router) => {
   router.get(
     "/transactions/userId",
     adapterMiddleware(makeGetLoginMiddleware()),
-    (req: Request, res: Response) => {}
+    (req: Request, res: Response) => {
+      makeGetByUserIdTransactionControllerFactory().handle(req, res);
+    }
   );
 
   router.get(

@@ -32,4 +32,29 @@ export class TransactionRepository implements TransactionRepositoryProtocol {
     const savedTransaction = await this.repository.save(transaction);
     return savedTransaction;
   }
+
+  async findByUserIdAndMonthlyRecordId(
+    data: TransactionRepositoryProtocol.FindByUserAndMonthlyRecordIdParams
+  ): Promise<TransactionModelMock[]> {
+    const transactions = await this.repository.find({
+      where: {
+        user: { id: data.userId },
+        monthly_record: { id: data.monthlyRecordId },
+      },
+      relations: ["user", "category", "monthly_record"],
+    });
+
+    return transactions.map((transaction) => ({
+      id: transaction.id,
+      title: transaction.title,
+      description: transaction?.description,
+      amount: transaction?.amount,
+      transaction_date: transaction.transaction_date,
+      monthly_record_id: transaction.monthly_record.id,
+      category_id: transaction.category.id,
+      user_id: transaction.user.id,
+      created_at: transaction.created_at,
+      updated_at: transaction.updated_at,
+    }));
+  }
 }
