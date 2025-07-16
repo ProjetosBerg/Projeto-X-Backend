@@ -8,6 +8,7 @@ import { User } from "@/domain/entities/postgres/User";
 import { Category } from "@/domain/entities/postgres/Category";
 import { MonthlyRecord } from "@/domain/entities/postgres/MonthlyRecord";
 import { TransactionRepositoryProtocol } from "../interfaces/transactionRepositoryProtocol";
+import { NotFoundError } from "@/data/errors/NotFoundError";
 
 export class TransactionRepository implements TransactionRepositoryProtocol {
   private repository: Repository<Transaction>;
@@ -74,5 +75,26 @@ export class TransactionRepository implements TransactionRepositoryProtocol {
       ...transaction,
       monthly_record_id: transaction?.monthly_record!.id,
     };
+  }
+  async delete(
+    data: TransactionRepositoryProtocol.DeleteTransactionParams
+  ): Promise<void> {
+    const transaction = await this.repository.findOne({
+      where: {
+        id: data.id,
+        user: { id: data.userId },
+      },
+    });
+
+    if (!transaction) {
+      throw new NotFoundError(
+        `Transação com ID ${data.id} não encontrada para este usuário`
+      );
+    }
+
+    await this.repository.delete({
+      id: data.id,
+      user: { id: data.userId },
+    });
   }
 }

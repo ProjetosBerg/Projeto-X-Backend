@@ -13,6 +13,9 @@ export interface TransactionRepositoryProtocol {
   findByIdAndUserId(
     data: TransactionRepositoryProtocol.FindByIdAndUserIdParams
   ): Promise<TransactionModelMock | null>;
+  delete(
+    data: TransactionRepositoryProtocol.DeleteTransactionParams
+  ): Promise<void>;
 }
 
 export namespace TransactionRepositoryProtocol {
@@ -31,6 +34,10 @@ export namespace TransactionRepositoryProtocol {
   };
 
   export type FindByIdAndUserIdParams = {
+    id: TransactionModel["id"];
+    userId: TransactionModel["user_id"];
+  };
+  export type DeleteTransactionParams = {
     id: TransactionModel["id"];
     userId: TransactionModel["user_id"];
   };

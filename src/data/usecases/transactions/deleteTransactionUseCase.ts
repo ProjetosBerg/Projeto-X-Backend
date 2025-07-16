@@ -1,51 +1,81 @@
-// import { ServerError } from "@/data/errors/ServerError";
-// import { NotFoundError } from "@/data/errors/NotFoundError";
-// import { TransactionRepositoryProtocol } from "@/infra/db/interfaces/TransactionRepositoryProtocol";
-// import { UserRepositoryProtocol } from "@/infra/db/interfaces/userRepositoryProtocol";
-// import { DeleteTransactionUseCaseProtocol } from "@/data/usecases/interfaces/Transaction/deleteTransactionUseCaseProtocol";
-// import { deleteTransactionValidationSchema } from "@/data/usecases/validation/Transaction/deleteTransactionValidationSchema";
+import { ServerError } from "@/data/errors/ServerError";
+import { NotFoundError } from "@/data/errors/NotFoundError";
+import { UserRepositoryProtocol } from "@/infra/db/interfaces/userRepositoryProtocol";
+import { MonthlyRecordRepositoryProtocol } from "@/infra/db/interfaces/monthlyRecordRepositoryProtocol";
+import { DeleteTransactionUseCaseProtocol } from "@/data/usecases/interfaces/transactions/deleteTransactionUseCaseProtocol";
+import { TransactionRepositoryProtocol } from "@/infra/db/interfaces/transactionRepositoryProtocol";
+import { deleteTransactionValidationSchema } from "../validation/transactions/deleteTransactionValidationSchema";
 
-// /**
-//  * Exclui um registro mensal pelo seu ID para um usuário específico
-//  *
-//  * @param {DeleteTransactionUseCaseProtocol.Params} data - Os dados de entrada para a exclusão do registro mensal
-//  * @param {string} data.id - O ID do registro mensal a ser excluído
-//  * @param {string} data.userId - O ID do usuário proprietário do registro mensal
-//  *
-//  * @returns {Promise<void>} É resolvida quando o registro mensal é excluído com sucesso
-//  *
-//  * @throws {ValidationError} Se os dados fornecidos forem inválidos
-//  * @throws {NotFoundError} Se o usuário ou o registro mensal não forem encontrados
-//  * @throws {ServerError} Se ocorrer um erro inesperado durante a exclusão
-//  */
+/**
+ * Deletes a transaction by its ID for a specific user
+ *
+ * @param {DeleteTransactionUseCaseProtocol.Params} data - The input data for deleting the transaction
+ * @param {string} data.id - The ID of the transaction to delete
+ * @param {string} data.userId - The ID of the user who owns the transaction
+ *
+ * @returns {Promise<void>} Resolves when the transaction is successfully deleted
+ *
+ * @throws {ValidationError} If the provided data is invalid
+ * @throws {NotFoundError} If the user, monthly record, or transaction is not found
+ * @throws {ServerError} If an unexpected error occurs during deletion
+ */
+export class DeleteTransactionUseCase
+  implements DeleteTransactionUseCaseProtocol
+{
+  constructor(
+    private readonly transactionRepository: TransactionRepositoryProtocol,
+    private readonly userRepository: UserRepositoryProtocol,
+    private readonly monthlyRecordRepository: MonthlyRecordRepositoryProtocol
+  ) {}
 
-// export class DeleteTransactionUseCase
-//   implements DeleteTransactionUseCaseProtocol
-// {
-//   constructor(
-//     private readonly TransactionRepository: TransactionRepositoryProtocol,
-//     private readonly userRepository: UserRepositoryProtocol
-//   ) {}
+  async handle(data: DeleteTransactionUseCaseProtocol.Params): Promise<void> {
+    try {
+      await deleteTransactionValidationSchema.validate(data, {
+        abortEarly: false,
+      });
 
-//   async handle(data: DeleteTransactionUseCaseProtocol.Params): Promise<void> {
-//     try {
-//       await deleteTransactionValidationSchema.validate(data, {
-//         abortEarly: false,
-//       });
-//     } catch (error: any) {
-//       if (error.name === "ValidationError") {
-//         throw error;
-//       }
+      const user = await this.userRepository.findOne({ id: data.userId });
+      if (!user) {
+        throw new NotFoundError(`Usuário com ID ${data.userId} não encontrado`);
+      }
 
-//       if (error instanceof NotFoundError) {
-//         throw error;
-//       }
+      const transaction = await this.transactionRepository.findByIdAndUserId({
+        id: data.transactionId,
+        userId: data.userId,
+      });
+      if (!transaction) {
+        throw new NotFoundError(
+          `Transação com ID ${data.transactionId} não encontrada para este usuário`
+        );
+      }
 
-//       const errorMessage =
-//         error.message || "Erro interno do servidor durante a deleção";
-//       throw new ServerError(
-//         `Falha ao deletar o registro mensal: ${errorMessage}`
-//       );
-//     }
-//   }
-// }
+      const monthlyRecord =
+        await this.monthlyRecordRepository.findByIdAndUserId({
+          id: String(transaction.monthly_record_id ?? ""),
+          userId: data.userId,
+        });
+      if (!monthlyRecord) {
+        throw new NotFoundError(
+          `Registro mensal com ID ${transaction?.monthly_record_id} não encontrado para este usuário`
+        );
+      }
+
+      await this.transactionRepository.delete({
+        id: data.transactionId,
+        userId: data.userId,
+      });
+    } catch (error: any) {
+      if (error.name === "ValidationError") {
+        throw error;
+      }
+
+      if (error instanceof NotFoundError) {
+        throw error;
+      }
+
+      const errorMessage =
+        error.message || "Erro interno do servidor durante a deleção";
+      throw new ServerError(`Falha ao deletar a transação: ${errorMessage}`);
+    }
+  }
+}

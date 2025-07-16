@@ -1,6 +1,6 @@
-// import { DeleteMonthlyRecordController } from "@/presentation/controllers/monthlyRecord/deleteMonthlyRecordController";
-// import { makeDeleteMonthlyRecordUseCaseFactory } from "../../usecase/monthlyRecord/deleteMonthlyRecordUseCaseFactory";
+import { DeleteTransactionController } from "@/presentation/controllers/transactions/deleteTransactionController";
+import { makeDeleteTransactionUseCaseFactory } from "../../usecase/transactions/deleteTransactionUseCaseFactory";
 
-// export const makeDeleteTransactionControllerFactory = () => {
-//   return new DeleteTransactionController(makeDeleteTransactionUseCaseFactory());
-// };
+export const makeDeleteTransactionControllerFactory = () => {
+  return new DeleteTransactionController(makeDeleteTransactionUseCaseFactory());
+};

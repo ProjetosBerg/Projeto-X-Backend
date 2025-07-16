@@ -1,10 +1,12 @@
-// import { DeleteMonthlyRecordUseCase } from "@/data/usecases/monthlyRecord/deleteMonthlyRecordyUseCase";
-// import { UserRepository } from "@/infra/db/postgres/userRepository";
-// import { MonthlyRecordRepository } from "@/infra/db/postgres/monthlyRecordRepository";
+import { UserRepository } from "@/infra/db/postgres/userRepository";
+import { MonthlyRecordRepository } from "@/infra/db/postgres/monthlyRecordRepository";
+import { DeleteTransactionUseCase } from "@/data/usecases/transactions/deleteTransactionUseCase";
+import { TransactionRepository } from "@/infra/db/postgres/transactionRepository";
 
-// export const makeDeleteTransactionUseCaseFactory = () => {
-//   return new DeleteTransactionUseCase(
-//     new TransactionRepository(),
-//     new UserRepository()
-//   );
-// };
+export const makeDeleteTransactionUseCaseFactory = () => {
+  return new DeleteTransactionUseCase(
+    new TransactionRepository(),
+    new UserRepository(),
+    new MonthlyRecordRepository()
+  );
+};
