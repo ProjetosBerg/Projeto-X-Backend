@@ -64,7 +64,6 @@ export class GetByIdTransactionUseCase
           `Registro mensal com ID ${transaction.monthly_record_id} não encontrado para este usuário`
         );
       }
-      console.log("chegou auqi 4");
 
       return transaction;
     } catch (error: any) {

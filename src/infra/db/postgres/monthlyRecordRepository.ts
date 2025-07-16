@@ -84,7 +84,6 @@ export class MonthlyRecordRepository
   async findByIdAndUserId(
     data: MonthlyRecordRepositoryProtocol.FindByIdAndUserIdParams
   ): Promise<MonthlyRecordMock | null> {
-    console.log("data", data);
     const monthlyRecord = await this.repository.findOne({
       where: {
         id: data.id,
