@@ -7,18 +7,19 @@ import { TransactionRepositoryProtocol } from "@/infra/db/interfaces/transaction
 import { deleteTransactionValidationSchema } from "../validation/transactions/deleteTransactionValidationSchema";
 
 /**
- * Deletes a transaction by its ID for a specific user
+ * Exclui uma transação pelo seu ID para um usuário específico
  *
- * @param {DeleteTransactionUseCaseProtocol.Params} data - The input data for deleting the transaction
- * @param {string} data.id - The ID of the transaction to delete
- * @param {string} data.userId - The ID of the user who owns the transaction
+ * @param {DeleteTransactionUseCaseProtocol.Params} data - Os dados de entrada para a exclusão da transação
+ * @param {string} data.transactionId - O ID da transação a ser excluída
+ * @param {string} data.userId - O ID do usuário proprietário da transação
  *
- * @returns {Promise<void>} Resolves when the transaction is successfully deleted
+ * @returns {Promise<void>} É resolvida quando a transação é excluída com sucesso
  *
- * @throws {ValidationError} If the provided data is invalid
- * @throws {NotFoundError} If the user, monthly record, or transaction is not found
- * @throws {ServerError} If an unexpected error occurs during deletion
+ * @throws {ValidationError} Se os dados fornecidos forem inválidos
+ * @throws {NotFoundError} Se o usuário, o registro mensal ou a transação não forem encontrados
+ * @throws {ServerError} Se ocorrer um erro inesperado durante a exclusão
  */
+
 export class DeleteTransactionUseCase
   implements DeleteTransactionUseCaseProtocol
 {

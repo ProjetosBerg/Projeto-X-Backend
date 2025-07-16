@@ -11,18 +11,19 @@ import { getByIdTransactionValidationSchema } from "@/data/usecases/validation/t
 import { TransactionRepositoryProtocol } from "@/infra/db/interfaces/transactionRepositoryProtocol";
 
 /**
- * Retrieves a transaction by its ID for a specific user
+ * Recupera uma transação pelo seu ID para um usuário específico
  *
- * @param {GetByIdTransactionUseCaseProtocol.Params} data - The input data for retrieving the transaction
- * @param {string} data.id - The ID of the transaction to retrieve
- * @param {string} data.userId - The ID of the user who owns the transaction
+ * @param {GetByIdTransactionUseCaseProtocol.Params} data - Os dados de entrada para a recuperação da transação
+ * @param {string} data.transactionId - O ID da transação a ser recuperada
+ * @param {string} data.userId - O ID do usuário proprietário da transação
  *
- * @returns {Promise<TransactionModel>} The retrieved transaction
+ * @returns {Promise<TransactionModel>} A transação recuperada
  *
- * @throws {ValidationError} If the provided data is invalid
- * @throws {NotFoundError} If the user, monthly record, or transaction is not found
- * @throws {ServerError} If an unexpected error occurs during retrieval
+ * @throws {ValidationError} Se os dados fornecidos forem inválidos
+ * @throws {NotFoundError} Se o usuário, o registro mensal ou a transação não forem encontrados
+ * @throws {ServerError} Se ocorrer um erro inesperado durante a recuperação
  */
+
 export class GetByIdTransactionUseCase
   implements GetByIdTransactionUseCaseProtocol
 {
