@@ -1,9 +1,17 @@
-import { TransactionModel } from "@/domain/models/postgres/TransactionModel";
+import {
+  TransactionModel,
+  TransactionModelMock,
+} from "@/domain/models/postgres/TransactionModel";
 
 export interface GetByIdTransactionUseCaseProtocol {
-  handle(data: GetByIdTransactionUseCaseProtocol.Params): Promise<any>;
+  handle(
+    data: GetByIdTransactionUseCaseProtocol.Params
+  ): Promise<TransactionModelMock>;
 }
 
 export namespace GetByIdTransactionUseCaseProtocol {
-  export type Params = {};
+  export type Params = {
+    transactionId: TransactionModel["id"];
+    userId: TransactionModel["user_id"];
+  };
 }

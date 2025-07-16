@@ -57,4 +57,22 @@ export class TransactionRepository implements TransactionRepositoryProtocol {
       updated_at: transaction.updated_at,
     }));
   }
+  async findByIdAndUserId(
+    data: TransactionRepositoryProtocol.FindByIdAndUserIdParams
+  ): Promise<TransactionModelMock | null> {
+    const transaction = await this.repository.findOne({
+      where: {
+        id: data.id,
+        user: { id: data.userId },
+      },
+      relations: ["user", "category", "monthly_record"],
+    });
+
+    if (!transaction) return null;
+
+    return {
+      ...transaction,
+      monthly_record_id: transaction?.monthly_record!.id,
+    };
+  }
 }

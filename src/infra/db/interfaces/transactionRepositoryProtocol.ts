@@ -10,6 +10,9 @@ export interface TransactionRepositoryProtocol {
   findByUserIdAndMonthlyRecordId(
     data: TransactionRepositoryProtocol.FindByUserAndMonthlyRecordIdParams
   ): Promise<TransactionModelMock[]>;
+  findByIdAndUserId(
+    data: TransactionRepositoryProtocol.FindByIdAndUserIdParams
+  ): Promise<TransactionModelMock | null>;
 }
 
 export namespace TransactionRepositoryProtocol {
@@ -25,5 +28,10 @@ export namespace TransactionRepositoryProtocol {
   export type FindByUserAndMonthlyRecordIdParams = {
     userId: TransactionModel["user_id"];
     monthlyRecordId: TransactionModel["monthly_record_id"];
+  };
+
+  export type FindByIdAndUserIdParams = {
+    id: TransactionModel["id"];
+    userId: TransactionModel["user_id"];
   };
 }

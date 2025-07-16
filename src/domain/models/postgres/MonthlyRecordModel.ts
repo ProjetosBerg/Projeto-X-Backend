@@ -18,6 +18,7 @@ export interface MonthlyRecordModel extends MonthlyRecord {
   updated_at: MonthlyRecord["updated_at"];
   category: MonthlyRecord["category"];
   transactions: Transaction[];
+  monthly_record?: any;
 }
 
 export type MonthlyRecordMock = Omit<

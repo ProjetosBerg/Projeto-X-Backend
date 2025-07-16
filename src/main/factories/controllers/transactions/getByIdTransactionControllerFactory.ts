@@ -1,8 +1,8 @@
-// import { GetByIdMonthlyRecordController } from "@/presentation/controllers/monthlyRecord/getByIdMonthlyRecordController";
-// import { makeGetByIdMonthlyRecordUseCaseFactory } from "../../usecase/monthlyRecord/getByIdMonthlyRecordUseCaseFactory";
+import { GetByIdTransactionController } from "@/presentation/controllers/transactions/getByIdTransactionController";
+import { makeGetByIdTransactionUseCaseFactory } from "../../usecase/transactions/getByIdTransactionUseCaseFactory";
 
-// export const makeGetByIdTransactionControllerFactory = () => {
-//   return new GetByIdTransactionController(
-//     makeGetByIdTransactionUseCaseFactory()
-//   );
-// };
+export const makeGetByIdTransactionControllerFactory = () => {
+  return new GetByIdTransactionController(
+    makeGetByIdTransactionUseCaseFactory()
+  );
+};
