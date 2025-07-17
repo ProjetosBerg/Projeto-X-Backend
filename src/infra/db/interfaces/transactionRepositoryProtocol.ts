@@ -16,6 +16,9 @@ export interface TransactionRepositoryProtocol {
   delete(
     data: TransactionRepositoryProtocol.DeleteTransactionParams
   ): Promise<void>;
+  update(
+    data: TransactionRepositoryProtocol.UpdateTransactionParams
+  ): Promise<TransactionModelMock>;
 }
 
 export namespace TransactionRepositoryProtocol {
@@ -40,5 +43,16 @@ export namespace TransactionRepositoryProtocol {
   export type DeleteTransactionParams = {
     id: TransactionModel["id"];
     userId: TransactionModel["user_id"];
+  };
+
+  export type UpdateTransactionParams = {
+    id: TransactionModel["id"];
+    userId: TransactionModel["user_id"];
+    title?: TransactionModel["title"];
+    description?: TransactionModel["description"];
+    amount?: TransactionModel["amount"];
+    transaction_date?: TransactionModel["transaction_date"];
+    monthly_record_id?: TransactionModel["monthly_record_id"];
+    category_id?: TransactionModel["category_id"];
   };
 }

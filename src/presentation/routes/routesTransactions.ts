@@ -1,5 +1,6 @@
 import { makeCreateTransactionControllerFactory } from "@/main/factories/controllers/transactions/createTransactionControllerFactory";
 import { makeDeleteTransactionControllerFactory } from "@/main/factories/controllers/transactions/deleteTransactionControllerFactory";
+import { makeEditTransactionControllerFactory } from "@/main/factories/controllers/transactions/editTransactionControllerFactory";
 import { makeGetByIdTransactionControllerFactory } from "@/main/factories/controllers/transactions/getByIdTransactionControllerFactory";
 import { makeGetByUserIdTransactionControllerFactory } from "@/main/factories/controllers/transactions/getByUserIdTransactionControllerFactory";
 import { makeGetLoginMiddleware } from "@/main/factories/middleware/getLogin";
@@ -33,7 +34,9 @@ export const routesTransactions = (router: Router) => {
   router.patch(
     "/transactions/edit/:id",
     adapterMiddleware(makeGetLoginMiddleware()),
-    (req: Request, res: Response) => {}
+    (req: Request, res: Response) => {
+      makeEditTransactionControllerFactory().handle(req, res);
+    }
   );
 
   router.delete(

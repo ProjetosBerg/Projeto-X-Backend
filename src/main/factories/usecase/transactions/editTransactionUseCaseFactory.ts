@@ -1,12 +1,14 @@
-// import { EditMonthlyRecordUseCase } from "@/data/usecases/monthlyRecord/editMonthlyRecordUseCase";
-// import { CategoryRepository } from "@/infra/db/postgres/categoryRepository";
-// import { UserRepository } from "@/infra/db/postgres/userRepository";
-// import { MonthlyRecordRepository } from "@/infra/db/postgres/monthlyRecordRepository";
+import { CategoryRepository } from "@/infra/db/postgres/categoryRepository";
+import { UserRepository } from "@/infra/db/postgres/userRepository";
+import { MonthlyRecordRepository } from "@/infra/db/postgres/monthlyRecordRepository";
+import { EditTransactionUseCase } from "@/data/usecases/transactions/editTransactionUseCase";
+import { TransactionRepository } from "@/infra/db/postgres/transactionRepository";
 
-// export const makeEditTransactionUseCaseFactory = () => {
-//   return new EditTransactionUseCase(
-//     new TransactionRepository(),
-//     new UserRepository(),
-//     new CategoryRepository()
-//   );
-// };
+export const makeEditTransactionUseCaseFactory = () => {
+  return new EditTransactionUseCase(
+    new TransactionRepository(),
+    new UserRepository(),
+    new CategoryRepository(),
+    new MonthlyRecordRepository()
+  );
+};

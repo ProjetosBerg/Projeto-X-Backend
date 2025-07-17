@@ -97,4 +97,32 @@ export class TransactionRepository implements TransactionRepositoryProtocol {
       user: { id: data.userId },
     });
   }
+
+  async update(
+    data: TransactionRepositoryProtocol.UpdateTransactionParams
+  ): Promise<TransactionModelMock> {
+    const transaction = await this.repository.findOne({
+      where: {
+        id: data.id,
+        user: { id: data.userId },
+      },
+      relations: ["category", "monthly_record"],
+    });
+
+    if (!transaction) {
+      throw new NotFoundError(
+        `Transação com ID ${data.id} não encontrada para este usuário`
+      );
+    }
+
+    if (data.title !== undefined) transaction.title = data.title;
+    if (data.description !== undefined)
+      transaction.description = data.description;
+    if (data.amount !== undefined) transaction.amount = data.amount;
+    if (data.transaction_date !== undefined)
+      transaction.transaction_date = data.transaction_date;
+
+    const updatedTransaction = await this.repository.save(transaction);
+    return updatedTransaction;
+  }
 }
