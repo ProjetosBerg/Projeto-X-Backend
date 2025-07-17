@@ -17,6 +17,18 @@ export class TransactionRepository implements TransactionRepositoryProtocol {
     this.repository = getRepository(Transaction);
   }
 
+  /**
+   * Cria uma nova transação no banco de dados
+   * @param {TransactionRepositoryProtocol.CreateTransactionParams} data - Os dados para criação da transação
+   * @param {string} data.title - Título da transação
+   * @param {string} [data.description] - Descrição opcional da transação
+   * @param {number} [data.amount] - Valor da transação
+   * @param {Date} data.transaction_date - Data da transação
+   * @param {string} data.monthly_record_id - ID do registro mensal
+   * @param {string} data.category_id - ID da categoria
+   * @param {string} data.user_id - ID do usuário
+   * @returns {Promise<TransactionModelMock>} A transação criada
+   */
   async create(
     data: TransactionRepositoryProtocol.CreateTransactionParams
   ): Promise<TransactionModelMock> {
@@ -34,6 +46,13 @@ export class TransactionRepository implements TransactionRepositoryProtocol {
     return savedTransaction;
   }
 
+  /**
+   * Busca transações por ID do usuário e ID do registro mensal
+   * @param {TransactionRepositoryProtocol.FindByUserAndMonthlyRecordIdParams} data - Os dados para busca
+   * @param {string} data.userId - ID do usuário
+   * @param {string} data.monthlyRecordId - ID do registro mensal
+   * @returns {Promise<TransactionModelMock[]>} Lista de transações encontradas
+   */
   async findByUserIdAndMonthlyRecordId(
     data: TransactionRepositoryProtocol.FindByUserAndMonthlyRecordIdParams
   ): Promise<TransactionModelMock[]> {
@@ -58,6 +77,14 @@ export class TransactionRepository implements TransactionRepositoryProtocol {
       updated_at: transaction.updated_at,
     }));
   }
+
+  /**
+   * Busca uma transação por ID e ID do usuário
+   * @param {TransactionRepositoryProtocol.FindByIdAndUserIdParams} data - Os dados para busca
+   * @param {string} data.id - ID da transação
+   * @param {string} data.userId - ID do usuário
+   * @returns {Promise<TransactionModelMock | null>} A transação encontrada ou null se não existir
+   */
   async findByIdAndUserId(
     data: TransactionRepositoryProtocol.FindByIdAndUserIdParams
   ): Promise<TransactionModelMock | null> {
@@ -76,6 +103,15 @@ export class TransactionRepository implements TransactionRepositoryProtocol {
       monthly_record_id: transaction?.monthly_record!.id,
     };
   }
+
+  /**
+   * Deleta uma transação do banco de dados
+   * @param {TransactionRepositoryProtocol.DeleteTransactionParams} data - Os dados para deleção
+   * @param {string} data.id - ID da transação
+   * @param {string} data.userId - ID do usuário
+   * @returns {Promise<void>} Não retorna valor
+   * @throws {NotFoundError} Quando a transação não é encontrada
+   */
   async delete(
     data: TransactionRepositoryProtocol.DeleteTransactionParams
   ): Promise<void> {
@@ -98,6 +134,20 @@ export class TransactionRepository implements TransactionRepositoryProtocol {
     });
   }
 
+  /**
+   * Atualiza uma transação no banco de dados
+   * @param {TransactionRepositoryProtocol.UpdateTransactionParams} data - Os dados para atualização
+   * @param {string} data.id - ID da transação
+   * @param {string} data.userId - ID do usuário
+   * @param {string} [data.title] - Título da transação
+   * @param {string} [data.description] - Descrição da transação
+   * @param {number} [data.amount] - Valor da transação
+   * @param {Date} [data.transaction_date] - Data da transação
+   * @param {string} [data.monthly_record_id] - ID do registro mensal
+   * @param {string} [data.category_id] - ID da categoria
+   * @returns {Promise<TransactionModelMock>} A transação atualizada
+   * @throws {NotFoundError} Quando a transação não é encontrada
+   */
   async update(
     data: TransactionRepositoryProtocol.UpdateTransactionParams
   ): Promise<TransactionModelMock> {
