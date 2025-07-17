@@ -9,7 +9,7 @@ import { deleteMonthlyRecordValidationSchema } from "@/data/usecases/validation/
  * Exclui um registro mensal pelo seu ID para um usuário específico
  *
  * @param {DeleteMonthlyRecordUseCaseProtocol.Params} data - Os dados de entrada para a exclusão do registro mensal
- * @param {string} data.id - O ID do registro mensal a ser excluído
+ * @param {string} data.monthlyRecordId - O ID do registro mensal a ser excluído
  * @param {string} data.userId - O ID do usuário proprietário do registro mensal
  *
  * @returns {Promise<void>} É resolvida quando o registro mensal é excluído com sucesso

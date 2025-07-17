@@ -12,7 +12,7 @@ import { editMonthlyRecordValidationSchema } from "@/data/usecases/validation/mo
  * Atualiza um registro mensal existente para um usuário específico
  *
  * @param {EditMonthlyRecordUseCaseProtocol.Params} data - Os dados de entrada para a atualização do registro mensal
- * @param {string} data.id - O ID do registro mensal a ser atualizado
+ * @param {string} data.monthlyRecordId - O ID do registro mensal a ser atualizado
  * @param {string} data.userId - O ID do usuário proprietário do registro mensal
  * @param {string} [data.title] - O novo título do registro mensal (opcional)
  * @param {string | null} [data.description] - A nova descrição do registro mensal (opcional)

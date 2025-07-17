@@ -21,9 +21,9 @@ import { editTransactionValidationSchema } from "../validation/transactions/edit
  * @param {string} [data.title] - O novo título da transação (opcional)
  * @param {string | null} [data.description] - A nova descrição da transação (opcional)
  * @param {number} [data.amount] - O novo valor da transação (opcional)
- * @param {Date} [data.transaction_date] - A nova data da transação (opcional)
- * @param {string} [data.monthly_record_id] - O novo ID do registro mensal (opcional)
- * @param {string} [data.category_id] - O novo ID da categoria (opcional)
+ * @param {Date} [data.transactionDate] - A nova data da transação (opcional)
+ * @param {string} [data.monthlyRecordId] - O novo ID do registro mensal (opcional)
+ * @param {string} [data.categoryId] - O novo ID da categoria (opcional)
  *
  * @returns {Promise<TransactionModel>} A transação atualizada
  *

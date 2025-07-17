@@ -12,7 +12,7 @@ import { editCategoryValidationSchema } from "../validation/category/editCategor
  * Updates a category for a specific user
  *
  * @param {EditCategoryUseCaseProtocol.Params} data - The input data for updating the category
- * @param {string} data.id - The ID of the category to update
+ * @param {string} data.categoryId - The ID of the category to update
  * @param {string} data.name - The name of the category
  * @param {string} [data.description] - The description of the category (optional)
  * @param {string} data.type - The type of the category ('expense' or 'revenue')

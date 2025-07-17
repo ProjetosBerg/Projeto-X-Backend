@@ -19,10 +19,10 @@ import { TransactionRepositoryProtocol } from "@/infra/db/interfaces/transaction
  * @param {string} data.title - O título da transação
  * @param {string} [data.description] - A descrição da transação (opcional)
  * @param {number} data.amount - O valor da transação
- * @param {Date} data.transaction_date - A data da transação
- * @param {string} data.monthly_record_id - O ID do registro mensal associado
- * @param {string} data.category_id - O ID da categoria associada
- * @param {string} data.user_id - O ID do usuário proprietário da transação
+ * @param {Date} data.transactionDate - A data da transação
+ * @param {string} data.monthlyRecordId - O ID do registro mensal associado
+ * @param {string} data.categoryId - O ID da categoria associada
+ * @param {string} data.userId - O ID do usuário proprietário da transação
  *
  * @returns {Promise<TransactionModel>} A transação criada
  *

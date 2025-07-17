@@ -10,7 +10,7 @@ import { getByIdRecordTypeValidationSchema } from "@/data/usecases/validation/re
  *
  * @param {GetByIdRecordTypeUseCaseProtocol.Params} data - Os dados de entrada contendo o ID do tipo de registro e o ID do usuário
  * @param {number} data.recordTypeId - O ID do tipo de registro a ser recuperado
- * @param {string} data.user_id - O ID do usuário proprietário do tipo de registro
+ * @param {string} data.userId - O ID do usuário proprietário do tipo de registro
  *
  * @returns {Promise<RecordTypeModel>} Uma promessa que retorna o tipo de registro
  *
