@@ -74,6 +74,13 @@ export class CustomField {
   })
   user_id!: string;
 
+  @Column({
+    type: "jsonb",
+    nullable: true,
+    default: null,
+  })
+  options?: string[];
+
   @CreateDateColumn()
   created_at!: Date;
 
