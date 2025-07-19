@@ -1,22 +1,23 @@
 import "reflect-metadata";
 import { createConnection, Connection } from "typeorm";
+import mongoose, { Connection as MongooseConnection } from "mongoose";
 import postgresDbConfig from "@/config/postgres";
 import mongoDbConfig from "@/config/mongodb";
 import logger from "@/loaders/logger";
 import PostgresEntities from "@/domain/entities/postgres";
-import MongodbSchemas from "@/domain/entities/mongo";
 
 class DatabaseHelper {
-  private connections: Connection[];
+  private typeOrmConnections: Connection[];
+  private mongooseConnection: MongooseConnection | null;
 
   private postgresDbConfig: any;
-
-  public mongoDgConfig: any;
+  private mongoDbConfig: any;
 
   constructor() {
-    this.connections = [];
+    this.typeOrmConnections = [];
+    this.mongooseConnection = null;
     this.postgresDbConfig = postgresDbConfig;
-    this.mongoDgConfig = mongoDbConfig;
+    this.mongoDbConfig = mongoDbConfig;
   }
 
   async startPostgresConnection() {
@@ -25,52 +26,48 @@ class DatabaseHelper {
         ...this.postgresDbConfig,
         entities: [...Object.values(PostgresEntities || {})],
         migrations: ["src/migrations/**/*.ts"],
-
         logging: false,
         maxQueryExecutionTime: 1000,
         name: "default",
       });
-      this.connections.push(postgresConnection);
+      this.typeOrmConnections.push(postgresConnection);
       logger.info("Postgres connected");
       return postgresConnection;
     } catch (error) {
       logger.error(`Database Postgres error: ${error}`);
-      return process.exit(1);
+      process.exit(1);
     }
   }
 
   async startMongodbConnection() {
     try {
-      const mongoConnection = await createConnection({
-        ...this.mongoDgConfig,
-        entities: [...Object.values(MongodbSchemas || {})],
-        useUnifiedTopology: true,
-        logging: false,
-        maxQueryExecutionTime: 10000,
-        name: "mongodb",
-        poolSize: 1000,
+      const uri = this.mongoDbConfig.url;
+      await mongoose.connect(uri, {
+        maxPoolSize: 1000,
+        connectTimeoutMS: 10000,
       });
-
-      await mongoConnection.synchronize(false);
-
+      this.mongooseConnection = mongoose.connection;
       logger.info("Mongodb connected");
-      return mongoConnection;
+      return this.mongooseConnection;
     } catch (error) {
-      logger.error(`Database MongoDb error: ${error}`);
-      return process.exit(1);
+      logger.error(`Database MongoDB error: ${error}`);
+      process.exit(1);
     }
   }
 
-  initConnections() {
-    return Promise.all([
+  async initConnections() {
+    await Promise.all([
       this.startPostgresConnection(),
       this.startMongodbConnection(),
     ]);
   }
 
-  closeConnections() {
-    const promises = this.connections.map((conn) => conn.close());
-    return Promise.all(promises);
+  async closeConnections() {
+    const typeOrmPromises = this.typeOrmConnections.map((conn) => conn.close());
+    const mongoosePromise = this.mongooseConnection
+      ? this.mongooseConnection.close()
+      : Promise.resolve();
+    await Promise.all([...typeOrmPromises, mongoosePromise]);
   }
 
   setPostgresPort(port: number) {
@@ -79,8 +76,12 @@ class DatabaseHelper {
   }
 
   setMongoPort(port: number) {
-    this.mongoDgConfig.port = port;
+    this.mongoDbConfig.port = port;
     return this;
+  }
+
+  getMongooseConnection() {
+    return this.mongooseConnection;
   }
 }
 

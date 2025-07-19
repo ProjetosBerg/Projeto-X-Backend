@@ -4,6 +4,7 @@ import { routesRecordTypes } from "./presentation/routes/routesRecordTypes";
 import { routesCategory } from "./presentation/routes/routesCategory";
 import { routesMonthlyRecord } from "./presentation/routes/routesMonthlyRecord";
 import { routesTransactions } from "./presentation/routes/routesTransactions";
+import { routesCustomFields } from "./presentation/routes/routesCustomFields";
 
 const router = Router();
 
@@ -16,4 +17,5 @@ routesRecordTypes(router);
 routesCategory(router);
 routesMonthlyRecord(router);
 routesTransactions(router);
+routesCustomFields(router);
 export default router;

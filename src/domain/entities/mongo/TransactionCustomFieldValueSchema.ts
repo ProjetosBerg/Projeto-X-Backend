@@ -1,52 +1,52 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Index,
-  Column,
-  CreateDateColumn,
-  UpdateDateColumn,
-  BeforeUpdate,
-} from "typeorm";
+import mongoose, { Schema, model } from "mongoose";
 
-@Entity("transaction_custom_field_values")
-export class TransactionCustomFieldValue {
-  @PrimaryGeneratedColumn("uuid")
-  id!: string;
+export const TransactionCustomFieldValueSchema = new Schema(
+  {
+    id: {
+      type: String,
+      default: () => new mongoose.Types.ObjectId().toString(),
+      required: true,
+    },
+    transaction_id: {
+      type: String,
+      required: true,
+      index: true,
+    },
+    custom_field_id: {
+      type: String,
+      required: true,
+      index: true,
+    },
+    value: {
+      type: Schema.Types.Mixed,
+      required: true,
+    },
+    user_id: {
+      type: String,
+      required: true,
+    },
+    created_at: {
+      type: Date,
+      default: Date.now,
+    },
+    updated_at: {
+      type: Date,
+      default: Date.now,
+    },
+  },
+  {
+    timestamps: { createdAt: "created_at", updatedAt: "updated_at" },
+  }
+);
 
-  @Index()
-  @Column({
-    type: "varchar",
-    nullable: false,
-  })
-  transaction_id!: string;
-
-  @Index()
-  @Column({
-    type: "varchar",
-    nullable: false,
-  })
-  custom_field_id!: string;
-
-  @Column({
-    type: "jsonb",
-    nullable: false,
-  })
-  value: any;
-
-  @Column({
-    type: "varchar",
-    nullable: false,
-  })
-  user_id!: string;
-
-  @CreateDateColumn()
-  created_at!: Date;
-
-  @UpdateDateColumn()
-  updated_at!: Date;
-
-  @BeforeUpdate()
-  updateTimestamp() {
+TransactionCustomFieldValueSchema.pre("save", function (next) {
+  if (this.isModified() && !this.isNew) {
     this.updated_at = new Date();
   }
-}
+  next();
+});
+
+export const TransactionCustomFieldValueModel = model(
+  "transaction_custom_field_values",
+  TransactionCustomFieldValueSchema
+);

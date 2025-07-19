@@ -1,16 +1,20 @@
-import { CustomField } from "@/domain/entities/mongo/CustomFieldsSchema";
+import { FieldType } from "@/domain/entities/mongo/CustomFieldsSchema";
 import { CategoryModel } from "../postgres/CategoryModel";
-import { RecordTypeModel } from "../postgres/RecordTypesModel";
 import { UserModel } from "../postgres/UserModel";
 
+export type Option = {
+  value: string;
+  recordTypeIds: number[];
+};
+
 export type CustomFieldModel = {
-  id?: CustomField["id"];
-  type: CustomField["type"];
-  label: CustomField["label"];
-  description?: CustomField["description"];
-  options?: CustomField["options"];
+  id?: string;
+  type: FieldType;
+  label: string;
+  description?: string | null;
+  options?: Option[];
   category_id: CategoryModel["id"];
-  record_type_id: RecordTypeModel["id"];
+  record_type_id: number[];
   name: string;
   required: boolean;
   user_id: UserModel["id"];

@@ -1,59 +1,63 @@
-// import { Request, Response } from "express";
-// import { ValidationError } from "yup";
-// import { IResponse, ResponseStatus, getError } from "@/utils/service";
-// import { Controller } from "@/presentation/protocols/controller";
-// import { CreateTransactionUseCase } from "@/data/usecases/transactions/createTransactionUseCase";
+import { Request, Response } from "express";
+import { ValidationError } from "yup";
+import { IResponse, ResponseStatus, getError } from "@/utils/service";
+import { Controller } from "@/presentation/protocols/controller";
+import { CreateCustomFieldUseCase } from "@/data/usecases/customFields/createCustomFieldUseCase";
 
-// export class CreateCustomFieldsController implements Controller {
-//   constructor(
-//     private readonly createCustomFieldsService: CreateCustomFieldsUseCase
-//   ) {
-//     this.createCustomFieldsService = createCustomFieldsService;
-//   }
+export class CreateCustomFieldsController implements Controller {
+  constructor(
+    private readonly createCustomFieldsService: CreateCustomFieldUseCase
+  ) {
+    this.createCustomFieldsService = createCustomFieldsService;
+  }
 
-//   async handle(
-//     req: Request,
-//     res: Response<IResponse>
-//   ): Promise<Response<IResponse>> {
-//     try {
-//       const {
-//         title,
-//         description,
-//         amount,
-//         transactionDate,
-//         monthlyRecordId,
-//         categoryId,
-//       } = req.body;
+  async handle(
+    req: Request,
+    res: Response<IResponse>
+  ): Promise<Response<IResponse>> {
+    try {
+      const {
+        type,
+        label,
+        name,
+        description,
+        recordTypeId,
+        required,
+        options,
+        categoryId,
+      } = req.body;
 
-//       const data = {
-//         title,
-//         description,
-//         amount,
-//         transactionDate,
-//         monthlyRecordId,
-//         categoryId,
-//       };
+      const data = {
+        type,
+        label,
+        name,
+        description,
+        recordTypeId,
+        required,
+        options,
+        categoryId,
+      };
 
-//       const createTransaction = await this.createCustomFieldsService.handle({
-//         ...data,
-//         userId: req.user!.id,
-//       });
-//       return res.status(201).json({
-//         status: ResponseStatus.OK,
-//         data: createTransaction,
-//         message: "Registro ao relatorio mensal criado com sucesso",
-//       });
-//     } catch (error) {
-//       if (error instanceof ValidationError) {
-//         return res.status(400).json({
-//           status: ResponseStatus.BAD_REQUEST,
-//           errors: error.errors,
-//         });
-//       }
-//       return res.status(500).json({
-//         status: ResponseStatus.INTERNAL_SERVER_ERROR,
-//         message: getError(error),
-//       });
-//     }
-//   }
-// }
+      const createTransaction = await this.createCustomFieldsService.handle({
+        ...data,
+        userId: req.user!.id,
+      });
+      return res.status(201).json({
+        status: ResponseStatus.OK,
+        data: createTransaction,
+        message: "Custom Field criado com sucesso",
+      });
+    } catch (error) {
+      if (error instanceof ValidationError) {
+        return res.status(400).json({
+          status: ResponseStatus.BAD_REQUEST,
+          errors: error.errors,
+        });
+      }
+      return res.status(500).json({
+        status: ResponseStatus.INTERNAL_SERVER_ERROR,
+        message: getError(error),
+      });
+    }
+  }
+}

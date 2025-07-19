@@ -1,3 +1,4 @@
+import { makeCreateCustomFieldsControllerFactory } from "@/main/factories/controllers/customFields/createCustomFieldsControllerFactory";
 import { makeGetLoginMiddleware } from "@/main/factories/middleware/getLogin";
 import { adapterMiddleware } from "@/utils/adapterMiddleware";
 import { Router, Request, Response } from "express";
@@ -17,7 +18,9 @@ export const routesCustomFields = (router: Router) => {
   router.post(
     "/custom-fields/create",
     adapterMiddleware(makeGetLoginMiddleware()),
-    (req: Request, res: Response) => {}
+    (req: Request, res: Response) => {
+      makeCreateCustomFieldsControllerFactory().handle(req, res);
+    }
   );
 
   router.patch(
