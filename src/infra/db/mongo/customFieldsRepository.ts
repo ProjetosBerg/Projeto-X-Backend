@@ -37,4 +37,25 @@ export class CustomFieldsRepository implements CustomFieldsRepositoryProtocol {
 
     return customField;
   }
+
+  async findByUserId(
+    data: CustomFieldsRepositoryProtocol.findByUserIdParams
+  ): Promise<CustomFieldModel[]> {
+    const customFields = await CustomField.find({ user_id: data.user_id });
+
+    return customFields.map((customField) => ({
+      id: customField.id,
+      type: customField.type,
+      label: customField.label,
+      name: customField.name,
+      category_id: customField.category_id,
+      user_id: customField.user_id,
+      description: customField.description,
+      options: customField.options as Option[],
+      record_type_id: customField.record_type_id,
+      required: customField.required,
+      created_at: customField.created_at,
+      updated_at: customField.updated_at,
+    }));
+  }
 }

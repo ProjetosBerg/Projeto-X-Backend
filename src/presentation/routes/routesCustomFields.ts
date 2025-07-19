@@ -1,4 +1,5 @@
 import { makeCreateCustomFieldsControllerFactory } from "@/main/factories/controllers/customFields/createCustomFieldsControllerFactory";
+import { makeGetByUserIdCustomFieldsControllerFactory } from "@/main/factories/controllers/customFields/getByUserIdCustomFieldsControllerFactory";
 import { makeGetLoginMiddleware } from "@/main/factories/middleware/getLogin";
 import { adapterMiddleware } from "@/utils/adapterMiddleware";
 import { Router, Request, Response } from "express";
@@ -7,7 +8,9 @@ export const routesCustomFields = (router: Router) => {
   router.get(
     "/custom-fields/userId",
     adapterMiddleware(makeGetLoginMiddleware()),
-    (req: Request, res: Response) => {}
+    (req: Request, res: Response) => {
+      makeGetByUserIdCustomFieldsControllerFactory().handle(req, res);
+    }
   );
 
   router.get(
