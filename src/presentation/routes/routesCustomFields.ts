@@ -1,5 +1,6 @@
 import { makeCreateCustomFieldsControllerFactory } from "@/main/factories/controllers/customFields/createCustomFieldsControllerFactory";
 import { makeEditCustomFieldsControllerFactory } from "@/main/factories/controllers/customFields/editCustomFieldsControllerFactory";
+import { makeGetByIdCustomFieldsControllerFactory } from "@/main/factories/controllers/customFields/getByIdCustomFieldsControllerFactory";
 import { makeGetByUserIdCustomFieldsControllerFactory } from "@/main/factories/controllers/customFields/getByUserIdCustomFieldsControllerFactory";
 import { makeGetLoginMiddleware } from "@/main/factories/middleware/getLogin";
 import { adapterMiddleware } from "@/utils/adapterMiddleware";
@@ -17,7 +18,9 @@ export const routesCustomFields = (router: Router) => {
   router.get(
     "/custom-fields/:id",
     adapterMiddleware(makeGetLoginMiddleware()),
-    (req: Request, res: Response) => {}
+    (req: Request, res: Response) => {
+      makeGetByIdCustomFieldsControllerFactory().handle(req, res);
+    }
   );
   router.post(
     "/custom-fields/create",
