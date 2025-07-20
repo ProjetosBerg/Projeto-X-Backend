@@ -1,10 +1,12 @@
-// import { CategoryRepository } from "@/infra/db/postgres/categoryRepository";
-// import { UserRepository } from "@/infra/db/postgres/userRepository";
-// import { MonthlyRecordRepository } from "@/infra/db/postgres/monthlyRecordRepository";
-// import { EditTransactionUseCase } from "@/data/usecases/transactions/editTransactionUseCase";
-// import { TransactionRepository } from "@/infra/db/postgres/transactionRepository";
-// import { EditCustomFieldUseCase } from "@/data/usecases/customFields/editCustomFieldUseCase";
+import { CategoryRepository } from "@/infra/db/postgres/categoryRepository";
+import { UserRepository } from "@/infra/db/postgres/userRepository";
+import { EditCustomFieldUseCase } from "@/data/usecases/customFields/editCustomFieldUseCase";
+import { CustomFieldsRepository } from "@/infra/db/mongo/customFieldsRepository";
 
-// export const makeEditCustomFieldsUseCaseFactory = () => {
-//   return new EditCustomFieldUseCase();
-// };
+export const makeEditCustomFieldsUseCaseFactory = () => {
+  return new EditCustomFieldUseCase(
+    new CustomFieldsRepository(),
+    new UserRepository(),
+    new CategoryRepository()
+  );
+};

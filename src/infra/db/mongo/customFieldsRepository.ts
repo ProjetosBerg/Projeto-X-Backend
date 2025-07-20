@@ -4,6 +4,7 @@ import {
 } from "@/domain/models/mongo/CustomFieldModel";
 import { CustomFieldsRepositoryProtocol } from "@/infra/db/interfaces/customFieldsRepositoryProtocol";
 import { CustomFieldModel as CustomField } from "@/domain/entities/mongo/CustomFieldsSchema";
+import { NotFoundError } from "@/data/errors/NotFoundError";
 
 export class CustomFieldsRepository implements CustomFieldsRepositoryProtocol {
   async create(
@@ -57,5 +58,48 @@ export class CustomFieldsRepository implements CustomFieldsRepositoryProtocol {
       created_at: customField.created_at,
       updated_at: customField.updated_at,
     }));
+  }
+
+  async findByIdAndUserId(
+    data: CustomFieldsRepositoryProtocol.FindByIdAndUserIdParams
+  ): Promise<CustomFieldModel | null> {
+    const customField = await CustomField.findOne({
+      _id: data.id,
+      user_id: data.user_id,
+    });
+
+    if (!customField) return null;
+
+    return customField;
+  }
+
+  async update(
+    data: CustomFieldsRepositoryProtocol.UpdateParams
+  ): Promise<CustomFieldModel> {
+    const customField = await CustomField.findOne({
+      _id: data.id,
+      user_id: data.user_id,
+    });
+
+    if (!customField) {
+      throw new NotFoundError(
+        `Campo personalizado com ID ${data.id} não encontrado para este usuário`
+      );
+    }
+
+    if (data.type !== undefined) customField.type = data.type;
+    if (data.label !== undefined) customField.label = data.label;
+    if (data.name !== undefined) customField.name = data.name;
+    if (data.category_id !== undefined)
+      customField.category_id = data.category_id;
+    if (data.description !== undefined && data.description !== null)
+      customField.description = data.description;
+    if (data.options !== undefined) customField.options = data.options as any;
+    if (data.record_type_id !== undefined)
+      customField.record_type_id = data.record_type_id;
+    if (data.required !== undefined) customField.required = data.required;
+
+    const updatedCustomField = await customField.save();
+    return updatedCustomField;
   }
 }

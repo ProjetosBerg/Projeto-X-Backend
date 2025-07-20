@@ -1,4 +1,5 @@
 import { makeCreateCustomFieldsControllerFactory } from "@/main/factories/controllers/customFields/createCustomFieldsControllerFactory";
+import { makeEditCustomFieldsControllerFactory } from "@/main/factories/controllers/customFields/editCustomFieldsControllerFactory";
 import { makeGetByUserIdCustomFieldsControllerFactory } from "@/main/factories/controllers/customFields/getByUserIdCustomFieldsControllerFactory";
 import { makeGetLoginMiddleware } from "@/main/factories/middleware/getLogin";
 import { adapterMiddleware } from "@/utils/adapterMiddleware";
@@ -29,7 +30,9 @@ export const routesCustomFields = (router: Router) => {
   router.patch(
     "/custom-fields/edit/:id",
     adapterMiddleware(makeGetLoginMiddleware()),
-    (req: Request, res: Response) => {}
+    (req: Request, res: Response) => {
+      makeEditCustomFieldsControllerFactory().handle(req, res);
+    }
   );
 
   router.delete(
