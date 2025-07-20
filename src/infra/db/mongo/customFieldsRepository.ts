@@ -102,4 +102,19 @@ export class CustomFieldsRepository implements CustomFieldsRepositoryProtocol {
     const updatedCustomField = await customField.save();
     return updatedCustomField;
   }
+
+  async delete(
+    data: CustomFieldsRepositoryProtocol.DeleteParams
+  ): Promise<void> {
+    const result = await CustomField.deleteOne({
+      _id: data.id,
+      user_id: data.user_id,
+    });
+
+    if (result.deletedCount === 0) {
+      throw new NotFoundError(
+        `Campo personalizado com ID ${data.id} não encontrado para este usuário`
+      );
+    }
+  }
 }

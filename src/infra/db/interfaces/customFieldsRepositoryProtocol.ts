@@ -16,6 +16,7 @@ export interface CustomFieldsRepositoryProtocol {
   update(
     data: CustomFieldsRepositoryProtocol.UpdateParams
   ): Promise<CustomFieldModel>;
+  delete(data: CustomFieldsRepositoryProtocol.DeleteParams): Promise<void>;
 }
 
 export namespace CustomFieldsRepositoryProtocol {
@@ -56,5 +57,9 @@ export namespace CustomFieldsRepositoryProtocol {
     options?: CustomFieldModel["options"] | null;
     record_type_id?: CustomFieldModel["record_type_id"];
     required?: CustomFieldModel["required"];
+  };
+  export type DeleteParams = {
+    id: CustomFieldModel["id"];
+    user_id: CustomFieldModel["user_id"];
   };
 }
