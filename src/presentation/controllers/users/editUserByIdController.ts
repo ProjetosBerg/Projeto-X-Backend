@@ -16,12 +16,13 @@ export class EditUserByIdController implements Controller {
   ): Promise<Response<IResponse>> {
     try {
       const { id } = req.params;
-      const { name, email, securityQuestions } = req.body;
+      const { name, email, securityQuestions, bio } = req.body;
 
       const data = {
         name,
         email,
         securityQuestions,
+        bio,
       };
 
       if (!id) {

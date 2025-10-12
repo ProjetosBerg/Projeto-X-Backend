@@ -44,6 +44,7 @@ export namespace UserRepositoryProtocol {
     id: UserModel["id"];
     name?: UserModel["name"];
     email?: UserModel["email"];
+    bio?: UserModel["bio"];
     securityQuestions?: Array<{
       question: SecurityQuestionModel["question"];
       answer: SecurityQuestionModel["answer"];

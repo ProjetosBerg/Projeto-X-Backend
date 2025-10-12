@@ -61,6 +61,7 @@ export class EditUserByIdUseCase implements EditUserByIdUseCaseProtocol {
         name: data?.name,
         email: data?.email,
         securityQuestions: hashedSecurityQuestions,
+        bio: data?.bio,
       });
 
       if (!updatedUser) {

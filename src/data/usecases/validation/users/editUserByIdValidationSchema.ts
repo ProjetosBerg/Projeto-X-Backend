@@ -24,4 +24,8 @@ export const editUserByIdValidationSchema = yup.object().shape({
         answer: yup.string().required("Resposta de segurança é obrigatória"),
       })
     ),
+  bio: yup
+    .string()
+    .max(200, "Bio deve ter no máximo 200 caracteres")
+    .nullable(),
 });

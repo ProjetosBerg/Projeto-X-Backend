@@ -13,6 +13,7 @@ export namespace EditUserByIdUseCaseProtocol {
     name?: UserModel["name"];
     email?: UserModel["email"];
     securityQuestions?: SecurityQuestionModel[];
+    bio?: UserModel["bio"];
   };
   export type Result = UserModel;
 }

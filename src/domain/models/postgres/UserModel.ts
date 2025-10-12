@@ -11,6 +11,7 @@ export type UserModel = {
   password: string;
   security_questions: SecurityQuestionModel[];
   categories?: CategoryModel[];
+  bio?: string;
   monthly_records?: MonthlyRecordModel[];
   transactions?: TransactionModel[];
   created_at?: Date;

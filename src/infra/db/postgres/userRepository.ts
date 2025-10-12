@@ -128,6 +128,7 @@ export class UserRepository implements UserRepositoryProtocol {
           })
         );
       }
+      if (data.bio !== undefined) user.bio = data.bio;
       user.updated_at = new Date();
 
       const updatedUser = await repository.save(user);
