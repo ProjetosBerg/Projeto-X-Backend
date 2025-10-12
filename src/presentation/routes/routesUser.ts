@@ -8,6 +8,7 @@ import { makeRegisterUserControllerFactory } from "@/main/factories/controllers/
 import { makeGetLoginMiddleware } from "@/main/factories/middleware/getLogin";
 import { adapterMiddleware } from "@/utils/adapterMiddleware";
 import { makeDeleteUserByIdControllerFactory } from "@/main/factories/controllers/user/deleteUserControllerFactory";
+import { makeResetPasswordUserControllerFactory } from "@/main/factories/controllers/user/resetPasswordUserControllerFactory";
 
 export const routesUser = (router: Router) => {
   router.get("/user/find-questions", (req: Request, res: Response) => {
@@ -33,6 +34,13 @@ export const routesUser = (router: Router) => {
   router.patch("/user/forgot-password", (req: Request, res: Response) => {
     makeForgotPasswordUserControllerFactory().handle(req, res);
   });
+  router.patch(
+    "/user/reset-password",
+    adapterMiddleware(makeGetLoginMiddleware()),
+    (req: Request, res: Response) => {
+      makeResetPasswordUserControllerFactory().handle(req, res);
+    }
+  );
 
   router.patch(
     "/user/edit/:id",
