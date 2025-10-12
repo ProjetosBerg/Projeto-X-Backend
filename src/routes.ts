@@ -5,12 +5,21 @@ import { routesCategory } from "./presentation/routes/routesCategory";
 import { routesMonthlyRecord } from "./presentation/routes/routesMonthlyRecord";
 import { routesTransactions } from "./presentation/routes/routesTransactions";
 import { routesCustomFields } from "./presentation/routes/routesCustomFields";
+import { adapterMiddleware } from "./utils/adapterMiddleware";
+import { GetUserLogin } from "./presentation/middlewares/getUserLogin";
 
 const router = Router();
 
 router.get("/health", (_req: Request, res: Response) => {
   res.status(200).json({ message: "ok" });
 });
+
+router.get("/auth/validate", adapterMiddleware(new GetUserLogin()), ((
+  req: Request,
+  res: Response
+) => {
+  res.status(200).json({ message: "Token válido", user: req.user });
+}) as import("express").RequestHandler);
 
 routesUser(router);
 routesRecordTypes(router);

@@ -25,7 +25,7 @@ class UserAuth implements IUserAuth {
         email: user.email,
       };
 
-      const token = jwt.sign(payload, this.JWT_SECRET, { expiresIn: "1h" });
+      const token = jwt.sign(payload, this.JWT_SECRET, { expiresIn: "30d" });
       return {
         message: "Você está autenticado",
         token,

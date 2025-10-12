@@ -31,4 +31,4 @@ const environments: EnvConfigs = {
   },
 };
 
-export default environments[process.env.NODE_ENV || "development"];
+export default environments[process.env.NODE_ENV || "production"];

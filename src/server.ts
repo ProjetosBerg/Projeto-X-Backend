@@ -6,6 +6,7 @@ import databaseHelper from "@/loaders/database";
 import logger from "@/loaders/logger";
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from "@/config/swagger";
+import cors from "cors";
 
 const app = express();
 dotenv.config();
@@ -14,7 +15,9 @@ const port = env.get("PORT").required().asPortNumber();
 const NODE_ENV = env.get("NODE_ENV").default("development").asString();
 
 app.use(express.json());
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cors());
 
 // Iniciar conexões com o banco de dados
 databaseHelper.initConnections();
