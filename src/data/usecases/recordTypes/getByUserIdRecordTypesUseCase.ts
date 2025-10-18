@@ -27,15 +27,21 @@ export class GetByUserIdRecordTypeUseCase
 
   async handle(
     data: GetByUserIdRecordTypeUseCaseProtocol.Params
-  ): Promise<RecordTypeModel[]> {
+  ): Promise<{ recordTypes: RecordTypeModel[]; total: number }> {
     try {
       await getByUserIdRecordTypeValidationSchema.validate(data, {
         abortEarly: false,
       });
 
-      const recordTypes = await this.recordTypeRepository.findByUserId({
-        userId: data?.userId,
-      });
+      const { recordTypes, total } =
+        await this.recordTypeRepository.findByUserId({
+          userId: data?.userId,
+          page: data.page || 1,
+          limit: data.limit || 10,
+          search: data.search,
+          sortBy: data.sortBy || "name",
+          order: data.order || "ASC",
+        });
 
       if (recordTypes?.length === 0) {
         throw new BusinessRuleError(
@@ -43,7 +49,7 @@ export class GetByUserIdRecordTypeUseCase
         );
       }
 
-      return recordTypes;
+      return { recordTypes, total };
     } catch (error: any) {
       if (error.name === "ValidationError") {
         throw error;

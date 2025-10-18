@@ -18,12 +18,26 @@ export class GetByUserIdRecordTypesController implements Controller {
     res: Response<IResponse>
   ): Promise<Response<IResponse>> {
     try {
-      const result = await this.getByUserIdRecordTypesService.handle({
-        userId: req.user!.id,
-      });
+      const {
+        page = 1,
+        limit = 10,
+        search = "",
+        sortBy = "",
+        order,
+      } = req.query;
+      const { recordTypes: result, total } =
+        await this.getByUserIdRecordTypesService.handle({
+          userId: req.user!.id,
+          page: Number(page),
+          limit: Number(limit),
+          search: String(search),
+          sortBy: sortBy as any,
+          order: String(order),
+        });
       return res.status(200).json({
         status: ResponseStatus.OK,
         data: result,
+        totalRegisters: total,
         message: "Tipos de registros obtidos com sucesso",
       });
     } catch (error) {

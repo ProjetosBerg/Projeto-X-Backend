@@ -9,7 +9,7 @@ export interface RecordTypesRepositoryProtocol {
   ): Promise<RecordTypeModel | null>;
   findByUserId(
     data: RecordTypesRepositoryProtocol.FindByUserIdParams
-  ): Promise<RecordTypeModel[]>;
+  ): Promise<{ recordTypes: RecordTypeModel[]; total: number }>;
 
   findByIdRecordType(
     data: RecordTypesRepositoryProtocol.FindByIdRecordTypeParams
@@ -37,6 +37,11 @@ export namespace RecordTypesRepositoryProtocol {
 
   export type FindByUserIdParams = {
     userId: RecordTypeModel["user_id"];
+    page?: number;
+    limit?: number;
+    search?: string;
+    sortBy?: string;
+    order?: string;
   };
 
   export type FindByIdRecordTypeParams = {

@@ -1,5 +1,5 @@
 import { RecordTypeModel } from "@/domain/models/postgres/RecordTypesModel";
-import { getRepository, Repository } from "typeorm";
+import { getRepository, ILike, Repository } from "typeorm";
 import { RecordTypesRepositoryProtocol } from "../interfaces/recordTypesRepositoryProtocol";
 import { RecordTypes } from "@/domain/entities/postgres/RecordTypes";
 import { BusinessRuleError } from "@/data/errors/BusinessRuleError";
@@ -69,20 +69,39 @@ export class RecordTypeRepository implements RecordTypesRepositoryProtocol {
 
   async findByUserId(
     data: RecordTypesRepositoryProtocol.FindByUserIdParams
-  ): Promise<RecordTypeModel[]> {
-    const recordTypes = await this.repository.find({
-      where: { user_id: { id: data?.userId } },
+  ): Promise<{ recordTypes: RecordTypeModel[]; total: number }> {
+    const page = data.page || 1;
+    const limit = data.limit || 10;
+    const offset = (page - 1) * limit;
+    const search = data.search || "";
+    const sortBy = data.sortBy || "name";
+    const order = data.order?.toUpperCase() === "DESC" ? "DESC" : "ASC";
+
+    const whereCondition = search
+      ? { name: ILike(`%${search}%`), user_id: { id: data.userId } }
+      : { user_id: { id: data.userId } };
+
+    const [recordTypes, total] = await this.repository.findAndCount({
+      where: whereCondition,
       relations: ["user_id"],
+      take: limit,
+      skip: offset,
+      order: { [sortBy]: order },
     });
 
-    return recordTypes.map((recordType) => ({
-      id: recordType.id,
-      user_id: recordType.user_id.id,
-      name: recordType.name,
-      icone: recordType.icone,
-      created_at: recordType.created_at,
-      updated_at: recordType.updated_at,
+    const normalizedRecordTypes: RecordTypeModel[] = recordTypes.map((rt) => ({
+      id: rt.id,
+      user_id: rt.user_id?.id,
+      name: rt.name,
+      icone: rt.icone,
+      created_at: rt.created_at,
+      updated_at: rt.updated_at,
     }));
+
+    return {
+      recordTypes: normalizedRecordTypes,
+      total,
+    };
   }
 
   /**

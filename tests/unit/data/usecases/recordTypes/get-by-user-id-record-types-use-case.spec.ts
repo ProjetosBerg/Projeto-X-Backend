@@ -30,14 +30,25 @@ describe("GetByUserIdRecordTypeUseCase", () => {
 
   test("should return record types for valid userId", async () => {
     const { sut, recordTypeRepositorySpy } = makeSut();
-    recordTypeRepositorySpy.findByUserId.mockResolvedValue([mockRecordType]);
+    recordTypeRepositorySpy.findByUserId.mockResolvedValue({
+      recordTypes: [mockRecordType],
+      total: 1,
+    });
 
     const input = { userId: mockRecordType.user_id };
     const result = await sut.handle(input);
 
-    expect(result).toEqual([mockRecordType]);
+    expect(result).toEqual({
+      recordTypes: [mockRecordType],
+      total: 1,
+    });
     expect(recordTypeRepositorySpy.findByUserId).toHaveBeenCalledWith({
       userId: input.userId,
+      page: 1,
+      limit: 10,
+      search: undefined,
+      sortBy: "name",
+      order: "ASC",
     });
     expect(recordTypeRepositorySpy.findByUserId).toHaveBeenCalledTimes(1);
   });
@@ -55,7 +66,10 @@ describe("GetByUserIdRecordTypeUseCase", () => {
 
   test("should throw BusinessRuleError if no record types are found", async () => {
     const { sut, recordTypeRepositorySpy } = makeSut();
-    recordTypeRepositorySpy.findByUserId.mockResolvedValue([]);
+    recordTypeRepositorySpy.findByUserId.mockResolvedValue({
+      recordTypes: [],
+      total: 0,
+    });
 
     const input = { userId: mockRecordType.user_id };
     await expect(sut.handle(input)).rejects.toThrow(
@@ -65,6 +79,11 @@ describe("GetByUserIdRecordTypeUseCase", () => {
     );
     expect(recordTypeRepositorySpy.findByUserId).toHaveBeenCalledWith({
       userId: input.userId,
+      page: 1,
+      limit: 10,
+      search: undefined,
+      sortBy: "name",
+      order: "ASC",
     });
     expect(recordTypeRepositorySpy.findByUserId).toHaveBeenCalledTimes(1);
   });
@@ -81,6 +100,11 @@ describe("GetByUserIdRecordTypeUseCase", () => {
     );
     expect(recordTypeRepositorySpy.findByUserId).toHaveBeenCalledWith({
       userId: input.userId,
+      page: 1,
+      limit: 10,
+      search: undefined,
+      sortBy: "name",
+      order: "ASC",
     });
     expect(recordTypeRepositorySpy.findByUserId).toHaveBeenCalledTimes(1);
   });
