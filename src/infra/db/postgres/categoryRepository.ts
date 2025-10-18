@@ -1,4 +1,4 @@
-import { Repository, getRepository } from "typeorm";
+import { ILike, Repository, getRepository } from "typeorm";
 import { Category } from "@/domain/entities/postgres/Category";
 import { CategoryModel } from "@/domain/models/postgres/CategoryModel";
 import { User } from "@/domain/entities/postgres/User";
@@ -94,11 +94,30 @@ export class CategoryRepository implements CategoryRepositoryProtocol {
 
   async findByUserId(
     data: CategoryRepositoryProtocol.FindByUserIdParams
-  ): Promise<Category[]> {
-    return await this.repository.find({
-      where: { user: { id: data.userId } },
+  ): Promise<{ categories: Category[]; total: number }> {
+    const page = data.page || 1;
+    const limit = data.limit || 10;
+    const offset = (page - 1) * limit;
+    const search = data.search || "";
+    const sortBy = data.sortBy || "name";
+    const order = data.order?.toUpperCase() === "DESC" ? "DESC" : "ASC";
+
+    const whereCondition = search
+      ? { name: ILike(`%${search}%`), user: { id: data.userId } }
+      : { user: { id: data.userId } };
+
+    const [categories, total] = await this.repository.findAndCount({
+      where: whereCondition,
       relations: ["record_type", "user"],
+      take: limit,
+      skip: offset,
+      order: { [sortBy]: order },
     });
+
+    return {
+      categories,
+      total,
+    };
   }
 
   /**

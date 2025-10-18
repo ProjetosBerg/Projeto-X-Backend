@@ -57,17 +57,28 @@ describe("GetByUserIdCategoryUseCase", () => {
     ];
 
     userRepositorySpy.findOne.mockResolvedValue(mockUser);
-    categoryRepositorySpy.findByUserId.mockResolvedValue([mockCategory]);
+    categoryRepositorySpy.findByUserId.mockResolvedValue({
+      categories: [mockCategory],
+      total: 1,
+    });
 
     const result = await sut.handle(input);
 
-    expect(result).toEqual(expectedCategories);
+    expect(result).toEqual({
+      categories: expectedCategories,
+      total: 1,
+    });
     expect(userRepositorySpy.findOne).toHaveBeenCalledWith({
       id: input.userId,
     });
     expect(userRepositorySpy.findOne).toHaveBeenCalledTimes(1);
     expect(categoryRepositorySpy.findByUserId).toHaveBeenCalledWith({
       userId: input.userId,
+      page: 1,
+      limit: 10,
+      search: undefined,
+      sortBy: "name",
+      order: "ASC",
     });
     expect(categoryRepositorySpy.findByUserId).toHaveBeenCalledTimes(1);
   });
@@ -103,7 +114,10 @@ describe("GetByUserIdCategoryUseCase", () => {
     const { sut, categoryRepositorySpy, userRepositorySpy } = makeSut();
     const input = { userId: mockUser.id };
     userRepositorySpy.findOne.mockResolvedValue(mockUser);
-    categoryRepositorySpy.findByUserId.mockResolvedValue([]);
+    categoryRepositorySpy.findByUserId.mockResolvedValue({
+      categories: [],
+      total: 0,
+    });
 
     await expect(sut.handle(input)).rejects.toThrow(
       new NotFoundError("Nenhuma categoria encontrada")
@@ -114,6 +128,11 @@ describe("GetByUserIdCategoryUseCase", () => {
     expect(userRepositorySpy.findOne).toHaveBeenCalledTimes(1);
     expect(categoryRepositorySpy.findByUserId).toHaveBeenCalledWith({
       userId: input.userId,
+      search: undefined,
+      limit: 10,
+      page: 1,
+      sortBy: "name",
+      order: "ASC",
     });
     expect(categoryRepositorySpy.findByUserId).toHaveBeenCalledTimes(1);
   });

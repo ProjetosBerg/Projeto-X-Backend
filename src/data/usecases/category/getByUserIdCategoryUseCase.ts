@@ -30,7 +30,7 @@ export class GetByUserIdCategoryUseCase
 
   async handle(
     data: GetByUserIdCategoryUseCaseProtocol.Params
-  ): Promise<CategoryModel[]> {
+  ): Promise<{ categories: CategoryModel[]; total: number }> {
     try {
       let categoriesFormat: CategoryModel[] = [];
 
@@ -43,8 +43,13 @@ export class GetByUserIdCategoryUseCase
         throw new NotFoundError("User não encontrado");
       }
 
-      const categories = await this.categoryRepository.findByUserId({
+      const { categories, total } = await this.categoryRepository.findByUserId({
         userId: data.userId,
+        page: data.page || 1,
+        limit: data.limit || 10,
+        search: data.search,
+        sortBy: data.sortBy || "name",
+        order: data.order || "ASC",
       });
 
       if (categories?.length === 0) {
@@ -62,7 +67,7 @@ export class GetByUserIdCategoryUseCase
         updated_at: category.updated_at,
       }));
 
-      return categoriesFormat;
+      return { categories: categoriesFormat, total };
     } catch (error: any) {
       if (error.name === "ValidationError") {
         throw error;
