@@ -28,7 +28,7 @@ export class GetByUserIdCustomFieldUseCase
 
   async handle(
     data: GetByUserIdCustomFieldUseCaseProtocol.Params
-  ): Promise<CustomFieldModel[]> {
+  ): Promise<{ customFields: CustomFieldModel[]; total: number }> {
     try {
       await getByUserIdCustomFieldValidationSchema.validate(data, {
         abortEarly: false,
@@ -39,10 +39,16 @@ export class GetByUserIdCustomFieldUseCase
         throw new NotFoundError(`Usuário com ID ${data.userId} não encontrado`);
       }
 
-      const customFields = await this.customFieldsRepository.findByUserId({
-        user_id: data.userId,
-      });
-      return customFields;
+      const { customFields, total } =
+        await this.customFieldsRepository.findByUserId({
+          user_id: data.userId,
+          page: data.page || 1,
+          limit: data.limit || 10,
+          search: data.search,
+          sortBy: data.sortBy || "label",
+          order: data.order || "ASC",
+        });
+      return { customFields, total };
     } catch (error: any) {
       if (error.name === "ValidationError") {
         throw error;

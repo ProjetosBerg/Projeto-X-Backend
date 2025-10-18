@@ -5,6 +5,7 @@ import {
 import { CustomFieldsRepositoryProtocol } from "@/infra/db/interfaces/customFieldsRepositoryProtocol";
 import { CustomFieldModel as CustomField } from "@/domain/entities/mongo/CustomFieldsSchema";
 import { NotFoundError } from "@/data/errors/NotFoundError";
+import { ILike } from "typeorm";
 
 export class CustomFieldsRepository implements CustomFieldsRepositoryProtocol {
   async create(
@@ -41,23 +42,28 @@ export class CustomFieldsRepository implements CustomFieldsRepositoryProtocol {
 
   async findByUserId(
     data: CustomFieldsRepositoryProtocol.findByUserIdParams
-  ): Promise<CustomFieldModel[]> {
-    const customFields = await CustomField.find({ user_id: data.user_id });
+  ): Promise<{ customFields: CustomFieldModel[]; total: number }> {
+    const page = data.page || 1;
+    const limit = data.limit || 10;
+    const search = data.search || "";
+    const sortBy = data.sortBy || "label";
+    const order = data.order === "DESC" ? -1 : 1;
 
-    return customFields.map((customField) => ({
-      id: customField.id,
-      type: customField.type,
-      label: customField.label,
-      name: customField.name,
-      category_id: customField.category_id,
-      user_id: customField.user_id,
-      description: customField.description,
-      options: customField.options as Option[],
-      record_type_id: customField.record_type_id,
-      required: customField.required,
-      created_at: customField.created_at,
-      updated_at: customField.updated_at,
-    }));
+    const whereCondition: any = { user_id: data.user_id };
+
+    if (search) {
+      whereCondition.label = { $regex: search, $options: "i" };
+    }
+
+    const total = await CustomField.countDocuments(whereCondition);
+
+    const customFields = await CustomField.find(whereCondition)
+      .sort({ [sortBy]: order })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .lean();
+
+    return { customFields, total };
   }
 
   async findByIdAndUserId(

@@ -19,13 +19,14 @@ export class CreateCustomFieldsController implements Controller {
       const {
         type,
         label,
-        name,
         description,
         recordTypeId,
         required,
         options,
         categoryId,
       } = req.body;
+
+      const name = label?.toLowerCase().replace(/[^a-zA-Z0-9]/g, "_");
 
       const data = {
         type,

@@ -9,7 +9,7 @@ export interface CustomFieldsRepositoryProtocol {
   ): Promise<CustomFieldModel | null>;
   findByUserId(
     data: CustomFieldsRepositoryProtocol.findByUserIdParams
-  ): Promise<CustomFieldModel[]>;
+  ): Promise<{ customFields: CustomFieldModel[]; total: number }>;
   findByIdAndUserId(
     data: CustomFieldsRepositoryProtocol.FindByIdAndUserIdParams
   ): Promise<CustomFieldModel | null>;
@@ -39,6 +39,11 @@ export namespace CustomFieldsRepositoryProtocol {
 
   export type findByUserIdParams = {
     user_id: CustomFieldModel["user_id"];
+    page?: number;
+    limit?: number;
+    search?: string;
+    sortBy?: string;
+    order?: string;
   };
 
   export type FindByIdAndUserIdParams = {

@@ -4,7 +4,7 @@ import { NotFoundError } from "@/data/errors/NotFoundError";
 import { ServerError } from "@/data/errors/ServerError";
 import { ValidationError } from "yup";
 import { mockCustomField } from "@/tests/unit/mocks/customFields/mockCustomFields";
-import { GetByUserIdCustomFieldUseCase } from "@/data/usecases/customFields/getByUserIdTransactionUseCase";
+import { GetByUserIdCustomFieldUseCase } from "@/data/usecases/customFields/getByUserIdCustomFieldUseCase";
 import { mockCustomFieldMultiple } from "@/tests/unit/mocks/customFields/mockCustomFieldMultiple";
 import { mockUser } from "@/tests/unit/mocks/user/mockUser";
 
@@ -46,10 +46,10 @@ describe("GetByUserIdCustomFieldUseCase", () => {
   test("should retrieve custom fields successfully", async () => {
     const { sut, customFieldsRepositorySpy, userRepositorySpy } = makeSut();
     userRepositorySpy.findOne.mockResolvedValue(mockUser);
-    customFieldsRepositorySpy.findByUserId.mockResolvedValue([
-      mockCustomField,
-      mockCustomFieldMultiple,
-    ]);
+    customFieldsRepositorySpy.findByUserId.mockResolvedValue({
+      customFields: [mockCustomField, mockCustomFieldMultiple],
+      total: 2,
+    });
 
     const input = {
       userId: mockUser.id,
@@ -57,13 +57,21 @@ describe("GetByUserIdCustomFieldUseCase", () => {
 
     const result = await sut.handle(input);
 
-    expect(result).toEqual([mockCustomField, mockCustomFieldMultiple]);
+    expect(result).toEqual({
+      customFields: [mockCustomField, mockCustomFieldMultiple],
+      total: 2,
+    });
     expect(userRepositorySpy.findOne).toHaveBeenCalledWith({
       id: input.userId,
     });
     expect(userRepositorySpy.findOne).toHaveBeenCalledTimes(1);
     expect(customFieldsRepositorySpy.findByUserId).toHaveBeenCalledWith({
       user_id: input.userId,
+      page: 1,
+      limit: 10,
+      search: undefined,
+      sortBy: "label",
+      order: "ASC",
     });
     expect(customFieldsRepositorySpy.findByUserId).toHaveBeenCalledTimes(1);
   });
@@ -71,7 +79,10 @@ describe("GetByUserIdCustomFieldUseCase", () => {
   test("should return empty array if no custom fields exist", async () => {
     const { sut, customFieldsRepositorySpy, userRepositorySpy } = makeSut();
     userRepositorySpy.findOne.mockResolvedValue(mockUser);
-    customFieldsRepositorySpy.findByUserId.mockResolvedValue([]);
+    customFieldsRepositorySpy.findByUserId.mockResolvedValue({
+      customFields: [],
+      total: 0,
+    });
 
     const input = {
       userId: mockUser.id,
@@ -79,13 +90,21 @@ describe("GetByUserIdCustomFieldUseCase", () => {
 
     const result = await sut.handle(input);
 
-    expect(result).toEqual([]);
+    expect(result).toEqual({
+      customFields: [],
+      total: 0,
+    });
     expect(userRepositorySpy.findOne).toHaveBeenCalledWith({
       id: input.userId,
     });
     expect(userRepositorySpy.findOne).toHaveBeenCalledTimes(1);
     expect(customFieldsRepositorySpy.findByUserId).toHaveBeenCalledWith({
       user_id: input.userId,
+      page: 1,
+      limit: 10,
+      search: undefined,
+      sortBy: "label",
+      order: "ASC",
     });
     expect(customFieldsRepositorySpy.findByUserId).toHaveBeenCalledTimes(1);
   });
@@ -142,6 +161,11 @@ describe("GetByUserIdCustomFieldUseCase", () => {
     expect(userRepositorySpy.findOne).toHaveBeenCalledTimes(1);
     expect(customFieldsRepositorySpy.findByUserId).toHaveBeenCalledWith({
       user_id: input.userId,
+      page: 1,
+      limit: 10,
+      search: undefined,
+      sortBy: "label",
+      order: "ASC",
     });
     expect(customFieldsRepositorySpy.findByUserId).toHaveBeenCalledTimes(1);
   });
