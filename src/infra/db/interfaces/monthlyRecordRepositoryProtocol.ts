@@ -2,6 +2,7 @@ import {
   MonthlyRecordMock,
   MonthlyRecordModel,
 } from "@/domain/models/postgres/MonthlyRecordModel";
+import { FilterParam } from "@/presentation/controllers/interfaces/FilterParam";
 
 export interface MonthlyRecordRepositoryProtocol {
   create(
@@ -12,7 +13,7 @@ export interface MonthlyRecordRepositoryProtocol {
   ): Promise<MonthlyRecordMock | null>;
   findByUserId(
     data: MonthlyRecordRepositoryProtocol.FindByUserIdParams
-  ): Promise<MonthlyRecordMock[]>;
+  ): Promise<{ records: MonthlyRecordMock[]; total: number }>;
   findByIdAndUserId(
     data: MonthlyRecordRepositoryProtocol.FindByIdAndUserIdParams
   ): Promise<MonthlyRecordMock | null>;
@@ -46,6 +47,12 @@ export namespace MonthlyRecordRepositoryProtocol {
   export type FindByUserIdParams = {
     userId: MonthlyRecordModel["user_id"];
     categoryId: MonthlyRecordModel["category_id"];
+    page?: number;
+    limit?: number;
+    search?: string;
+    sortBy?: string;
+    order?: string;
+    filters?: FilterParam[];
   };
 
   export type FindByIdAndUserIdParams = {

@@ -45,9 +45,10 @@ describe("GetByUserIdMonthlyRecordUseCase", () => {
   test("should retrieve monthly records successfully", async () => {
     const { sut, monthlyRecordRepositorySpy, userRepositorySpy } = makeSut();
     userRepositorySpy.findOne.mockResolvedValue(mockUser);
-    monthlyRecordRepositorySpy.findByUserId.mockResolvedValue([
-      mockMonthlyRecord,
-    ]);
+    monthlyRecordRepositorySpy.findByUserId.mockResolvedValue({
+      records: [mockMonthlyRecord],
+      total: 1,
+    });
 
     const input = {
       userId: mockMonthlyRecord.user_id,
@@ -56,7 +57,7 @@ describe("GetByUserIdMonthlyRecordUseCase", () => {
 
     const result = await sut.handle(input);
 
-    expect(result).toEqual([mockMonthlyRecord]);
+    expect(result).toEqual({ records: [mockMonthlyRecord], total: 1 });
     expect(userRepositorySpy.findOne).toHaveBeenCalledWith({
       id: input.userId,
     });
@@ -64,6 +65,11 @@ describe("GetByUserIdMonthlyRecordUseCase", () => {
     expect(monthlyRecordRepositorySpy.findByUserId).toHaveBeenCalledWith({
       userId: input.userId,
       categoryId: input.categoryId,
+      page: 1,
+      limit: 10,
+      filters: [],
+      sortBy: "title",
+      order: "ASC",
     });
     expect(monthlyRecordRepositorySpy.findByUserId).toHaveBeenCalledTimes(1);
   });
@@ -71,7 +77,10 @@ describe("GetByUserIdMonthlyRecordUseCase", () => {
   test("should return empty array if no monthly records exist", async () => {
     const { sut, monthlyRecordRepositorySpy, userRepositorySpy } = makeSut();
     userRepositorySpy.findOne.mockResolvedValue(mockUser);
-    monthlyRecordRepositorySpy.findByUserId.mockResolvedValue([]);
+    monthlyRecordRepositorySpy.findByUserId.mockResolvedValue({
+      records: [],
+      total: 0,
+    });
 
     const input = {
       userId: mockMonthlyRecord.user_id,
@@ -80,7 +89,7 @@ describe("GetByUserIdMonthlyRecordUseCase", () => {
 
     const result = await sut.handle(input);
 
-    expect(result).toEqual([]);
+    expect(result).toEqual({ records: [], total: 0 });
     expect(userRepositorySpy.findOne).toHaveBeenCalledWith({
       id: input.userId,
     });
@@ -88,6 +97,11 @@ describe("GetByUserIdMonthlyRecordUseCase", () => {
     expect(monthlyRecordRepositorySpy.findByUserId).toHaveBeenCalledWith({
       userId: input.userId,
       categoryId: input.categoryId,
+      page: 1,
+      limit: 10,
+      filters: [],
+      sortBy: "title",
+      order: "ASC",
     });
     expect(monthlyRecordRepositorySpy.findByUserId).toHaveBeenCalledTimes(1);
   });
@@ -157,6 +171,11 @@ describe("GetByUserIdMonthlyRecordUseCase", () => {
     expect(monthlyRecordRepositorySpy.findByUserId).toHaveBeenCalledWith({
       userId: input.userId,
       categoryId: input.categoryId,
+      page: 1,
+      limit: 10,
+      filters: [],
+      sortBy: "title",
+      order: "ASC",
     });
     expect(monthlyRecordRepositorySpy.findByUserId).toHaveBeenCalledTimes(1);
   });

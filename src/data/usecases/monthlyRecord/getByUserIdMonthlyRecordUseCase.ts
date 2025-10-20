@@ -29,7 +29,7 @@ export class GetByUserIdMonthlyRecordUseCase
 
   async handle(
     data: GetByUserIdMonthlyRecordUseCaseProtocol.Params
-  ): Promise<MonthlyRecordMock[]> {
+  ): Promise<{ records: MonthlyRecordMock[]; total: number }> {
     try {
       await getByUserIdMonthlyRecordValidationSchema.validate(data, {
         abortEarly: false,
@@ -39,12 +39,18 @@ export class GetByUserIdMonthlyRecordUseCase
         throw new NotFoundError(`Usuário com ID ${data.userId} não encontrado`);
       }
 
-      const monthlyRecords = await this.monthlyRecordRepository.findByUserId({
-        userId: data.userId,
-        categoryId: data.categoryId,
-      });
+      const { records: monthlyRecords, total } =
+        await this.monthlyRecordRepository.findByUserId({
+          userId: data.userId,
+          categoryId: data.categoryId,
+          page: data.page || 1,
+          limit: data.limit || 10,
+          sortBy: data.sortBy || "title",
+          order: data.order || "ASC",
+          filters: data.filters || [],
+        });
 
-      return monthlyRecords;
+      return { records: monthlyRecords, total };
     } catch (error: any) {
       if (error.name === "ValidationError") {
         throw error;

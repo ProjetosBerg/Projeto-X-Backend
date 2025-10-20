@@ -3,6 +3,7 @@ import { ValidationError } from "yup";
 import { IResponse, ResponseStatus, getError } from "@/utils/service";
 import { Controller } from "@/presentation/protocols/controller";
 import { GetByUserIdMonthlyRecordUseCase } from "@/data/usecases/monthlyRecord/getByUserIdMonthlyRecordUseCase";
+import { FilterParam } from "../interfaces/FilterParam";
 
 export class GetByUserIdMonthlyRecordController implements Controller {
   constructor(
@@ -16,14 +17,34 @@ export class GetByUserIdMonthlyRecordController implements Controller {
     res: Response<IResponse>
   ): Promise<Response<IResponse>> {
     try {
-      const { categoryId } = req.body;
-      const result = await this.getByUserIdMonthlyRecordService.handle({
-        categoryId,
-        userId: req.user!.id,
-      });
+      const { page = 1, limit = 10, sortBy = "", order } = req.query;
+      // const { categoryId } = req.body;
+      const categoryId = "09f35c57-3019-46c8-8d9d-c31406792c23";
+      let filters: FilterParam[] = [];
+      if (req.query.filters) {
+        try {
+          filters = JSON.parse(req.query.filters as string);
+        } catch (e) {
+          return res.status(400).json({
+            status: ResponseStatus.BAD_REQUEST,
+            message: "Formato de filtros inválido. Esperado um JSON válido.",
+          });
+        }
+      }
+      const { records: result, total } =
+        await this.getByUserIdMonthlyRecordService.handle({
+          categoryId,
+          userId: req.user!.id,
+          page: Number(page),
+          limit: Number(limit),
+          sortBy: sortBy as any,
+          order: String(order),
+          filters,
+        });
       return res.status(200).json({
         status: ResponseStatus.OK,
         data: result,
+        totalRegisters: total,
         message: "Registros obtidos com sucesso",
       });
     } catch (error) {
