@@ -1,4 +1,9 @@
 import { CategoryModel } from "@/domain/models/postgres/CategoryModel";
+export interface CategoryModelWithRecordType extends CategoryModel {
+  record_type_id: number | undefined;
+  record_type_name: string | undefined;
+  record_type_icone: string | undefined;
+}
 
 export interface CategoryRepositoryProtocol {
   create(
@@ -9,7 +14,7 @@ export interface CategoryRepositoryProtocol {
   ): Promise<CategoryModel | null>;
   findByUserId(
     data: CategoryRepositoryProtocol.FindByUserIdParams
-  ): Promise<{ categories: CategoryModel[]; total: number }>;
+  ): Promise<{ categories: CategoryModelWithRecordType[]; total: number }>;
   findByIdAndUserId(
     data: CategoryRepositoryProtocol.FindByIdAndUserIdParams
   ): Promise<CategoryModel | null>;

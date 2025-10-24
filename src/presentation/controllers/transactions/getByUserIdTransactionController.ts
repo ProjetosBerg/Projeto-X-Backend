@@ -16,9 +16,9 @@ export class GetByUserIdTransactionController implements Controller {
     res: Response<IResponse>
   ): Promise<Response<IResponse>> {
     try {
-      const { monthlyRecordId } = req.body;
+      const { monthlyRecordId } = req.query;
       const result = await this.getByUserIdTransactionService.handle({
-        monthlyRecordId,
+        monthlyRecordId: String(monthlyRecordId),
         userId: req.user!.id,
       });
       return res.status(200).json({

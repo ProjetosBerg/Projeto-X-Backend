@@ -3,7 +3,10 @@ import { Category } from "@/domain/entities/postgres/Category";
 import { CategoryModel } from "@/domain/models/postgres/CategoryModel";
 import { User } from "@/domain/entities/postgres/User";
 import { RecordTypes } from "@/domain/entities/postgres/RecordTypes";
-import { CategoryRepositoryProtocol } from "../interfaces/categoryRepositoryProtocol";
+import {
+  CategoryModelWithRecordType,
+  CategoryRepositoryProtocol,
+} from "../interfaces/categoryRepositoryProtocol";
 import { NotFoundError } from "@/data/errors/NotFoundError";
 
 export class CategoryRepository implements CategoryRepositoryProtocol {
@@ -94,7 +97,7 @@ export class CategoryRepository implements CategoryRepositoryProtocol {
 
   async findByUserId(
     data: CategoryRepositoryProtocol.FindByUserIdParams
-  ): Promise<{ categories: Category[]; total: number }> {
+  ): Promise<{ categories: CategoryModelWithRecordType[]; total: number }> {
     const page = data.page || 1;
     const limit = data.limit || 10;
     const offset = (page - 1) * limit;
@@ -114,8 +117,21 @@ export class CategoryRepository implements CategoryRepositoryProtocol {
       order: { [sortBy]: order },
     });
 
+    const formattedCategories = categories.map((category) => ({
+      id: category.id,
+      name: category.name,
+      description: category.description,
+      type: category.type,
+      record_type_id: category.record_type?.id || undefined,
+      record_type_name: category.record_type?.name || undefined,
+      record_type_icone: category.record_type?.icone || undefined,
+      user_id: category.user?.id,
+      created_at: category.created_at,
+      updated_at: category.updated_at,
+    }));
+
     return {
-      categories,
+      categories: formattedCategories,
       total,
     };
   }

@@ -17,10 +17,15 @@ export class GetByUserIdMonthlyRecordController implements Controller {
     res: Response<IResponse>
   ): Promise<Response<IResponse>> {
     try {
-      const { page = 1, limit = 10, sortBy = "", order } = req.query;
-      // const { categoryId } = req.body;
-      const categoryId = "09f35c57-3019-46c8-8d9d-c31406792c23";
+      const {
+        page = 1,
+        limit = 10,
+        sortBy = "",
+        order,
+        categoryId,
+      } = req.query;
       let filters: FilterParam[] = [];
+
       if (req.query.filters) {
         try {
           filters = JSON.parse(req.query.filters as string);
@@ -33,7 +38,7 @@ export class GetByUserIdMonthlyRecordController implements Controller {
       }
       const { records: result, total } =
         await this.getByUserIdMonthlyRecordService.handle({
-          categoryId,
+          categoryId: String(categoryId),
           userId: req.user!.id,
           page: Number(page),
           limit: Number(limit),

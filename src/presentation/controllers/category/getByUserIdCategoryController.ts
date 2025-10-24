@@ -22,13 +22,14 @@ export class GetByUserIdCategoryController implements Controller {
         search = "",
         sortBy = "",
         order,
+        isSideBar = false,
       } = req.query;
 
       const { categories: result, total } =
         await this.getByUserIdCategoryService.handle({
           userId: req.user!.id,
-          page: Number(page),
-          limit: Number(limit),
+          page: isSideBar ? 1 : Number(page),
+          limit: isSideBar ? 1000000000000 : Number(limit),
           search: String(search),
           sortBy: sortBy as any,
           order: String(order),

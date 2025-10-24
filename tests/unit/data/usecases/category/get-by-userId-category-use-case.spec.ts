@@ -3,7 +3,7 @@ import { UserRepositoryProtocol } from "@/infra/db/interfaces/userRepositoryProt
 import { NotFoundError } from "@/data/errors/NotFoundError";
 import { ServerError } from "@/data/errors/ServerError";
 import { ValidationError } from "yup";
-import { mockCategory } from "@/tests/unit/mocks/category/mockCategory";
+import { mockCategoryWithRecordType } from "@/tests/unit/mocks/category/mockCategory";
 import { mockUser } from "@/tests/unit/mocks/user/mockUser";
 import { GetByUserIdCategoryUseCase } from "@/data/usecases/category/getByUserIdCategoryUseCase";
 
@@ -11,7 +11,7 @@ export const makeCategoryRepository =
   (): jest.Mocked<CategoryRepositoryProtocol> => ({
     create: jest.fn(),
     findByNameAndUserId: jest.fn(),
-    findByUserId: jest.fn().mockResolvedValue([mockCategory]),
+    findByUserId: jest.fn().mockResolvedValue([mockCategoryWithRecordType]),
     ...({} as any),
   });
 
@@ -45,20 +45,22 @@ describe("GetByUserIdCategoryUseCase", () => {
     const input = { userId: mockUser.id };
     const expectedCategories = [
       {
-        id: mockCategory.id,
-        name: mockCategory.name,
-        description: mockCategory.description,
-        type: mockCategory.type,
-        record_type_id: mockCategory.record_type_id,
-        user_id: mockCategory.user_id,
-        created_at: mockCategory.created_at,
-        updated_at: mockCategory.updated_at,
+        id: mockCategoryWithRecordType.id,
+        name: mockCategoryWithRecordType.name,
+        description: mockCategoryWithRecordType.description,
+        type: mockCategoryWithRecordType.type,
+        record_type_id: mockCategoryWithRecordType.record_type_id,
+        record_type_name: mockCategoryWithRecordType.record_type_name,
+        record_type_icone: mockCategoryWithRecordType.record_type_icone,
+        user_id: mockCategoryWithRecordType.user_id,
+        created_at: mockCategoryWithRecordType.created_at,
+        updated_at: mockCategoryWithRecordType.updated_at,
       },
     ];
 
     userRepositorySpy.findOne.mockResolvedValue(mockUser);
     categoryRepositorySpy.findByUserId.mockResolvedValue({
-      categories: [mockCategory],
+      categories: [mockCategoryWithRecordType],
       total: 1,
     });
 
