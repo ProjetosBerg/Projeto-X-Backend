@@ -14,7 +14,6 @@ import { CreateTransactionUseCase } from "@/data/usecases/transactions/createTra
 import { CustomFieldsRepositoryProtocol } from "@/infra/db/interfaces/customFieldsRepositoryProtocol";
 import { mockCustomField } from "@/tests/unit/mocks/customFields/mockCustomFields";
 import { TransactionCustomFieldRepositoryProtocol } from "@/infra/db/interfaces/TransactionCustomFieldRepositoryProtocol";
-import { tr } from "@faker-js/faker";
 
 export const makeTransactionRepository =
   (): jest.Mocked<TransactionRepositoryProtocol> => ({
