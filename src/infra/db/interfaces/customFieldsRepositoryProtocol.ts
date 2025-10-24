@@ -13,6 +13,9 @@ export interface CustomFieldsRepositoryProtocol {
   findByIdAndUserId(
     data: CustomFieldsRepositoryProtocol.FindByIdAndUserIdParams
   ): Promise<CustomFieldModel | null>;
+  findByIdsAndUserId(
+    data: CustomFieldsRepositoryProtocol.FindByIdsAndUserIdParams
+  ): Promise<CustomFieldModel[] | null>;
   update(
     data: CustomFieldsRepositoryProtocol.UpdateParams
   ): Promise<CustomFieldModel>;
@@ -44,6 +47,11 @@ export namespace CustomFieldsRepositoryProtocol {
     search?: string;
     sortBy?: string;
     order?: string;
+  };
+
+  export type FindByIdsAndUserIdParams = {
+    ids: CustomFieldModel["id"][];
+    user_id: CustomFieldModel["user_id"];
   };
 
   export type FindByIdAndUserIdParams = {

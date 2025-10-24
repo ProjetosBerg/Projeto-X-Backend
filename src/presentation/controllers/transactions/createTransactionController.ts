@@ -23,6 +23,7 @@ export class CreateTransactionController implements Controller {
         transactionDate,
         monthlyRecordId,
         categoryId,
+        customFields,
       } = req.body;
 
       const data = {
@@ -32,6 +33,7 @@ export class CreateTransactionController implements Controller {
         transactionDate,
         monthlyRecordId,
         categoryId,
+        customFields,
       };
 
       const createTransaction = await this.createTransactionService.handle({

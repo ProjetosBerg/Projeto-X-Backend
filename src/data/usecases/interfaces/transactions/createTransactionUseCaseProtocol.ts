@@ -2,11 +2,13 @@ import {
   TransactionModel,
   TransactionModelMock,
 } from "@/domain/models/postgres/TransactionModel";
+import { CustomFieldValueWithMetadata } from "../../transactions/createTransactionUseCase";
 
 export interface CreateTransactionUseCaseProtocol {
-  handle(
-    data: CreateTransactionUseCaseProtocol.Params
-  ): Promise<TransactionModelMock>;
+  handle(data: CreateTransactionUseCaseProtocol.Params): Promise<{
+    transaction: TransactionModelMock;
+    customFields?: CustomFieldValueWithMetadata[];
+  }>;
 }
 
 export namespace CreateTransactionUseCaseProtocol {
@@ -18,5 +20,6 @@ export namespace CreateTransactionUseCaseProtocol {
     monthlyRecordId: TransactionModel["monthly_record_id"];
     categoryId: TransactionModel["category_id"];
     userId: TransactionModel["user_id"];
+    customFields?: { custom_field_id: string; value: any }[];
   };
 }

@@ -5,7 +5,6 @@ import {
 import { CustomFieldsRepositoryProtocol } from "@/infra/db/interfaces/customFieldsRepositoryProtocol";
 import { CustomFieldModel as CustomField } from "@/domain/entities/mongo/CustomFieldsSchema";
 import { NotFoundError } from "@/data/errors/NotFoundError";
-import { ILike } from "typeorm";
 
 export class CustomFieldsRepository implements CustomFieldsRepositoryProtocol {
   async create(
@@ -66,6 +65,26 @@ export class CustomFieldsRepository implements CustomFieldsRepositoryProtocol {
     return { customFields, total };
   }
 
+  async findByIdsAndUserId(
+    data: CustomFieldsRepositoryProtocol.FindByIdsAndUserIdParams
+  ): Promise<CustomFieldModel[] | null> {
+    if (!data.ids || data.ids.length === 0) {
+      return [];
+    }
+
+    const customFields = await CustomField.find({
+      _id: { $in: data.ids },
+      user_id: data.user_id,
+    }).lean();
+
+    if (customFields.length !== data.ids.length) {
+      console.warn(
+        `Nem todos os custom fields foram encontrados para userId ${data.user_id}`
+      );
+    }
+
+    return customFields;
+  }
   async findByIdAndUserId(
     data: CustomFieldsRepositoryProtocol.FindByIdAndUserIdParams
   ): Promise<CustomFieldModel | null> {
