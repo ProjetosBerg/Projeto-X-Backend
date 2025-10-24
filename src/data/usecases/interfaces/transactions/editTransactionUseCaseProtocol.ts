@@ -2,11 +2,13 @@ import {
   TransactionModel,
   TransactionModelMock,
 } from "@/domain/models/postgres/TransactionModel";
+import { CustomFieldValueWithMetadata } from "../../transactions/utils/customFieldValueWithMetadata";
 
 export interface EditTransactionUseCaseProtocol {
-  handle(
-    data: EditTransactionUseCaseProtocol.Params
-  ): Promise<TransactionModelMock>;
+  handle(data: EditTransactionUseCaseProtocol.Params): Promise<{
+    transaction: TransactionModelMock;
+    customFields?: CustomFieldValueWithMetadata[];
+  }>;
 }
 
 export namespace EditTransactionUseCaseProtocol {
@@ -19,5 +21,6 @@ export namespace EditTransactionUseCaseProtocol {
     transactionDate?: TransactionModel["transaction_date"];
     monthlyRecordId?: TransactionModel["monthly_record_id"];
     categoryId?: TransactionModel["category_id"];
+    customFields?: { custom_field_id: string; value: any }[];
   };
 }

@@ -22,6 +22,7 @@ export class EditTransactionController implements Controller {
         transactionDate,
         monthlyRecordId,
         categoryId,
+        customFields,
       } = req.body;
 
       const data = {
@@ -31,6 +32,7 @@ export class EditTransactionController implements Controller {
         transactionDate,
         monthlyRecordId,
         categoryId,
+        customFields,
       };
 
       const result = await this.editTransactionService.handle({

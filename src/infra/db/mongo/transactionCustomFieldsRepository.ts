@@ -44,7 +44,6 @@ export class TransactionCustomFieldRepository
     const result = await TransactionCustomFieldValueModel.deleteMany(query);
 
     if (result.deletedCount === 0) {
-      // Opcional: Não lançar erro se não encontrar, pois pode ser normal
       console.warn(
         `Nenhum valor de campo customizado encontrado para transaction_id ${data.transaction_id}`
       );
