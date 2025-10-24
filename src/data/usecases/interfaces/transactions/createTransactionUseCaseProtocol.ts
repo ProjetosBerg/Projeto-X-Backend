@@ -2,7 +2,7 @@ import {
   TransactionModel,
   TransactionModelMock,
 } from "@/domain/models/postgres/TransactionModel";
-import { CustomFieldValueWithMetadata } from "../../transactions/createTransactionUseCase";
+import { CustomFieldValueWithMetadata } from "../../transactions/utils/customFieldValueWithMetadata";
 
 export interface CreateTransactionUseCaseProtocol {
   handle(data: CreateTransactionUseCaseProtocol.Params): Promise<{
