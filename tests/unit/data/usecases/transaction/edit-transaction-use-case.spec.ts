@@ -179,60 +179,63 @@ describe("EditTransactionUseCase", () => {
     expect(transactionRepositorySpy.update).toHaveBeenCalledTimes(1);
   });
 
-  // test("should update a transaction with minimal fields", async () => {
-  //   const {
-  //     sut,
-  //     transactionRepositorySpy,
-  //     userRepositorySpy,
-  //     monthlyRecordRepositorySpy,
-  //   } = makeSut();
-  //   userRepositorySpy.findOne.mockResolvedValue(mockUser);
-  //   transactionRepositorySpy.findByIdAndUserId.mockResolvedValue(
-  //     mockTransaction
-  //   );
-  //   monthlyRecordRepositorySpy.findByIdAndUserId.mockResolvedValue(
-  //     mockMonthlyRecord
-  //   );
-  //   transactionRepositorySpy.update.mockResolvedValue({
-  //     ...mockTransaction,
-  //     title: mockUpdatedTransaction.title,
-  //   });
+  test("should update a transaction with minimal fields", async () => {
+    const {
+      sut,
+      transactionRepositorySpy,
+      userRepositorySpy,
+      monthlyRecordRepositorySpy,
+    } = makeSut();
+    userRepositorySpy.findOne.mockResolvedValue(mockUser);
+    transactionRepositorySpy.findByIdAndUserId.mockResolvedValue(
+      mockTransaction
+    );
+    monthlyRecordRepositorySpy.findByIdAndUserId.mockResolvedValue(
+      mockMonthlyRecord
+    );
+    transactionRepositorySpy.update.mockResolvedValue({
+      ...mockTransaction,
+      title: mockUpdatedTransaction.title,
+    });
 
-  //   const input = {
-  //     transactionId: mockTransaction.id,
-  //     userId: mockUser.id,
-  //     title: mockUpdatedTransaction.title,
-  //   };
+    const input = {
+      transactionId: mockTransaction.id,
+      userId: mockUser.id,
+      title: mockUpdatedTransaction.title,
+    };
 
-  //   const result = await sut.handle(input);
+    const result = await sut.handle(input);
 
-  //   expect(result).toEqual({
-  //     ...mockTransaction,
-  //     title: mockUpdatedTransaction.title,
-  //   });
-  //   expect(userRepositorySpy.findOne).toHaveBeenCalledWith({
-  //     id: input.userId,
-  //   });
-  //   expect(userRepositorySpy.findOne).toHaveBeenCalledTimes(1);
-  //   expect(transactionRepositorySpy.findByIdAndUserId).toHaveBeenCalledWith({
-  //     id: input.transactionId,
-  //     userId: input.userId,
-  //   });
-  //   expect(transactionRepositorySpy.findByIdAndUserId).toHaveBeenCalledTimes(1);
-  //   expect(monthlyRecordRepositorySpy.findByIdAndUserId).toHaveBeenCalledWith({
-  //     id: mockTransaction.monthly_record_id,
-  //     userId: input.userId,
-  //   });
-  //   expect(monthlyRecordRepositorySpy.findByIdAndUserId).toHaveBeenCalledTimes(
-  //     1
-  //   );
-  //   expect(transactionRepositorySpy.update).toHaveBeenCalledWith({
-  //     id: input.transactionId,
-  //     title: input.title,
-  //     userId: input.userId,
-  //   });
-  //   expect(transactionRepositorySpy.update).toHaveBeenCalledTimes(1);
-  // });
+    expect(result).toEqual({
+      transaction: {
+        ...mockTransaction,
+        title: mockUpdatedTransaction.title,
+      },
+      customFields: [],
+    });
+    expect(userRepositorySpy.findOne).toHaveBeenCalledWith({
+      id: input.userId,
+    });
+    expect(userRepositorySpy.findOne).toHaveBeenCalledTimes(1);
+    expect(transactionRepositorySpy.findByIdAndUserId).toHaveBeenCalledWith({
+      id: input.transactionId,
+      userId: input.userId,
+    });
+    expect(transactionRepositorySpy.findByIdAndUserId).toHaveBeenCalledTimes(1);
+    expect(monthlyRecordRepositorySpy.findByIdAndUserId).toHaveBeenCalledWith({
+      id: mockTransaction.monthly_record_id,
+      userId: input.userId,
+    });
+    expect(monthlyRecordRepositorySpy.findByIdAndUserId).toHaveBeenCalledTimes(
+      1
+    );
+    expect(transactionRepositorySpy.update).toHaveBeenCalledWith({
+      id: input.transactionId,
+      title: input.title,
+      userId: input.userId,
+    });
+    expect(transactionRepositorySpy.update).toHaveBeenCalledTimes(1);
+  });
 
   test("should throw ValidationError if id is empty", async () => {
     const {
