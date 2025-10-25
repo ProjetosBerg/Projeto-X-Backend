@@ -8,6 +8,8 @@ import { mockMonthlyRecord } from "@/tests/unit/mocks/monthlyRecord/mockMonthlyR
 import { TransactionRepositoryProtocol } from "@/infra/db/interfaces/transactionRepositoryProtocol";
 import { DeleteTransactionUseCase } from "@/data/usecases/transactions/deleteTransactionUseCase";
 import { mockUser } from "@/tests/unit/mocks/user/mockUser";
+import { TransactionCustomFieldRepositoryProtocol } from "@/infra/db/interfaces/TransactionCustomFieldRepositoryProtocol";
+import { mockCustomField } from "@/tests/unit/mocks/customFields/mockCustomFields";
 
 export const makeTransactionRepository =
   (): jest.Mocked<TransactionRepositoryProtocol> => ({
@@ -33,15 +35,28 @@ export const makeMonthlyRecordRepository =
     delete: jest.fn(),
     ...({} as any),
   });
+export const makeTransactionCustomFieldsRepository =
+  (): jest.Mocked<TransactionCustomFieldRepositoryProtocol> => ({
+    create: jest.fn().mockResolvedValue(mockTransaction),
+    findByNameAndUserId: jest.fn().mockResolvedValue(null),
+    findByIdAndUserId: jest.fn().mockResolvedValue(mockTransaction),
+    update: jest.fn().mockResolvedValue(mockTransaction),
+    findByTransactionId: jest.fn().mockResolvedValue([mockCustomField]),
+    deleteByTransactionId: jest.fn().mockResolvedValue(undefined),
+    ...({} as any),
+  });
 
 const makeSut = () => {
   const transactionRepositorySpy = makeTransactionRepository();
   const userRepositorySpy = makeUserRepository();
   const monthlyRecordRepositorySpy = makeMonthlyRecordRepository();
+  const transactionCustomFieldsRepositorySpy =
+    makeTransactionCustomFieldsRepository();
   const sut = new DeleteTransactionUseCase(
     transactionRepositorySpy,
     userRepositorySpy,
-    monthlyRecordRepositorySpy
+    monthlyRecordRepositorySpy,
+    transactionCustomFieldsRepositorySpy
   );
 
   return {
