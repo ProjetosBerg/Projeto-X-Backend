@@ -2,11 +2,15 @@ import {
   TransactionModel,
   TransactionModelMock,
 } from "@/domain/models/postgres/TransactionModel";
+import { CustomFieldValueWithMetadata } from "../../transactions/utils/customFieldValueWithMetadata";
 
 export interface GetByUserIdTransactionUseCaseProtocol {
-  handle(
-    data: GetByUserIdTransactionUseCaseProtocol.Params
-  ): Promise<TransactionModelMock[]>;
+  handle(data: GetByUserIdTransactionUseCaseProtocol.Params): Promise<
+    Array<{
+      transaction: TransactionModelMock;
+      customFields?: CustomFieldValueWithMetadata[];
+    }>
+  >;
 }
 
 export namespace GetByUserIdTransactionUseCaseProtocol {

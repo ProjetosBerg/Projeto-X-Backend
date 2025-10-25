@@ -2,19 +2,22 @@ import { ServerError } from "@/data/errors/ServerError";
 import { NotFoundError } from "@/data/errors/NotFoundError";
 import { UserRepositoryProtocol } from "@/infra/db/interfaces/userRepositoryProtocol";
 import { MonthlyRecordRepositoryProtocol } from "@/infra/db/interfaces/monthlyRecordRepositoryProtocol";
+import { CustomFieldsRepositoryProtocol } from "@/infra/db/interfaces/customFieldsRepositoryProtocol";
 import { TransactionModelMock } from "@/domain/models/postgres/TransactionModel";
 import { GetByUserIdTransactionUseCaseProtocol } from "../interfaces/transactions/getByUserIdTransactionUseCaseProtocol";
 import { getByUserIdTransactionValidationSchema } from "../validation/transactions/getByUserIdTransactionValidationSchema";
 import { TransactionRepositoryProtocol } from "@/infra/db/interfaces/transactionRepositoryProtocol";
+import { CustomFieldValueWithMetadata } from "./utils/customFieldValueWithMetadata";
+import { TransactionCustomFieldRepositoryProtocol } from "@/infra/db/interfaces/TransactionCustomFieldRepositoryProtocol";
 
 /**
- * Recupera todas as transações de um usuário específico para um registro mensal
+ * Recupera todas as transações de um usuário específico para um registro mensal, enriquecidas com campos customizados
  *
  * @param {GetByUserIdTransactionUseCaseProtocol.Params} data - Os dados de entrada para a recuperação das transações
  * @param {string} data.userId - O ID do usuário proprietário das transações
  * @param {string} data.monthlyRecordId - O ID do registro mensal associado às transações
  *
- * @returns {Promise<TransactionModelMock[]>} Um array de transações
+ * @returns {Promise<Array<{ transaction: TransactionModelMock; customFields?: CustomFieldValueWithMetadata[]; }>>} Um array de transações enriquecidas com campos customizados
  *
  * @throws {ValidationError} Se os dados fornecidos forem inválidos
  * @throws {NotFoundError} Se o usuário ou o registro mensal não forem encontrados
@@ -27,12 +30,17 @@ export class GetByUserIdTransactionUseCase
   constructor(
     private readonly transactionRepository: TransactionRepositoryProtocol,
     private readonly userRepository: UserRepositoryProtocol,
-    private readonly monthlyRecordRepository: MonthlyRecordRepositoryProtocol
+    private readonly monthlyRecordRepository: MonthlyRecordRepositoryProtocol,
+    private readonly customFieldRepository: CustomFieldsRepositoryProtocol,
+    private readonly transactionCustomFieldRepository: TransactionCustomFieldRepositoryProtocol
   ) {}
 
-  async handle(
-    data: GetByUserIdTransactionUseCaseProtocol.Params
-  ): Promise<TransactionModelMock[]> {
+  async handle(data: GetByUserIdTransactionUseCaseProtocol.Params): Promise<
+    Array<{
+      transaction: TransactionModelMock;
+      customFields?: CustomFieldValueWithMetadata[];
+    }>
+  > {
     try {
       await getByUserIdTransactionValidationSchema.validate(data, {
         abortEarly: false,
@@ -60,7 +68,48 @@ export class GetByUserIdTransactionUseCase
           monthlyRecordId: data.monthlyRecordId,
         });
 
-      return transactions;
+      const enrichedTransactions = await Promise.all(
+        transactions.map(async (transaction) => {
+          const customFieldValues =
+            await this.transactionCustomFieldRepository.findByTransactionId({
+              transaction_id: transaction.id,
+              user_id: data.userId,
+            });
+
+          let enrichedCustomFields: CustomFieldValueWithMetadata[] = [];
+          if (customFieldValues.length > 0) {
+            const valueIds = customFieldValues.map((v) => v.custom_field_id);
+            const customFieldDefs =
+              await this.customFieldRepository.findByIdsAndUserId({
+                ids: valueIds,
+                user_id: data.userId,
+              });
+
+            enrichedCustomFields = customFieldValues.map((value) => {
+              const cfDef = customFieldDefs?.find(
+                (cf) => cf.id === value.custom_field_id
+              );
+              if (!cfDef) {
+                throw new ServerError(
+                  `Definição de campo customizado não encontrada para ID ${value.custom_field_id}`
+                );
+              }
+              return {
+                id: value.id!,
+                custom_field_id: value.custom_field_id!,
+                value: value.value,
+                label: cfDef.label,
+                type: cfDef.type,
+                required: cfDef.required,
+              };
+            });
+          }
+
+          return { transaction, customFields: enrichedCustomFields };
+        })
+      );
+
+      return enrichedTransactions;
     } catch (error: any) {
       if (error.name === "ValidationError") {
         throw error;
