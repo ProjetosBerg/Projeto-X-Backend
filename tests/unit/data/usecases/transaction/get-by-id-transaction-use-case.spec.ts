@@ -8,6 +8,10 @@ import { mockMonthlyRecord } from "@/tests/unit/mocks/monthlyRecord/mockMonthlyR
 import { TransactionRepositoryProtocol } from "@/infra/db/interfaces/transactionRepositoryProtocol";
 import { mockUser } from "@/tests/unit/mocks/user/mockUser";
 import { GetByIdTransactionUseCase } from "@/data/usecases/transactions/getByIdTransactionUseCase";
+import { CustomFieldsRepositoryProtocol } from "@/infra/db/interfaces/customFieldsRepositoryProtocol";
+import { TransactionCustomFieldRepositoryProtocol } from "@/infra/db/interfaces/TransactionCustomFieldRepositoryProtocol";
+import { mockCustomField } from "@/tests/unit/mocks/customFields/mockCustomFields";
+import { tr } from "@faker-js/faker";
 
 export const makeTransactionRepository =
   (): jest.Mocked<TransactionRepositoryProtocol> => ({
@@ -32,14 +36,38 @@ export const makeMonthlyRecordRepository =
     delete: jest.fn(),
   });
 
+export const makeCustomFieldsRepository =
+  (): jest.Mocked<CustomFieldsRepositoryProtocol> => ({
+    create: jest.fn().mockResolvedValue(mockCustomField),
+    findByNameAndUserId: jest.fn().mockResolvedValue(null),
+    ...({} as any),
+  });
+
+export const makeTransactionCustomFieldsRepository =
+  (): jest.Mocked<TransactionCustomFieldRepositoryProtocol> => ({
+    create: jest.fn().mockResolvedValue(mockTransaction),
+    findByNameAndUserId: jest.fn().mockResolvedValue(null),
+    findByIdAndUserId: jest.fn().mockResolvedValue(mockTransaction),
+    update: jest.fn().mockResolvedValue(mockTransaction),
+    findByTransactionId: jest.fn().mockResolvedValue([]),
+    findByIdsAndUserId: jest.fn().mockResolvedValue([mockCustomField]),
+    deleteByTransactionId: jest.fn().mockResolvedValue(undefined),
+    ...({} as any),
+  });
+
 const makeSut = () => {
   const transactionRepositorySpy = makeTransactionRepository();
   const userRepositorySpy = makeUserRepository();
   const monthlyRecordRepositorySpy = makeMonthlyRecordRepository();
+  const customFieldsRepositorySpy = makeCustomFieldsRepository();
+  const transactionCustomFieldsRepositorySpy =
+    makeTransactionCustomFieldsRepository();
   const sut = new GetByIdTransactionUseCase(
     transactionRepositorySpy,
     userRepositorySpy,
-    monthlyRecordRepositorySpy
+    monthlyRecordRepositorySpy,
+    customFieldsRepositorySpy,
+    transactionCustomFieldsRepositorySpy
   );
 
   return {
@@ -77,7 +105,7 @@ describe("GetByIdTransactionUseCase", () => {
 
     const result = await sut.handle(input);
 
-    expect(result).toEqual(mockTransaction);
+    expect(result).toEqual({ transaction: mockTransaction, customFields: [] });
     expect(userRepositorySpy.findOne).toHaveBeenCalledWith({
       id: input.userId,
     });
