@@ -5,15 +5,16 @@ import { MonthlyRecordRepositoryProtocol } from "@/infra/db/interfaces/monthlyRe
 import { DeleteTransactionUseCaseProtocol } from "@/data/usecases/interfaces/transactions/deleteTransactionUseCaseProtocol";
 import { TransactionRepositoryProtocol } from "@/infra/db/interfaces/transactionRepositoryProtocol";
 import { deleteTransactionValidationSchema } from "../validation/transactions/deleteTransactionValidationSchema";
+import { TransactionCustomFieldRepositoryProtocol } from "@/infra/db/interfaces/TransactionCustomFieldRepositoryProtocol";
 
 /**
- * Exclui uma transação pelo seu ID para um usuário específico
+ * Exclui uma transação pelo seu ID para um usuário específico, incluindo seus valores de campos customizados associados
  *
  * @param {DeleteTransactionUseCaseProtocol.Params} data - Os dados de entrada para a exclusão da transação
  * @param {string} data.transactionId - O ID da transação a ser excluída
  * @param {string} data.userId - O ID do usuário proprietário da transação
  *
- * @returns {Promise<void>} É resolvida quando a transação é excluída com sucesso
+ * @returns {Promise<void>} É resolvida quando a transação e seus campos customizados são excluídos com sucesso
  *
  * @throws {ValidationError} Se os dados fornecidos forem inválidos
  * @throws {NotFoundError} Se o usuário, o registro mensal ou a transação não forem encontrados
@@ -26,7 +27,8 @@ export class DeleteTransactionUseCase
   constructor(
     private readonly transactionRepository: TransactionRepositoryProtocol,
     private readonly userRepository: UserRepositoryProtocol,
-    private readonly monthlyRecordRepository: MonthlyRecordRepositoryProtocol
+    private readonly monthlyRecordRepository: MonthlyRecordRepositoryProtocol,
+    private readonly transactionCustomFieldRepository: TransactionCustomFieldRepositoryProtocol
   ) {}
 
   async handle(data: DeleteTransactionUseCaseProtocol.Params): Promise<void> {
@@ -60,6 +62,11 @@ export class DeleteTransactionUseCase
           `Registro mensal com ID ${transaction?.monthly_record_id} não encontrado para este usuário`
         );
       }
+
+      await this.transactionCustomFieldRepository.deleteByTransactionId({
+        transaction_id: data.transactionId,
+        user_id: data.userId,
+      });
 
       await this.transactionRepository.delete({
         id: data.transactionId,
