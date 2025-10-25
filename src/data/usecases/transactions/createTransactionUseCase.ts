@@ -97,7 +97,10 @@ export class CreateTransactionUseCase
             );
           }
 
-          if (cf.required && (cfValue.value == null || cfValue.value === "")) {
+          if (
+            cf.required &&
+            [null, "", undefined, "null", "undefined"].includes(cfValue.value)
+          ) {
             throw new BusinessRuleError(`O campo "${cf.label}" é obrigatório`);
           }
 
