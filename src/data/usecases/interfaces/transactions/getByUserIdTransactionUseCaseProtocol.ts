@@ -9,6 +9,7 @@ export interface GetByUserIdTransactionUseCaseProtocol {
     Array<{
       transaction: TransactionModelMock;
       customFields?: CustomFieldValueWithMetadata[];
+      recordTypeId?: number;
     }>
   >;
 }

@@ -4,6 +4,7 @@ import { GetByUserIdTransactionUseCase } from "@/data/usecases/transactions/getB
 import { TransactionRepository } from "@/infra/db/postgres/transactionRepository";
 import { CustomFieldsRepository } from "@/infra/db/mongo/customFieldsRepository";
 import { TransactionCustomFieldRepository } from "@/infra/db/mongo/transactionCustomFieldsRepository";
+import { CategoryRepository } from "@/infra/db/postgres/categoryRepository";
 
 export const makeGetByUserIdTransactionUseCaseFactory = () => {
   return new GetByUserIdTransactionUseCase(
@@ -11,6 +12,7 @@ export const makeGetByUserIdTransactionUseCaseFactory = () => {
     new UserRepository(),
     new MonthlyRecordRepository(),
     new CustomFieldsRepository(),
-    new TransactionCustomFieldRepository()
+    new TransactionCustomFieldRepository(),
+    new CategoryRepository()
   );
 };

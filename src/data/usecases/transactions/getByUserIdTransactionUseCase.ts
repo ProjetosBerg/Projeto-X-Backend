@@ -9,6 +9,7 @@ import { getByUserIdTransactionValidationSchema } from "../validation/transactio
 import { TransactionRepositoryProtocol } from "@/infra/db/interfaces/transactionRepositoryProtocol";
 import { CustomFieldValueWithMetadata } from "./utils/customFieldValueWithMetadata";
 import { TransactionCustomFieldRepositoryProtocol } from "@/infra/db/interfaces/TransactionCustomFieldRepositoryProtocol";
+import { CategoryRepositoryProtocol } from "@/infra/db/interfaces/categoryRepositoryProtocol";
 
 /**
  * Recupera todas as transações de um usuário específico para um registro mensal, enriquecidas com campos customizados
@@ -32,7 +33,8 @@ export class GetByUserIdTransactionUseCase
     private readonly userRepository: UserRepositoryProtocol,
     private readonly monthlyRecordRepository: MonthlyRecordRepositoryProtocol,
     private readonly customFieldRepository: CustomFieldsRepositoryProtocol,
-    private readonly transactionCustomFieldRepository: TransactionCustomFieldRepositoryProtocol
+    private readonly transactionCustomFieldRepository: TransactionCustomFieldRepositoryProtocol,
+    private readonly categoryRepository: CategoryRepositoryProtocol
   ) {}
 
   async handle(data: GetByUserIdTransactionUseCaseProtocol.Params): Promise<
@@ -41,6 +43,7 @@ export class GetByUserIdTransactionUseCase
       customFields?: CustomFieldValueWithMetadata[];
     }>
   > {
+    let recordTypeId: number | undefined = undefined;
     try {
       await getByUserIdTransactionValidationSchema.validate(data, {
         abortEarly: false,
@@ -67,6 +70,20 @@ export class GetByUserIdTransactionUseCase
           userId: data.userId,
           monthlyRecordId: data.monthlyRecordId,
         });
+
+      if (transactions.length && transactions.length !== 0) {
+        const category = await this.categoryRepository.findByIdAndUserId({
+          id: String(transactions[0]?.category_id),
+          userId: data.userId,
+        });
+
+        if (!category) {
+          throw new NotFoundError(
+            `Categoria com ID ${transactions[0]?.category_id} não encontrada para este usuário`
+          );
+        }
+        recordTypeId = category?.record_type_id;
+      }
 
       const enrichedTransactions = await Promise.all(
         transactions.map(async (transaction) => {
@@ -105,7 +122,11 @@ export class GetByUserIdTransactionUseCase
             });
           }
 
-          return { transaction, customFields: enrichedCustomFields };
+          return {
+            transaction,
+            customFields: enrichedCustomFields,
+            recordTypeId,
+          };
         })
       );
 
