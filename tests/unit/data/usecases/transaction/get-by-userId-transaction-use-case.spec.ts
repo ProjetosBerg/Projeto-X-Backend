@@ -12,6 +12,8 @@ import { TransactionCustomFieldRepositoryProtocol } from "@/infra/db/interfaces/
 import { mockCustomField } from "@/tests/unit/mocks/customFields/mockCustomFields";
 import { CustomFieldsRepositoryProtocol } from "@/infra/db/interfaces/customFieldsRepositoryProtocol";
 import { tr } from "@faker-js/faker";
+import { CategoryRepositoryProtocol } from "@/infra/db/interfaces/categoryRepositoryProtocol";
+import { mockCategory } from "@/tests/unit/mocks/category/mockCategory";
 
 export const makeTransactionRepository =
   (): jest.Mocked<TransactionRepositoryProtocol> => ({
@@ -56,6 +58,14 @@ export const makeTransactionCustomFieldsRepository =
     ...({} as any),
   });
 
+export const makeCategoryRepository =
+  (): jest.Mocked<CategoryRepositoryProtocol> => ({
+    create: jest.fn().mockResolvedValue(mockCategory),
+    findByNameAndUserId: jest.fn().mockResolvedValue(null),
+    findByIdAndUserId: jest.fn().mockResolvedValue(mockCategory),
+    ...({} as any),
+  });
+
 const makeSut = () => {
   const transactionRepositorySpy = makeTransactionRepository();
   const userRepositorySpy = makeUserRepository();
@@ -63,12 +73,14 @@ const makeSut = () => {
   const customFieldsRepositorySpy = makeCustomFieldsRepository();
   const transactionCustomFieldsRepositorySpy =
     makeTransactionCustomFieldsRepository();
+  const categoryRepositorySpy = makeCategoryRepository();
   const sut = new GetByUserIdTransactionUseCase(
     transactionRepositorySpy,
     userRepositorySpy,
     monthlyRecordRepositorySpy,
     customFieldsRepositorySpy,
-    transactionCustomFieldsRepositorySpy
+    transactionCustomFieldsRepositorySpy,
+    categoryRepositorySpy
   );
 
   return {
@@ -112,6 +124,7 @@ describe("GetByUserIdTransactionUseCase", () => {
           ...mockTransaction,
         },
         customFields: [],
+        recordTypeId: 1,
       },
     ]);
 
