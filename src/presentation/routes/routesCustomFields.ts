@@ -2,6 +2,7 @@ import { makeCreateCustomFieldsControllerFactory } from "@/main/factories/contro
 import { makeDeleteCustomFieldsControllerFactory } from "@/main/factories/controllers/customFields/deleteCustomFieldsControllerFactory";
 import { makeEditCustomFieldsControllerFactory } from "@/main/factories/controllers/customFields/editCustomFieldsControllerFactory";
 import { makeGetByIdCustomFieldsControllerFactory } from "@/main/factories/controllers/customFields/getByIdCustomFieldsControllerFactory";
+import { makeGetByRecordTypeIdCustomFieldsControllerFactory } from "@/main/factories/controllers/customFields/getByRecordTypesIdCustomFieldsControllerFactory";
 import { makeGetByUserIdCustomFieldsControllerFactory } from "@/main/factories/controllers/customFields/getByUserIdCustomFieldsControllerFactory";
 import { makeGetLoginMiddleware } from "@/main/factories/middleware/getLogin";
 import { adapterMiddleware } from "@/utils/adapterMiddleware";
@@ -13,6 +14,14 @@ export const routesCustomFields = (router: Router) => {
     adapterMiddleware(makeGetLoginMiddleware()),
     (req: Request, res: Response) => {
       makeGetByUserIdCustomFieldsControllerFactory().handle(req, res);
+    }
+  );
+
+  router.get(
+    "/custom-fields/get-by-record-type",
+    adapterMiddleware(makeGetLoginMiddleware()),
+    (req: Request, res: Response) => {
+      makeGetByRecordTypeIdCustomFieldsControllerFactory().handle(req, res);
     }
   );
 

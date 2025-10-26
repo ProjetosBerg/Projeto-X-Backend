@@ -39,6 +39,17 @@ export class CustomFieldsRepository implements CustomFieldsRepositoryProtocol {
     return customField;
   }
 
+  async findByRecordTypeId(
+    data: CustomFieldsRepositoryProtocol.findByRecordTypeIdParams
+  ): Promise<{ customFields: CustomFieldModel[]; total: number }> {
+    const customFields = await CustomField.find({
+      record_type_id: data.record_type_id,
+      category_id: data.category_id,
+      user_id: data.user_id,
+    }).lean();
+
+    return { customFields, total: customFields.length };
+  }
   async findByUserId(
     data: CustomFieldsRepositoryProtocol.findByUserIdParams
   ): Promise<{ customFields: CustomFieldModel[]; total: number }> {
