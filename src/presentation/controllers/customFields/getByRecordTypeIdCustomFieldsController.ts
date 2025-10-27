@@ -24,7 +24,6 @@ export class GetByRecordTypeIdCustomFieldsController implements Controller {
           categoryId: String(categoryId),
           recordTypeId: Number(recordTypeId),
         });
-      console.log("result", result);
       return res.status(200).json({
         status: ResponseStatus.OK,
         data: result,
