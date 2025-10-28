@@ -10,6 +10,8 @@ import { TransactionRepositoryProtocol } from "@/infra/db/interfaces/transaction
 import { CustomFieldValueWithMetadata } from "./utils/customFieldValueWithMetadata";
 import { TransactionCustomFieldRepositoryProtocol } from "@/infra/db/interfaces/TransactionCustomFieldRepositoryProtocol";
 import { CategoryRepositoryProtocol } from "@/infra/db/interfaces/categoryRepositoryProtocol";
+import { CustomFieldModel } from "@/domain/models/mongo/CustomFieldModel";
+import { FilterParam } from "@/presentation/controllers/interfaces/FilterParam";
 
 /**
  * Recupera todas as transações de um usuário específico para um registro mensal, enriquecidas com campos customizados
@@ -71,18 +73,50 @@ export class GetByUserIdTransactionUseCase
           monthlyRecordId: data.monthlyRecordId,
         });
 
-      if (transactions.length && transactions.length !== 0) {
+      let fieldTypes: Record<string, string> = {
+        title: "text",
+        description: "text",
+        amount: "number",
+        transaction_date: "date",
+        created_at: "date",
+        updated_at: "date",
+      };
+
+      let customFieldDefs: CustomFieldModel[] = [];
+
+      if (transactions.length > 0) {
         const category = await this.categoryRepository.findByIdAndUserId({
-          id: String(transactions[0]?.category_id),
+          id: String(transactions[0].category_id),
           userId: data.userId,
         });
 
         if (!category) {
           throw new NotFoundError(
-            `Categoria com ID ${transactions[0]?.category_id} não encontrada para este usuário`
+            `Categoria com ID ${transactions[0].category_id} não encontrada para este usuário`
           );
         }
-        recordTypeId = category?.record_type_id;
+        recordTypeId = category.record_type_id;
+
+        const { customFields } =
+          await this.customFieldRepository.findByRecordTypeId({
+            record_type_id: recordTypeId!,
+            category_id: transactions[0].category_id,
+            user_id: data.userId,
+          });
+
+        customFieldDefs = customFields;
+
+        const customFieldTypes = customFieldDefs.reduce(
+          (acc: Record<string, string>, def: CustomFieldModel) => {
+            const ftype =
+              def.type === "multiple" ? "text" : def.type.toLowerCase();
+            acc[`customFields.${def.name}`] = ftype;
+            return acc;
+          },
+          {}
+        );
+
+        fieldTypes = { ...fieldTypes, ...customFieldTypes };
       }
 
       const enrichedTransactions = await Promise.all(
@@ -95,15 +129,8 @@ export class GetByUserIdTransactionUseCase
 
           let enrichedCustomFields: CustomFieldValueWithMetadata[] = [];
           if (customFieldValues.length > 0) {
-            const valueIds = customFieldValues.map((v) => v.custom_field_id);
-            const customFieldDefs =
-              await this.customFieldRepository.findByIdsAndUserId({
-                ids: valueIds,
-                user_id: data.userId,
-              });
-
             enrichedCustomFields = customFieldValues.map((value) => {
-              const cfDef = customFieldDefs?.find(
+              const cfDef = customFieldDefs.find(
                 (cf) => cf.id === value.custom_field_id
               );
               if (!cfDef) {
@@ -130,7 +157,84 @@ export class GetByUserIdTransactionUseCase
         })
       );
 
-      return enrichedTransactions;
+      let result = enrichedTransactions;
+
+      if (data.filters && data.filters.length > 0) {
+        const tempItems = enrichedTransactions.map((enriched) => {
+          const customMap: Record<string, string> = {};
+          if (enriched.customFields && enriched.customFields.length > 0) {
+            enriched.customFields.forEach((cf) => {
+              const def = customFieldDefs.find(
+                (d) => d.id === cf.custom_field_id
+              );
+              if (def) {
+                const mapVal = Array.isArray(cf.value)
+                  ? cf.value.join(", ")
+                  : String(cf.value);
+                customMap[def.name] = mapVal;
+              }
+            });
+          }
+          return {
+            transaction: enriched.transaction,
+            customFields: customMap,
+          };
+        });
+
+        const filteredTemp = this.applyFilters(
+          tempItems,
+          data.filters,
+          fieldTypes
+        );
+
+        const idToEnriched = new Map(
+          enrichedTransactions.map((e) => [e.transaction.id, e])
+        );
+
+        result = filteredTemp.map(
+          (temp) => idToEnriched.get(temp.transaction.id)!
+        );
+      }
+
+      if (data.sortBy) {
+        const direction = data.order === "desc" ? "desc" : "asc";
+
+        const tempItemsForSort = result.map((enriched) => {
+          const customMap: Record<string, string> = {};
+          if (enriched.customFields && enriched.customFields.length > 0) {
+            enriched.customFields.forEach((cf) => {
+              const def = customFieldDefs.find(
+                (d) => d.id === cf.custom_field_id
+              );
+              if (def) {
+                const mapVal = Array.isArray(cf.value)
+                  ? cf.value.join(", ")
+                  : String(cf.value);
+                customMap[def.name] = mapVal;
+              }
+            });
+          }
+          return {
+            transaction: enriched.transaction,
+            customFields: customMap,
+          };
+        });
+
+        const sortedTemp = this.applySort(
+          tempItemsForSort,
+          data.sortBy,
+          direction,
+          fieldTypes
+        );
+
+        const idToEnriched = new Map(result.map((e) => [e.transaction.id, e]));
+
+        result = sortedTemp.map(
+          (temp) => idToEnriched.get(temp.transaction.id)!
+        );
+      }
+
+      return result;
     } catch (error: any) {
       if (error.name === "ValidationError") {
         throw error;
@@ -143,6 +247,153 @@ export class GetByUserIdTransactionUseCase
       const errorMessage =
         error.message || "Erro interno do servidor durante a busca";
       throw new ServerError(`Falha na busca das transações: ${errorMessage}`);
+    }
+  }
+
+  private applyFilters(
+    items: any[],
+    filters: FilterParam[],
+    fieldTypes: Record<string, string>
+  ): any[] {
+    return items.filter((item) =>
+      filters.every((filter) => {
+        const { val, type } = this.getFieldValueAndType(
+          item,
+          filter.field,
+          fieldTypes
+        );
+        console.log(
+          "val",
+          val,
+          "type",
+          type,
+          "filter.value",
+          filter.value,
+          "filter.value2",
+          filter.value2,
+          "filter.field",
+          filter.field
+        );
+        return this.applyOperator(
+          val,
+          filter.operator,
+          type,
+          filter.value,
+          filter.value2
+        );
+      })
+    );
+  }
+
+  private applySort(
+    items: any[],
+    sortBy: string,
+    order: "asc" | "desc",
+    fieldTypes: Record<string, string>
+  ): any[] {
+    return [...items].sort((a, b) => {
+      const { val: aVal, type } = this.getFieldValueAndType(
+        a,
+        sortBy,
+        fieldTypes
+      );
+      const { val: bVal } = this.getFieldValueAndType(b, sortBy, fieldTypes);
+      const aNorm = this.normalize(aVal, type);
+      const bNorm = this.normalize(bVal, type);
+      if (aNorm < bNorm) {
+        return order === "asc" ? -1 : 1;
+      } else if (aNorm > bNorm) {
+        return order === "asc" ? 1 : -1;
+      }
+      return 0;
+    });
+  }
+
+  private getFieldValueAndType(
+    item: any,
+    field: string,
+    fieldTypes: Record<string, string>
+  ): { val: any; type: string } {
+    const transaction = item.transaction;
+    let val: any;
+    const type = fieldTypes[field] || "text";
+
+    if (field === "category.name") {
+      val = transaction.category_name;
+    } else if (field.startsWith("customFields.")) {
+      const name = field.split(".")[1];
+      val = item.customFields?.[name] || "";
+    } else {
+      val = transaction[field] || "";
+    }
+
+    return { val, type };
+  }
+
+  private applyOperator(
+    val: any,
+    operator: string,
+    type: string,
+    value: any,
+    value2?: any
+  ): boolean {
+    const normVal = this.normalize(val, type);
+    if (normVal === null) return false;
+
+    const normValue = this.normalize(value, type);
+    if (normValue === null) return false;
+    console.log("normVal", normVal, "normValue", normValue);
+
+    switch (operator) {
+      case "equals":
+        return normVal === normValue;
+      case "contains":
+        return type === "text" && String(normVal).includes(String(normValue));
+      case "startsWith":
+        return type === "text" && String(normVal).startsWith(String(normValue));
+      case "endsWith":
+        return type === "text" && String(normVal).endsWith(String(normValue));
+      case "gt":
+        return (type === "number" || type === "date") && normVal > normValue;
+      case "gte":
+        return (type === "number" || type === "date") && normVal >= normValue;
+      case "lt":
+        return (type === "number" || type === "date") && normVal < normValue;
+      case "lte":
+        return (type === "number" || type === "date") && normVal <= normValue;
+      case "between":
+        if (!value2) return false;
+        const normValue2 = this.normalize(value2, type);
+        if (normValue2 === null) return false;
+        return (
+          (type === "number" || type === "date") &&
+          normVal >= normValue &&
+          normVal <= normValue2
+        );
+      case "in":
+        if (!Array.isArray(value)) return false;
+        return value.some((v) => {
+          const normV = this.normalize(v, type);
+          return normVal === normV;
+        });
+      default:
+        return false;
+    }
+  }
+
+  private normalize(value: any, type: string): any {
+    if (value === undefined || value === null || value === "") return null;
+
+    switch (type) {
+      case "number":
+        const num = parseFloat(String(value));
+        return isNaN(num) ? null : num;
+      case "date":
+        const date = new Date(String(value));
+        return isNaN(date.getTime()) ? null : date.getTime();
+      case "text":
+      default:
+        return String(value).toLowerCase().trim();
     }
   }
 }

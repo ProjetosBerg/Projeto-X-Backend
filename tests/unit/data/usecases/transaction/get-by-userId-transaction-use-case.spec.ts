@@ -14,6 +14,7 @@ import { CustomFieldsRepositoryProtocol } from "@/infra/db/interfaces/customFiel
 import { tr } from "@faker-js/faker";
 import { CategoryRepositoryProtocol } from "@/infra/db/interfaces/categoryRepositoryProtocol";
 import { mockCategory } from "@/tests/unit/mocks/category/mockCategory";
+import { mockCustomFieldMultiple } from "@/tests/unit/mocks/customFields/mockCustomFieldMultiple";
 
 export const makeTransactionRepository =
   (): jest.Mocked<TransactionRepositoryProtocol> => ({
@@ -43,6 +44,10 @@ export const makeCustomFieldsRepository =
   (): jest.Mocked<CustomFieldsRepositoryProtocol> => ({
     create: jest.fn().mockResolvedValue(mockCustomField),
     findByNameAndUserId: jest.fn().mockResolvedValue(null),
+    findByRecordTypeId: jest.fn().mockResolvedValue({
+      customFields: [mockCustomField, mockCustomFieldMultiple],
+      total: 2,
+    }),
     ...({} as any),
   });
 
