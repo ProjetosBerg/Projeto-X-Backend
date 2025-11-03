@@ -1,8 +1,8 @@
-import { GetByUserIdCategoryController } from "@/presentation/controllers/category/getByUserIdCategoryController";
-import { makeGetByUserIdCategoryUseCaseFactory } from "../../usecase/category/getByUserIdCategoryUseCaseFactory";
+// import { GetByUserIdCategoryController } from "@/presentation/controllers/category/getByUserIdCategoryController";
+// import { makeGetByUserIdCategoryUseCaseFactory } from "../../usecase/category/getByUserIdCategoryUseCaseFactory";
 
-export const makeGetByUserIdRoutinesControllerFactory = () => {
-  return new GetByUserIdRoutinesController(
-    makeGetByUserIdRoutinesUseCaseFactory()
-  );
-};
+// export const makeGetByUserIdRoutinesControllerFactory = () => {
+//   return new GetByUserIdRoutinesController(
+//     makeGetByUserIdRoutinesUseCaseFactory()
+//   );
+// };
