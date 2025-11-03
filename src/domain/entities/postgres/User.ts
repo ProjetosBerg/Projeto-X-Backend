@@ -12,6 +12,7 @@ import { SecurityQuestion } from "./SecurityQuestion";
 import { Category } from "./Category";
 import { MonthlyRecord } from "./MonthlyRecord";
 import { Transaction } from "./Transaction";
+import { Routines } from "./Routines";
 
 @Entity("users")
 export class User extends BaseEntity {
@@ -40,6 +41,9 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Category, (category) => category.user, { cascade: true })
   categories!: Category[];
+
+  @OneToMany(() => Routines, (routine) => routine.user, { cascade: true })
+  routines!: Routines[];
 
   @OneToMany(() => MonthlyRecord, (record) => record.user, { cascade: true })
   monthly_records!: MonthlyRecord[];
