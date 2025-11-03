@@ -7,6 +7,7 @@ import { routesTransactions } from "./presentation/routes/routesTransactions";
 import { routesCustomFields } from "./presentation/routes/routesCustomFields";
 import { adapterMiddleware } from "./utils/adapterMiddleware";
 import { GetUserLogin } from "./presentation/middlewares/getUserLogin";
+import { routesRoutines } from "./presentation/routes/routesRoutines";
 
 const router = Router();
 
@@ -27,4 +28,5 @@ routesCategory(router);
 routesMonthlyRecord(router);
 routesTransactions(router);
 routesCustomFields(router);
+routesRoutines(router);
 export default router;
