@@ -5,6 +5,9 @@ export interface RoutinesRepositoryProtocol {
   findByTypeAndPeriodAndUserId(
     data: RoutinesRepositoryProtocol.FindByTypeAndPeriodAndUserIdParams
   ): Promise<RoutineModel | null>;
+  findByPeriodAndUserIdAndDateRange(
+    data: RoutinesRepositoryProtocol.FindByPeriodAndUserIdAndDateRangeParams
+  ): Promise<RoutineModel | null>;
   findByUserId(
     data: RoutinesRepositoryProtocol.FindByUserIdParams
   ): Promise<{ routines: RoutineModel[]; total: number }>;
@@ -30,6 +33,13 @@ export namespace RoutinesRepositoryProtocol {
     type: RoutineModel["type"];
     period?: RoutineModel["period"];
     userId: RoutineModel["user_id"];
+  };
+
+  export type FindByPeriodAndUserIdAndDateRangeParams = {
+    period: RoutineModel["period"];
+    userId: RoutineModel["user_id"];
+    startDate: Date;
+    endDate: Date;
   };
 
   export type FindByUserIdParams = {

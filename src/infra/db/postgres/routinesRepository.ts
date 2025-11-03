@@ -1,9 +1,9 @@
-import { ILike, IsNull, Repository, getRepository } from "typeorm";
+import { Between, ILike, IsNull, Repository, getRepository } from "typeorm";
 import { Routines } from "@/domain/entities/postgres/Routines";
 import { User } from "@/domain/entities/postgres/User";
+import { RoutinesRepositoryProtocol } from "../interfaces/routinesRepositoryProtocol";
 import { NotFoundError } from "@/data/errors/NotFoundError";
 import { RoutineModel } from "@/domain/models/postgres/RoutinModel";
-import { RoutinesRepositoryProtocol } from "../interfaces/routinesRepositoryProtocol";
 
 export class RoutinesRepository implements RoutinesRepositoryProtocol {
   private repository: Repository<Routines>;
@@ -64,6 +64,39 @@ export class RoutinesRepository implements RoutinesRepositoryProtocol {
 
     const routine = await this.repository.findOne({
       where,
+      relations: ["user"],
+    });
+
+    if (!routine) return null;
+
+    return {
+      id: routine.id,
+      type: routine.type,
+      period: routine.period,
+      user_id: routine.user.id,
+      created_at: routine.created_at,
+      updated_at: routine.updated_at,
+    };
+  }
+
+  /**
+   * Busca uma rotina por período, ID do usuário e range de datas (para validação de "um por dia")
+   * @param {RoutinesRepositoryProtocol.FindByPeriodAndUserIdAndDateRangeParams} data - Os dados para busca
+   * @param {Period} data.period - Período da rotina
+   * @param {string} data.userId - ID do usuário
+   * @param {Date} data.startDate - Data de início do range
+   * @param {Date} data.endDate - Data de fim do range
+   * @returns {Promise<RoutineModel | null>} A rotina encontrada ou null se não existir
+   */
+  async findByPeriodAndUserIdAndDateRange(
+    data: RoutinesRepositoryProtocol.FindByPeriodAndUserIdAndDateRangeParams
+  ): Promise<RoutineModel | null> {
+    const routine = await this.repository.findOne({
+      where: {
+        period: data.period,
+        user: { id: data.userId },
+        created_at: Between(data.startDate, data.endDate),
+      },
       relations: ["user"],
     });
 

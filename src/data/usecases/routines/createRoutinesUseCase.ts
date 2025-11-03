@@ -1,9 +1,9 @@
 import { ServerError } from "@/data/errors/ServerError";
 import { BusinessRuleError } from "@/data/errors/BusinessRuleError";
+import { CreateRoutinesUseCaseProtocol } from "@/data/usecases/interfaces/routines/createRoutinesUseCaseProtocol";
 import { createRoutinesValidationSchema } from "@/data/usecases/validation/routines/createRoutinesValidationSchema";
-import { RoutineModel } from "@/domain/models/postgres/RoutinModel";
-import { CreateRoutinesUseCaseProtocol } from "../interfaces/routines/createRoutinesUseCaseProtocol";
 import { RoutinesRepositoryProtocol } from "@/infra/db/interfaces/routinesRepositoryProtocol";
+import { RoutineModel } from "@/domain/models/postgres/RoutinModel";
 
 /**
  * Cria uma nova rotina para um usuário
@@ -16,7 +16,7 @@ import { RoutinesRepositoryProtocol } from "@/infra/db/interfaces/routinesReposi
  * @returns {Promise<RoutineModel>} A rotina criada
  *
  * @throws {ValidationError} Se os dados fornecidos forem inválidos
- * @throws {BusinessRuleError} Se já existir uma rotina com o mesmo tipo e período para o usuário
+ * @throws {BusinessRuleError} Se já existir uma rotina com o mesmo tipo e período para o usuário OU se já existir uma rotina para o período no dia atual
  * @throws {ServerError} Se ocorrer um erro inesperado durante a criação
  */
 
@@ -44,6 +44,27 @@ export class CreateRoutinesUseCase implements CreateRoutinesUseCaseProtocol {
         throw new BusinessRuleError(
           `Já existe uma rotina com o tipo "${data.type}"${data.period ? ` e período "${data.period}"` : " sem período"} para este usuário`
         );
+      }
+
+      if (data.period) {
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+        const todayEnd = new Date();
+        todayEnd.setHours(23, 59, 59, 999);
+
+        const existingTodayRoutine =
+          await this.routinesRepository.findByPeriodAndUserIdAndDateRange({
+            period: data.period,
+            userId: data.userId,
+            startDate: todayStart,
+            endDate: todayEnd,
+          });
+
+        if (existingTodayRoutine) {
+          throw new BusinessRuleError(
+            `Já existe uma rotina para o período "${data.period}" neste dia para este usuário`
+          );
+        }
       }
 
       const createdRoutine = await this.routinesRepository.create({
