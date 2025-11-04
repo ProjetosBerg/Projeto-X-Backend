@@ -5,6 +5,7 @@ import { makeCreateRoutinesControllerFactory } from "@/main/factories/controller
 import { makeGetByUserIdRoutinesControllerFactory } from "@/main/factories/controllers/routines/getByUserIdRoutinesControllerFactory";
 import { makeGetByIdRoutinesControllerFactory } from "@/main/factories/controllers/routines/getByIdRoutinesControllerFactory";
 import { makeEditRoutinesControllerFactory } from "@/main/factories/controllers/routines/editRoutinesControllerFactory";
+import { makeDeleteRoutinesControllerFactory } from "@/main/factories/controllers/routines/deleteRoutinesControllerFactory";
 
 export const routesRoutines = (router: Router) => {
   router.get(
@@ -41,6 +42,8 @@ export const routesRoutines = (router: Router) => {
   router.delete(
     "/routines/delete/:id",
     adapterMiddleware(makeGetLoginMiddleware()),
-    (req: Request, res: Response) => {}
+    (req: Request, res: Response) => {
+      makeDeleteRoutinesControllerFactory().handle(req, res);
+    }
   );
 };

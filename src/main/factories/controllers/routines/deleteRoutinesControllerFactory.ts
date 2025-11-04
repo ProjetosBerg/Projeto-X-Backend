@@ -1,6 +1,6 @@
-// import { DeleteCategoryController } from "@/presentation/controllers/category/deleteCategoryController";
-// import { makeDeleteCategoryUseCaseFactory } from "@/main/factories/usecase/category/deleteCategoryUseCaseFactory";
+import { DeleteRoutinesController } from "@/presentation/controllers/routines/deleteRoutinesController";
+import { makeDeleteRoutinesUseCaseFactory } from "../../usecase/routines/deleteRoutinesUseCaseFactory";
 
-// export const makeDeleteRoutinesControllerFactory = () => {
-//   return new DeleteRoutinesController(makeDeleteRoutinesUseCaseFactory());
-// };
+export const makeDeleteRoutinesControllerFactory = () => {
+  return new DeleteRoutinesController(makeDeleteRoutinesUseCaseFactory());
+};
