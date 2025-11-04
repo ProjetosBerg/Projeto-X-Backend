@@ -13,6 +13,7 @@ import { RecordTypes } from "./RecordTypes";
 import { User } from "./User";
 import { MonthlyRecord } from "./MonthlyRecord";
 import { Transaction } from "./Transaction";
+import { Notes } from "./Notes";
 
 @Entity("categories")
 export class Category extends BaseEntity {
@@ -47,6 +48,11 @@ export class Category extends BaseEntity {
     cascade: true,
   })
   transactions!: Transaction[];
+
+  @OneToMany(() => Notes, (note) => note.category, {
+    cascade: true,
+  })
+  notes!: Notes[];
 
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   created_at!: Date;

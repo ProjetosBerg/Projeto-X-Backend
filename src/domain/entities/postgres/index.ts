@@ -4,7 +4,8 @@ import { SecurityQuestion } from "@/domain/entities/postgres/SecurityQuestion";
 import { Category } from "@/domain/entities/postgres/Category";
 import { MonthlyRecord } from "@/domain/entities/postgres/MonthlyRecord";
 import { Transaction } from "@/domain/entities/postgres/Transaction";
-import { Routines } from "./Routines";
+import { Routines } from "@/domain/entities/postgres/Routines";
+import { Notes } from "@/domain/entities/postgres/Notes";
 
 export default {
   User,
@@ -14,4 +15,5 @@ export default {
   MonthlyRecord,
   Transaction,
   Routines,
+  Notes,
 };

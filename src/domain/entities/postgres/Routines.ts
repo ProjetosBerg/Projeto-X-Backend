@@ -7,9 +7,11 @@ import {
   BaseEntity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
 } from "typeorm";
 import { User } from "./User";
 import { Period } from "@/domain/models/postgres/RoutinModel";
+import { Notes } from "./Notes";
 
 @Entity("routines")
 export class Routines extends BaseEntity {
@@ -28,6 +30,11 @@ export class Routines extends BaseEntity {
   @ManyToOne(() => User, (user) => user.routines, { nullable: false })
   @JoinColumn({ name: "user_id" })
   user!: User;
+
+  @OneToMany(() => Notes, (note) => note.routine, {
+    cascade: true,
+  })
+  notes!: Notes[];
 
   @UpdateDateColumn({
     type: "timestamp",
