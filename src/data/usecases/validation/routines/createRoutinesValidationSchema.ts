@@ -1,6 +1,5 @@
 import * as yup from "yup";
-
-const periodValues = ["Manhã", "Tarde", "Noite"] as string[];
+import { periodValues } from "./utils/periodValues";
 
 export const createRoutinesValidationSchema = yup.object().shape({
   type: yup
