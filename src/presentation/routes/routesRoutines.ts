@@ -4,6 +4,7 @@ import { Router, Request, Response } from "express";
 import { makeCreateRoutinesControllerFactory } from "@/main/factories/controllers/routines/createRoutinesControllerFactory";
 import { makeGetByUserIdRoutinesControllerFactory } from "@/main/factories/controllers/routines/getByUserIdRoutinesControllerFactory";
 import { makeGetByIdRoutinesControllerFactory } from "@/main/factories/controllers/routines/getByIdRoutinesControllerFactory";
+import { makeEditRoutinesControllerFactory } from "@/main/factories/controllers/routines/editRoutinesControllerFactory";
 
 export const routesRoutines = (router: Router) => {
   router.get(
@@ -32,7 +33,9 @@ export const routesRoutines = (router: Router) => {
   router.patch(
     "/routines/edit/:id",
     adapterMiddleware(makeGetLoginMiddleware()),
-    (req: Request, res: Response) => {}
+    (req: Request, res: Response) => {
+      makeEditRoutinesControllerFactory().handle(req, res);
+    }
   );
 
   router.delete(

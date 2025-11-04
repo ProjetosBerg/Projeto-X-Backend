@@ -1,4 +1,11 @@
-import { Between, ILike, IsNull, Repository, getRepository } from "typeorm";
+import {
+  Between,
+  ILike,
+  IsNull,
+  Not,
+  Repository,
+  getRepository,
+} from "typeorm";
 import { Routines } from "@/domain/entities/postgres/Routines";
 import { User } from "@/domain/entities/postgres/User";
 import { RoutinesRepositoryProtocol } from "../interfaces/routinesRepositoryProtocol";
@@ -41,11 +48,12 @@ export class RoutinesRepository implements RoutinesRepositoryProtocol {
   }
 
   /**
-   * Busca uma rotina por tipo, período e ID do usuário
+   * Busca uma rotina por tipo, período e ID do usuário (excluindo ID opcional)
    * @param {RoutinesRepositoryProtocol.FindByTypeAndPeriodAndUserIdParams} data - Os dados para busca
    * @param {string} data.type - Tipo da rotina
    * @param {Period} [data.period] - Período da rotina
    * @param {string} data.userId - ID do usuário
+   * @param {string} [data.excludeId] - ID a excluir da busca
    * @returns {Promise<RoutineModel | null>} A rotina encontrada ou null se não existir
    */
   async findByTypeAndPeriodAndUserId(
@@ -60,6 +68,10 @@ export class RoutinesRepository implements RoutinesRepositoryProtocol {
       where.period = data.period;
     } else {
       where.period = IsNull();
+    }
+
+    if (data.excludeId) {
+      where.id = Not(data.excludeId);
     }
 
     const routine = await this.repository.findOne({
@@ -80,23 +92,30 @@ export class RoutinesRepository implements RoutinesRepositoryProtocol {
   }
 
   /**
-   * Busca uma rotina por período, ID do usuário e range de datas (para validação de "um por dia")
+   * Busca uma rotina por período, ID do usuário e range de datas (excluindo ID opcional)
    * @param {RoutinesRepositoryProtocol.FindByPeriodAndUserIdAndDateRangeParams} data - Os dados para busca
    * @param {Period} data.period - Período da rotina
    * @param {string} data.userId - ID do usuário
    * @param {Date} data.startDate - Data de início do range
    * @param {Date} data.endDate - Data de fim do range
+   * @param {string} [data.excludeId] - ID a excluir da busca
    * @returns {Promise<RoutineModel | null>} A rotina encontrada ou null se não existir
    */
   async findByPeriodAndUserIdAndDateRange(
     data: RoutinesRepositoryProtocol.FindByPeriodAndUserIdAndDateRangeParams
   ): Promise<RoutineModel | null> {
+    const where: any = {
+      period: data.period,
+      user: { id: data.userId },
+      created_at: Between(data.startDate, data.endDate),
+    };
+
+    if (data.excludeId) {
+      where.id = Not(data.excludeId);
+    }
+
     const routine = await this.repository.findOne({
-      where: {
-        period: data.period,
-        user: { id: data.userId },
-        created_at: Between(data.startDate, data.endDate),
-      },
+      where,
       relations: ["user"],
     });
 
@@ -233,6 +252,7 @@ export class RoutinesRepository implements RoutinesRepositoryProtocol {
         id: data.id,
         user: { id: data.userId },
       },
+      relations: ["user"],
     });
 
     if (!routine) {
