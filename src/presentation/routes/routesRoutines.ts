@@ -3,6 +3,7 @@ import { adapterMiddleware } from "@/utils/adapterMiddleware";
 import { Router, Request, Response } from "express";
 import { makeCreateRoutinesControllerFactory } from "@/main/factories/controllers/routines/createRoutinesControllerFactory";
 import { makeGetByUserIdRoutinesControllerFactory } from "@/main/factories/controllers/routines/getByUserIdRoutinesControllerFactory";
+import { makeGetByIdRoutinesControllerFactory } from "@/main/factories/controllers/routines/getByIdRoutinesControllerFactory";
 
 export const routesRoutines = (router: Router) => {
   router.get(
@@ -16,7 +17,9 @@ export const routesRoutines = (router: Router) => {
   router.get(
     "/routines/:id",
     adapterMiddleware(makeGetLoginMiddleware()),
-    (req: Request, res: Response) => {}
+    (req: Request, res: Response) => {
+      makeGetByIdRoutinesControllerFactory().handle(req, res);
+    }
   );
   router.post(
     "/routines/create",

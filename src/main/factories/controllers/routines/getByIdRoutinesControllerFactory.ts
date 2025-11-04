@@ -1,6 +1,6 @@
-// import { GetByIdCategoryController } from "@/presentation/controllers/category/getByIdCategoryController";
-// import { makeGetByIdCategoryUseCaseFactory } from "@/main/factories/usecase/category/getByIdCategoryUseCaseFactory";
+import { GetByIdRoutinesController } from "@/presentation/controllers/routines/getByIdRoutinesController";
+import { makeGetByIdRoutinesUseCaseFactory } from "../../usecase/routines/getByIdRoutinesUseCaseFactory";
 
-// export const makeGetByIdRoutinesControllerFactory = () => {
-//   return new GetByIdRoutinesController(makeGetByIdRoutinesUseCaseFactory());
-// };
+export const makeGetByIdRoutinesControllerFactory = () => {
+  return new GetByIdRoutinesController(makeGetByIdRoutinesUseCaseFactory());
+};
