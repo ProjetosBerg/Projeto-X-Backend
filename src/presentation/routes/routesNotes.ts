@@ -1,8 +1,9 @@
 import { makeGetLoginMiddleware } from "@/main/factories/middleware/getLogin";
 import { adapterMiddleware } from "@/utils/adapterMiddleware";
 import { Router, Request, Response } from "express";
+import { makeCreateNotesControllerFactory } from "@/main/factories/controllers/notes/createNotesControllerFactory";
 
-export const routesRoutines = (router: Router) => {
+export const routesNotes = (router: Router) => {
   router.get(
     "/notes/userId",
     adapterMiddleware(makeGetLoginMiddleware()),
@@ -17,7 +18,9 @@ export const routesRoutines = (router: Router) => {
   router.post(
     "/notes/create",
     adapterMiddleware(makeGetLoginMiddleware()),
-    (req: Request, res: Response) => {}
+    (req: Request, res: Response) => {
+      makeCreateNotesControllerFactory().handle(req, res);
+    }
   );
 
   router.patch(

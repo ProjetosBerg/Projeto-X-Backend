@@ -8,6 +8,7 @@ import { routesCustomFields } from "./presentation/routes/routesCustomFields";
 import { adapterMiddleware } from "./utils/adapterMiddleware";
 import { GetUserLogin } from "./presentation/middlewares/getUserLogin";
 import { routesRoutines } from "./presentation/routes/routesRoutines";
+import { routesNotes } from "./presentation/routes/routesNotes";
 
 const router = Router();
 
@@ -29,4 +30,5 @@ routesMonthlyRecord(router);
 routesTransactions(router);
 routesCustomFields(router);
 routesRoutines(router);
+routesNotes(router);
 export default router;
