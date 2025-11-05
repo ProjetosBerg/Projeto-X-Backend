@@ -1,6 +1,6 @@
-// import { GetByUserIdRoutinesUseCase } from "@/data/usecases/routines/getByUserIdRoutinesUseCase";
-// import { RoutinesRepository } from "@/infra/db/postgres/routinesRepository";
+import { GetByUserIdNotesUseCase } from "@/data/usecases/notes/getByUserIdNotesUseCase";
+import { NotesRepository } from "@/infra/db/postgres/notesRepository";
 
-// export const makeGetByUserIdNotesUseCaseFactory = () => {
-//   return new GetByUserIdNotesUseCase(new NotesRepository());
-// };
+export const makeGetByUserIdNotesUseCaseFactory = () => {
+  return new GetByUserIdNotesUseCase(new NotesRepository());
+};

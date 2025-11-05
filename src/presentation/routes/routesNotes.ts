@@ -3,12 +3,15 @@ import { adapterMiddleware } from "@/utils/adapterMiddleware";
 import { Router, Request, Response } from "express";
 import { makeCreateNotesControllerFactory } from "@/main/factories/controllers/notes/createNotesControllerFactory";
 import { makeEditNotesControllerFactory } from "@/main/factories/controllers/notes/editNotesControllerFactory";
+import { makeGetByUserIdNotesControllerFactory } from "@/main/factories/controllers/notes/getByUserIdNotesControllerFactory";
 
 export const routesNotes = (router: Router) => {
   router.get(
     "/notes/userId",
     adapterMiddleware(makeGetLoginMiddleware()),
-    (req: Request, res: Response) => {}
+    (req: Request, res: Response) => {
+      makeGetByUserIdNotesControllerFactory().handle(req, res);
+    }
   );
 
   router.get(

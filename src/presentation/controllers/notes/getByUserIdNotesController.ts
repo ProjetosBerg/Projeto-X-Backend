@@ -2,13 +2,13 @@ import { Request, Response } from "express";
 import { ValidationError } from "yup";
 import { IResponse, ResponseStatus, getError } from "@/utils/service";
 import { Controller } from "@/presentation/protocols/controller";
-import { GetByUserIdRoutinesUseCase } from "@/data/usecases/routines/getByUserIdRoutinesUseCase";
+import { GetByUserIdNotesUseCase } from "@/data/usecases/notes/getByUserIdNotesUseCase";
 
-export class GetByUserIdRoutinesController implements Controller {
+export class GetByUserIdNotesController implements Controller {
   constructor(
-    private readonly getByUserIdRoutinesService: GetByUserIdRoutinesUseCase
+    private readonly getByUserIdNotesService: GetByUserIdNotesUseCase
   ) {
-    this.getByUserIdRoutinesService = getByUserIdRoutinesService;
+    this.getByUserIdNotesService = getByUserIdNotesService;
   }
 
   async handle(
@@ -22,23 +22,23 @@ export class GetByUserIdRoutinesController implements Controller {
         search = "",
         sortBy = "",
         order,
-        isCalendar = false,
+        isListAll = false,
       } = req.query;
 
-      const { routines: result, total } =
-        await this.getByUserIdRoutinesService.handle({
+      const { notes: result, total } =
+        await this.getByUserIdNotesService.handle({
           userId: req.user!.id,
-          page: isCalendar ? 1 : Number(page),
-          limit: isCalendar ? 1000000000000 : Number(limit),
+          page: isListAll ? 1 : Number(page),
+          limit: isListAll ? 1000000000000 : Number(limit),
           search: String(search),
           sortBy: sortBy as any,
-          order: String(order || "ASC") || "ASC",
+          order: String(order || "ASC"),
         });
       return res.status(200).json({
         status: ResponseStatus.OK,
         data: result,
         totalRegisters: total,
-        message: "Rotinas obtidas com sucesso",
+        message: "Anotações obtidas com sucesso",
       });
     } catch (error) {
       if (error instanceof ValidationError) {

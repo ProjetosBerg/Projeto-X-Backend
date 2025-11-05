@@ -1,4 +1,4 @@
-import { Repository, getRepository } from "typeorm";
+import { ILike, Repository, getRepository } from "typeorm";
 import { Notes } from "@/domain/entities/postgres/Notes";
 import { NotesModel } from "@/domain/models/postgres/NotesModel";
 import { User } from "@/domain/entities/postgres/User";
@@ -17,7 +17,6 @@ export class NotesRepository implements NotesRepositoryProtocol {
   /**
    * Cria uma nova nota no banco de dados
    * @param {NotesRepositoryProtocol.CreateNote} data - Os dados para criação da nota
-   * ... (mantém o método create anterior)
    */
   async create(data: NotesRepositoryProtocol.CreateNote): Promise<NotesModel> {
     const note = this.repository.create({
@@ -93,6 +92,61 @@ export class NotesRepository implements NotesRepositoryProtocol {
       user_id: note.user.id,
       created_at: note.created_at,
       updated_at: note.updated_at,
+    };
+  }
+
+  /**
+   * Busca notas por ID do usuário
+   * @param {NotesRepositoryProtocol.FindByUserIdParams} data - Os dados para busca
+   * @param {string} data.userId - ID do usuário
+   * @returns {Promise<{ notes: NotesModel[]; total: number }>} Lista de notas encontradas
+   */
+  async findByUserId(
+    data: NotesRepositoryProtocol.FindByUserIdParams
+  ): Promise<{ notes: NotesModel[]; total: number }> {
+    const page = data.page || 1;
+    const limit = data.limit || 10;
+    const offset = (page - 1) * limit;
+    const search = data.search || "";
+    const sortBy = data.sortBy || "activity";
+    const order = data.order?.toUpperCase() === "DESC" ? "DESC" : "ASC";
+
+    const whereCondition = search
+      ? [
+          { activity: ILike(`%${search}%`), user: { id: data.userId } },
+          { description: ILike(`%${search}%`), user: { id: data.userId } },
+        ]
+      : { user: { id: data.userId } };
+
+    const [notes, total] = await this.repository.findAndCount({
+      where: whereCondition,
+      relations: ["user", "routine", "category"],
+      take: limit,
+      skip: offset,
+      order: { [sortBy]: order },
+    });
+
+    const formattedNotes = notes.map((note) => ({
+      id: note.id,
+      status: note.status,
+      collaborators: note.collaborators,
+      priority: note.priority,
+      category_id: note.category?.id,
+      activity: note.activity,
+      activityType: note.activityType,
+      description: note.description,
+      startTime: note.startTime,
+      endTime: note.endTime,
+      comments: note.comments,
+      routine_id: note.routine.id,
+      user_id: note.user.id,
+      created_at: note.created_at,
+      updated_at: note.updated_at,
+    }));
+
+    return {
+      notes: formattedNotes,
+      total,
     };
   }
 

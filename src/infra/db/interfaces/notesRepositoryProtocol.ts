@@ -9,6 +9,9 @@ export interface NotesRepositoryProtocol {
   updateNote(
     data: NotesRepositoryProtocol.UpdateNoteParams
   ): Promise<NotesModel>;
+  findByUserId(
+    data: NotesRepositoryProtocol.FindByUserIdParams
+  ): Promise<{ notes: NotesModel[]; total: number }>;
 }
 
 export namespace NotesRepositoryProtocol {
@@ -46,5 +49,14 @@ export namespace NotesRepositoryProtocol {
     routine_id?: NotesModel["routine_id"];
     id: NotesModel["id"];
     userId: NotesModel["user_id"];
+  };
+
+  export type FindByUserIdParams = {
+    userId: NotesModel["user_id"];
+    page?: number;
+    limit?: number;
+    search?: string;
+    sortBy?: string;
+    order?: string;
   };
 }
