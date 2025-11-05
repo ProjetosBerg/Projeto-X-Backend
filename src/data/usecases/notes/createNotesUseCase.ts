@@ -8,23 +8,23 @@ import { CreateNotesUseCaseProtocol } from "../interfaces/notes/createNotesUseCa
 import { NotesRepositoryProtocol } from "@/infra/db/interfaces/notesRepositoryProtocol";
 
 /**
- * Cria uma nova nota para um usuário
+ * Cria uma nova AAnotaçãoção para um usuário
  *
- * @param {CreateNotesUseCaseProtocol.Params} data - Os dados de entrada para a criação da nota
- * @param {string} data.status - O status da nota
- * @param {string[]} [data.collaborators] - Colaboradores da nota (opcional)
- * @param {string} data.priority - A prioridade da nota
+ * @param {CreateNotesUseCaseProtocol.Params} data - Os dados de entrada para a criação da Anotação
+ * @param {string} data.status - O status da AAnotaçãoção
+ * @param {string[]} [data.collaborators] - Colaboradores da Anotação (opcional)
+ * @param {string} data.priority - A prioridade da Anotação
  * @param {string} [data.category_id] - O ID da categoria associada (opcional)
- * @param {string} data.activity - A atividade da nota
+ * @param {string} data.activity - A atividade da Anotação
  * @param {string} data.activityType - O tipo de atividade
- * @param {string} data.description - A descrição da nota
+ * @param {string} data.description - A descrição da Anotação
  * @param {string} data.startTime - Hora de início
  * @param {string} data.endTime - Hora de fim
  * @param {Comment[]} [data.comments] - Comentários iniciais (opcional)
  * @param {string} data.routine_id - O ID da rotina associada
- * @param {string} data.userId - O ID do usuário proprietário da nota
+ * @param {string} data.userId - O ID do usuário proprietário da Anotação
  *
- * @returns {Promise<NotesModel>} A nota criada
+ * @returns {Promise<NotesModel>} A Anotação criada
  *
  * @throws {ValidationError} Se os dados fornecidos forem inválidos
  * @throws {BusinessRuleError} Se a rotina ou categoria não existirem para o usuário
@@ -96,7 +96,7 @@ export class CreateNotesUseCase implements CreateNotesUseCaseProtocol {
 
       const errorMessage =
         error.message || "Erro interno do servidor durante o cadastro";
-      throw new ServerError(`Falha no cadastro de nota: ${errorMessage}`);
+      throw new ServerError(`Falha no cadastro de Anotação: ${errorMessage}`);
     }
   }
 }

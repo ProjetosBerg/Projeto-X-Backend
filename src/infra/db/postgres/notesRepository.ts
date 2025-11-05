@@ -15,8 +15,8 @@ export class NotesRepository implements NotesRepositoryProtocol {
   }
 
   /**
-   * Cria uma nova nota no banco de dados
-   * @param {NotesRepositoryProtocol.CreateNote} data - Os dados para criação da nota
+   * Cria uma nova Anotação no banco de dados
+   * @param {NotesRepositoryProtocol.CreateNote} data - Os dados para criação da Anotação
    */
   async create(data: NotesRepositoryProtocol.CreateNote): Promise<NotesModel> {
     const note = this.repository.create({
@@ -57,11 +57,11 @@ export class NotesRepository implements NotesRepositoryProtocol {
   }
 
   /**
-   * Busca uma nota por ID e ID do usuário
+   * Busca uma Anotação por ID e ID do usuário
    * @param {NotesRepositoryProtocol.FindByIdAndUserIdParams} data - Os dados para busca
-   * @param {string} data.id - ID da nota
+   * @param {string} data.id - ID da Anotação
    * @param {string} data.userId - ID do usuário
-   * @returns {Promise<NotesModel | null>} A nota encontrada ou null se não existir
+   * @returns {Promise<NotesModel | null>} A Anotação encontrada ou null se não existir
    */
   async findByIdAndUserId(
     data: NotesRepositoryProtocol.FindByIdAndUserIdParams
@@ -96,10 +96,10 @@ export class NotesRepository implements NotesRepositoryProtocol {
   }
 
   /**
-   * Busca notas por ID do usuário
+   * Busca Anotaçãos por ID do usuário
    * @param {NotesRepositoryProtocol.FindByUserIdParams} data - Os dados para busca
    * @param {string} data.userId - ID do usuário
-   * @returns {Promise<{ notes: NotesModel[]; total: number }>} Lista de notas encontradas
+   * @returns {Promise<{ notes: NotesModel[]; total: number }>} Lista de Anotaçãos encontradas
    */
   async findByUserId(
     data: NotesRepositoryProtocol.FindByUserIdParams
@@ -151,9 +151,9 @@ export class NotesRepository implements NotesRepositoryProtocol {
   }
 
   /**
-   * Atualiza uma nota no banco de dados
+   * Atualiza uma Anotação no banco de dados
    * @param {NotesRepositoryProtocol.UpdateNoteParams} data - Os dados para atualização
-   * @param {string} data.id - ID da nota
+   * @param {string} data.id - ID da Anotação
    * @param {string} data.userId - ID do usuário
    * @param {string} [data.status] - Novo status
    * @param {string[]} [data.collaborators] - Novos colaboradores
@@ -166,8 +166,8 @@ export class NotesRepository implements NotesRepositoryProtocol {
    * @param {string} [data.endTime] - Nova hora de fim
    * @param {Comment[]} [data.comments] - Novos comentários
    * @param {string} [data.routine_id] - Novo ID da rotina
-   * @returns {Promise<NotesModel>} A nota atualizada
-   * @throws {NotFoundError} Quando a nota não é encontrada
+   * @returns {Promise<NotesModel>} A Anotação atualizada
+   * @throws {NotFoundError} Quando a Anotação não é encontrada
    */
   async updateNote(
     data: NotesRepositoryProtocol.UpdateNoteParams
@@ -182,7 +182,7 @@ export class NotesRepository implements NotesRepositoryProtocol {
 
     if (!note) {
       throw new NotFoundError(
-        `Nota com ID ${data.id} não encontrada para este usuário`
+        `Anotação com ID ${data.id} não encontrada para este usuário`
       );
     }
 

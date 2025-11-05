@@ -236,7 +236,7 @@ describe("EditNotesUseCase", () => {
 
     await expect(sut.handle(input)).rejects.toThrow(ValidationError);
     await expect(sut.handle(input)).rejects.toMatchObject({
-      errors: expect.arrayContaining(["ID da nota é obrigatório"]),
+      errors: expect.arrayContaining(["ID da Anotação é obrigatório"]),
     });
     expect(notesRepositorySpy.findByIdAndUserId).not.toHaveBeenCalled();
     expect(notesRepositorySpy.updateNote).not.toHaveBeenCalled();
@@ -252,7 +252,9 @@ describe("EditNotesUseCase", () => {
 
     await expect(sut.handle(input)).rejects.toThrow(ValidationError);
     await expect(sut.handle(input)).rejects.toMatchObject({
-      errors: expect.arrayContaining(["ID da nota deve ser um UUID válido"]),
+      errors: expect.arrayContaining([
+        "ID da Anotação deve ser um UUID válido",
+      ]),
     });
     expect(notesRepositorySpy.findByIdAndUserId).not.toHaveBeenCalled();
     expect(notesRepositorySpy.updateNote).not.toHaveBeenCalled();
@@ -286,7 +288,7 @@ describe("EditNotesUseCase", () => {
 
     await expect(sut.handle(input)).rejects.toThrow(
       new NotFoundError(
-        `Nota com ID ${input.noteId} não encontrada para este usuário`
+        `Anotação com ID ${input.noteId} não encontrada para este usuário`
       )
     );
     expect(notesRepositorySpy.findByIdAndUserId).toHaveBeenCalledWith({
@@ -370,7 +372,7 @@ describe("EditNotesUseCase", () => {
     };
 
     await expect(sut.handle(input)).rejects.toThrow(
-      new ServerError("Falha na edição de nota: Database error")
+      new ServerError("Falha na edição de Anotação: Database error")
     );
     expect(notesRepositorySpy.findByIdAndUserId).toHaveBeenCalledWith({
       id: input.noteId,

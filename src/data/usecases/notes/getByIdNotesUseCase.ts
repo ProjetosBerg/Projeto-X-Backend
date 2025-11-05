@@ -6,16 +6,16 @@ import { GetByIdNotesUseCaseProtocol } from "../interfaces/notes/getByIdNotesUse
 import { getByIdNotesValidationSchema } from "../validation/notes/getByIdNotesValidationSchema";
 
 /**
- * Busca uma nota por ID e ID do usuário
+ * Busca uma Anotação por ID e ID do usuário
  *
  * @param {GetByIdNotesUseCaseProtocol.Params} data - Os dados de entrada para a busca
- * @param {string} data.noteId - O ID da nota
- * @param {string} data.userId - O ID do usuário proprietário da nota
+ * @param {string} data.noteId - O ID da Anotação
+ * @param {string} data.userId - O ID do usuário proprietário da Anotação
  *
- * @returns {Promise<NotesModel>} A nota encontrada
+ * @returns {Promise<NotesModel>} A Anotação encontrada
  *
  * @throws {ValidationError} Se os dados fornecidos forem inválidos
- * @throws {NotFoundError} Se a nota não for encontrada para o usuário
+ * @throws {NotFoundError} Se a Anotação não for encontrada para o usuário
  * @throws {ServerError} Se ocorrer um erro inesperado durante a busca
  */
 
@@ -35,7 +35,7 @@ export class GetByIdNotesUseCase implements GetByIdNotesUseCaseProtocol {
 
       if (!note) {
         throw new NotFoundError(
-          `Anotação com ID ${data.noteId} não encontrada para este usuário`
+          `AAnotaçãoção com ID ${data.noteId} não encontrada para este usuário`
         );
       }
 
@@ -51,7 +51,7 @@ export class GetByIdNotesUseCase implements GetByIdNotesUseCaseProtocol {
 
       const errorMessage =
         error.message || "Erro interno do servidor durante a busca";
-      throw new ServerError(`Falha na busca de anotação: ${errorMessage}`);
+      throw new ServerError(`Falha na busca de aAnotaçãoção: ${errorMessage}`);
     }
   }
 }

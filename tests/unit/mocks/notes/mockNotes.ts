@@ -16,7 +16,7 @@ export const mockNotes: NotesModel = {
   activity: "Reunião importante",
   activityType: "Virtual",
   description:
-    "Descrição detalhada da nota com mais de 10 caracteres para passar na validação.",
+    "Descrição detalhada da Anotação com mais de 10 caracteres para passar na validação.",
   startTime: "09:00",
   endTime: "10:00",
   comments: [mockComment],

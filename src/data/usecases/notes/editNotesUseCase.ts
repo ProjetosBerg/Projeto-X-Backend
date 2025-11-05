@@ -9,10 +9,10 @@ import { EditNotesUseCaseProtocol } from "../interfaces/notes/editNotesUseCasePr
 import { editNotesValidationSchema } from "../validation/notes/editNotesValidationSchema";
 
 /**
- * Edita uma nota existente para um usuário
+ * Edita uma Anotação existente para um usuário
  *
- * @param {EditNotesUseCaseProtocol.Params} data - Os dados de entrada para a edição da nota
- * @param {string} [data.status] - O novo status da nota (opcional)
+ * @param {EditNotesUseCaseProtocol.Params} data - Os dados de entrada para a edição da Anotação
+ * @param {string} [data.status] - O novo status da Anotação (opcional)
  * @param {string[]} [data.collaborators] - Novos colaboradores (opcional)
  * @param {string} [data.priority] - Nova prioridade (opcional)
  * @param {string} [data.category_id] - Novo ID da categoria (opcional)
@@ -23,13 +23,13 @@ import { editNotesValidationSchema } from "../validation/notes/editNotesValidati
  * @param {string} [data.endTime] - Nova hora de fim (opcional)
  * @param {Comment[]} [data.comments] - Novos comentários (opcional)
  * @param {string} [data.routine_id] - Novo ID da rotina (opcional)
- * @param {string} data.noteId - O ID da nota a ser editada
- * @param {string} data.userId - O ID do usuário proprietário da nota
+ * @param {string} data.noteId - O ID da Anotação a ser editada
+ * @param {string} data.userId - O ID do usuário proprietário da Anotação
  *
- * @returns {Promise<NotesModel>} A nota editada
+ * @returns {Promise<NotesModel>} A Anotação editada
  *
  * @throws {ValidationError} Se os dados fornecidos forem inválidos
- * @throws {NotFoundError} Se a nota não for encontrada para o usuário
+ * @throws {NotFoundError} Se a Anotação não for encontrada para o usuário
  * @throws {BusinessRuleError} Se o novo routine_id ou category_id não existirem para o usuário
  * @throws {ServerError} Se ocorrer um erro inesperado durante a edição
  */
@@ -54,7 +54,7 @@ export class EditNotesUseCase implements EditNotesUseCaseProtocol {
 
       if (!existingNote) {
         throw new NotFoundError(
-          `Nota com ID ${data.noteId} não encontrada para este usuário`
+          `Anotação com ID ${data.noteId} não encontrada para este usuário`
         );
       }
 
@@ -126,7 +126,7 @@ export class EditNotesUseCase implements EditNotesUseCaseProtocol {
 
       const errorMessage =
         error.message || "Erro interno do servidor durante a edição";
-      throw new ServerError(`Falha na edição de nota: ${errorMessage}`);
+      throw new ServerError(`Falha na edição de Anotação: ${errorMessage}`);
     }
   }
 }

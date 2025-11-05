@@ -329,7 +329,7 @@ describe("CreateNotesUseCase", () => {
     } as any;
 
     await expect(sut.handle(input)).rejects.toThrow(
-      new ServerError("Falha no cadastro de nota: Database error")
+      new ServerError("Falha no cadastro de Anotação: Database error")
     );
     expect(routinesRepositorySpy.findByIdAndUserId).toHaveBeenCalledWith({
       id: input.routine_id,

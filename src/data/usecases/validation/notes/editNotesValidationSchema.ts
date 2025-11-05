@@ -62,7 +62,7 @@ export const editNotesValidationSchema = yup.object().shape({
     .nullable(),
   noteId: yup
     .string()
-    .required("ID da nota é obrigatório")
-    .uuid("ID da nota deve ser um UUID válido"),
+    .required("ID da Anotação é obrigatório")
+    .uuid("ID da Anotação deve ser um UUID válido"),
   userId: yup.string().required("ID do Usuário é obrigatório"),
 });
