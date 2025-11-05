@@ -2,11 +2,11 @@ import { Request, Response } from "express";
 import { ValidationError } from "yup";
 import { IResponse, ResponseStatus, getError } from "@/utils/service";
 import { Controller } from "@/presentation/protocols/controller";
-import { GetByIdRoutinesUseCase } from "@/data/usecases/routines/getByIdRoutinesUseCase";
+import { GetByIdNotesUseCase } from "@/data/usecases/notes/getByIdNotesUseCase";
 
-export class GetByIdRoutinesController implements Controller {
-  constructor(private readonly getByIdRoutinesService: GetByIdRoutinesUseCase) {
-    this.getByIdRoutinesService = getByIdRoutinesService;
+export class GetByIdNotesController implements Controller {
+  constructor(private readonly getByIdNotesService: GetByIdNotesUseCase) {
+    this.getByIdNotesService = getByIdNotesService;
   }
 
   async handle(
@@ -15,14 +15,14 @@ export class GetByIdRoutinesController implements Controller {
   ): Promise<Response<IResponse>> {
     try {
       const { id } = req.params;
-      const result = await this.getByIdRoutinesService.handle({
-        routineId: String(id),
+      const result = await this.getByIdNotesService.handle({
+        noteId: String(id),
         userId: req.user!.id,
       });
       return res.status(200).json({
         status: ResponseStatus.OK,
         data: result,
-        message: "Rotina obtida com sucesso",
+        message: "Anotação obtida com sucesso",
       });
     } catch (error) {
       if (error instanceof ValidationError) {

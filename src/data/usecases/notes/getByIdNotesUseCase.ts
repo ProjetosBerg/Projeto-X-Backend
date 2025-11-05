@@ -1,50 +1,45 @@
 import { ServerError } from "@/data/errors/ServerError";
 import { NotFoundError } from "@/data/errors/NotFoundError";
-
-import { RoutinesRepositoryProtocol } from "@/infra/db/interfaces/routinesRepositoryProtocol";
-import { RoutineModel } from "@/domain/models/postgres/RoutinModel";
-import { GetByIdRoutinesUseCaseProtocol } from "../interfaces/routines/getByIdRoutinesUseCaseProtocol";
-import { getByIdRoutinesValidationSchema } from "../validation/routines/getByIdRoutinesValidationSchema";
+import { NotesModel } from "@/domain/models/postgres/NotesModel";
+import { NotesRepositoryProtocol } from "@/infra/db/interfaces/notesRepositoryProtocol";
+import { GetByIdNotesUseCaseProtocol } from "../interfaces/notes/getByIdNotesUseCaseProtocol";
+import { getByIdNotesValidationSchema } from "../validation/notes/getByIdNotesValidationSchema";
 
 /**
- * Busca uma rotina por ID e ID do usuário
+ * Busca uma nota por ID e ID do usuário
  *
- * @param {GetByIdRoutinesUseCaseProtocol.Params} data - Os dados de entrada para a busca
- * @param {string} data.routineId - O ID da rotina
- * @param {string} data.userId - O ID do usuário proprietário da rotina
+ * @param {GetByIdNotesUseCaseProtocol.Params} data - Os dados de entrada para a busca
+ * @param {string} data.noteId - O ID da nota
+ * @param {string} data.userId - O ID do usuário proprietário da nota
  *
- * @returns {Promise<RoutineModel>} A rotina encontrada
+ * @returns {Promise<NotesModel>} A nota encontrada
  *
  * @throws {ValidationError} Se os dados fornecidos forem inválidos
- * @throws {NotFoundError} Se a rotina não for encontrada para o usuário
+ * @throws {NotFoundError} Se a nota não for encontrada para o usuário
  * @throws {ServerError} Se ocorrer um erro inesperado durante a busca
  */
 
-export class GetByIdRoutinesUseCase implements GetByIdRoutinesUseCaseProtocol {
-  constructor(
-    private readonly routinesRepository: RoutinesRepositoryProtocol
-  ) {}
+export class GetByIdNotesUseCase implements GetByIdNotesUseCaseProtocol {
+  constructor(private readonly notesRepository: NotesRepositoryProtocol) {}
 
-  async handle(
-    data: GetByIdRoutinesUseCaseProtocol.Params
-  ): Promise<RoutineModel> {
+  async handle(data: GetByIdNotesUseCaseProtocol.Params): Promise<NotesModel> {
     try {
-      await getByIdRoutinesValidationSchema.validate(data, {
+      await getByIdNotesValidationSchema.validate(data, {
         abortEarly: false,
       });
 
-      const routine = await this.routinesRepository.findByIdAndUserId({
-        id: data.routineId,
+      const note = await this.notesRepository.findByIdAndUserId({
+        id: data.noteId,
         userId: data.userId,
       });
 
-      if (!routine) {
+      if (!note) {
         throw new NotFoundError(
-          `Rotina com ID ${data.routineId} não encontrada para este usuário`
+          `Anotação com ID ${data.noteId} não encontrada para este usuário`
         );
       }
 
-      return routine;
+      return note;
     } catch (error: any) {
       if (error.name === "ValidationError") {
         throw error;
@@ -56,7 +51,7 @@ export class GetByIdRoutinesUseCase implements GetByIdRoutinesUseCaseProtocol {
 
       const errorMessage =
         error.message || "Erro interno do servidor durante a busca";
-      throw new ServerError(`Falha na busca de rotina: ${errorMessage}`);
+      throw new ServerError(`Falha na busca de anotação: ${errorMessage}`);
     }
   }
 }

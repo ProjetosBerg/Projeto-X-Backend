@@ -4,6 +4,7 @@ import { Router, Request, Response } from "express";
 import { makeCreateNotesControllerFactory } from "@/main/factories/controllers/notes/createNotesControllerFactory";
 import { makeEditNotesControllerFactory } from "@/main/factories/controllers/notes/editNotesControllerFactory";
 import { makeGetByUserIdNotesControllerFactory } from "@/main/factories/controllers/notes/getByUserIdNotesControllerFactory";
+import { makeGetByIdNotesControllerFactory } from "@/main/factories/controllers/notes/getByIdNotesControllerFactory";
 
 export const routesNotes = (router: Router) => {
   router.get(
@@ -17,7 +18,9 @@ export const routesNotes = (router: Router) => {
   router.get(
     "/notes/:id",
     adapterMiddleware(makeGetLoginMiddleware()),
-    (req: Request, res: Response) => {}
+    (req: Request, res: Response) => {
+      makeGetByIdNotesControllerFactory().handle(req, res);
+    }
   );
   router.post(
     "/notes/create",
