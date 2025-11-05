@@ -2,11 +2,11 @@ import { Request, Response } from "express";
 import { ValidationError } from "yup";
 import { IResponse, ResponseStatus, getError } from "@/utils/service";
 import { Controller } from "@/presentation/protocols/controller";
-import { EditRoutinesUseCase } from "@/data/usecases/routines/editRoutinesUseCase";
+import { EditNotesUseCase } from "@/data/usecases/notes/editNotesUseCase";
 
-export class EditRoutinesController implements Controller {
-  constructor(private readonly editRoutinesService: EditRoutinesUseCase) {
-    this.editRoutinesService = editRoutinesService;
+export class EditNotesController implements Controller {
+  constructor(private readonly editNotesService: EditNotesUseCase) {
+    this.editNotesService = editNotesService;
   }
 
   async handle(
@@ -15,22 +15,43 @@ export class EditRoutinesController implements Controller {
   ): Promise<Response<IResponse>> {
     try {
       const { id } = req.params;
-      const { type, period } = req.body;
+      const {
+        status,
+        collaborators,
+        priority,
+        category_id,
+        activity,
+        activityType,
+        description,
+        startTime,
+        endTime,
+        comments,
+        routine_id,
+      } = req.body;
 
       const data = {
-        type,
-        period,
+        status,
+        collaborators,
+        priority,
+        category_id,
+        activity,
+        activityType,
+        description,
+        startTime,
+        endTime,
+        comments,
+        routine_id,
       };
 
-      const result = await this.editRoutinesService.handle({
+      const result = await this.editNotesService.handle({
         ...data,
-        routineId: String(id),
+        noteId: id,
         userId: req.user!.id,
       });
       return res.status(200).json({
         status: ResponseStatus.OK,
         data: result,
-        message: "Rotina editada com sucesso",
+        message: "Anotação editada com sucesso",
       });
     } catch (error) {
       if (error instanceof ValidationError) {

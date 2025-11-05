@@ -5,6 +5,7 @@ import { User } from "@/domain/entities/postgres/User";
 import { Routines } from "@/domain/entities/postgres/Routines";
 import { Category } from "@/domain/entities/postgres/Category";
 import { NotesRepositoryProtocol } from "../interfaces/notesRepositoryProtocol";
+import { NotFoundError } from "@/data/errors/NotFoundError";
 
 export class NotesRepository implements NotesRepositoryProtocol {
   private repository: Repository<Notes>;
@@ -16,19 +17,7 @@ export class NotesRepository implements NotesRepositoryProtocol {
   /**
    * Cria uma nova nota no banco de dados
    * @param {NotesRepositoryProtocol.CreateNote} data - Os dados para criação da nota
-   * @param {string} data.status - Status da nota
-   * @param {string[]} [data.collaborators] - Colaboradores opcionais
-   * @param {string} data.priority - Prioridade da nota
-   * @param {string} [data.category_id] - ID da categoria opcional
-   * @param {string} data.activity - Atividade da nota
-   * @param {string} data.activityType - Tipo de atividade
-   * @param {string} data.description - Descrição da nota
-   * @param {string} data.startTime - Hora de início
-   * @param {string} data.endTime - Hora de fim
-   * @param {Comment[]} [data.comments] - Comentários opcionais
-   * @param {string} data.routine_id - ID da rotina
-   * @param {string} data.userId - ID do usuário
-   * @returns {Promise<NotesModel>} A nota criada
+   * ... (mantém o método create anterior)
    */
   async create(data: NotesRepositoryProtocol.CreateNote): Promise<NotesModel> {
     const note = this.repository.create({
@@ -65,6 +54,119 @@ export class NotesRepository implements NotesRepositoryProtocol {
       user_id: savedNote.user.id,
       created_at: savedNote.created_at,
       updated_at: savedNote.updated_at,
+    };
+  }
+
+  /**
+   * Busca uma nota por ID e ID do usuário
+   * @param {NotesRepositoryProtocol.FindByIdAndUserIdParams} data - Os dados para busca
+   * @param {string} data.id - ID da nota
+   * @param {string} data.userId - ID do usuário
+   * @returns {Promise<NotesModel | null>} A nota encontrada ou null se não existir
+   */
+  async findByIdAndUserId(
+    data: NotesRepositoryProtocol.FindByIdAndUserIdParams
+  ): Promise<NotesModel | null> {
+    const note = await this.repository.findOne({
+      where: {
+        id: data.id,
+        user: { id: data.userId },
+      },
+      relations: ["user", "routine", "category"],
+    });
+
+    if (!note) return null;
+
+    return {
+      id: note.id,
+      status: note.status,
+      collaborators: note.collaborators,
+      priority: note.priority,
+      category_id: note.category?.id,
+      activity: note.activity,
+      activityType: note.activityType,
+      description: note.description,
+      startTime: note.startTime,
+      endTime: note.endTime,
+      comments: note.comments,
+      routine_id: note.routine.id,
+      user_id: note.user.id,
+      created_at: note.created_at,
+      updated_at: note.updated_at,
+    };
+  }
+
+  /**
+   * Atualiza uma nota no banco de dados
+   * @param {NotesRepositoryProtocol.UpdateNoteParams} data - Os dados para atualização
+   * @param {string} data.id - ID da nota
+   * @param {string} data.userId - ID do usuário
+   * @param {string} [data.status] - Novo status
+   * @param {string[]} [data.collaborators] - Novos colaboradores
+   * @param {string} [data.priority] - Nova prioridade
+   * @param {string} [data.category_id] - Novo ID da categoria
+   * @param {string} [data.activity] - Nova atividade
+   * @param {string} [data.activityType] - Novo tipo de atividade
+   * @param {string} [data.description] - Nova descrição
+   * @param {string} [data.startTime] - Nova hora de início
+   * @param {string} [data.endTime] - Nova hora de fim
+   * @param {Comment[]} [data.comments] - Novos comentários
+   * @param {string} [data.routine_id] - Novo ID da rotina
+   * @returns {Promise<NotesModel>} A nota atualizada
+   * @throws {NotFoundError} Quando a nota não é encontrada
+   */
+  async updateNote(
+    data: NotesRepositoryProtocol.UpdateNoteParams
+  ): Promise<NotesModel> {
+    const note = await this.repository.findOne({
+      where: {
+        id: data.id,
+        user: { id: data.userId },
+      },
+      relations: ["user", "routine", "category"],
+    });
+
+    if (!note) {
+      throw new NotFoundError(
+        `Nota com ID ${data.id} não encontrada para este usuário`
+      );
+    }
+
+    if (data.status !== undefined) note.status = data.status;
+    if (data.collaborators !== undefined)
+      note.collaborators = data.collaborators;
+    if (data.priority !== undefined) note.priority = data.priority;
+    if (data.activity !== undefined) note.activity = data.activity;
+    if (data.activityType !== undefined) note.activityType = data.activityType;
+    if (data.description !== undefined) note.description = data.description;
+    if (data.startTime !== undefined) note.startTime = data.startTime;
+    if (data.endTime !== undefined) note.endTime = data.endTime;
+    if (data.comments !== undefined) note.comments = data.comments;
+    if (data.routine_id !== undefined)
+      note.routine = { id: data.routine_id } as Routines;
+    if (data.category_id !== undefined)
+      note.category = data.category_id
+        ? ({ id: data.category_id } as Category)
+        : undefined;
+    note.updated_at = new Date();
+
+    const updatedNote = await this.repository.save(note);
+    return {
+      id: updatedNote.id,
+      status: updatedNote.status,
+      collaborators: updatedNote.collaborators,
+      priority: updatedNote.priority,
+      category_id: updatedNote.category?.id,
+      activity: updatedNote.activity,
+      activityType: updatedNote.activityType,
+      description: updatedNote.description,
+      startTime: updatedNote.startTime,
+      endTime: updatedNote.endTime,
+      comments: updatedNote.comments,
+      routine_id: updatedNote.routine.id,
+      user_id: updatedNote.user.id,
+      created_at: updatedNote.created_at,
+      updated_at: updatedNote.updated_at,
     };
   }
 }

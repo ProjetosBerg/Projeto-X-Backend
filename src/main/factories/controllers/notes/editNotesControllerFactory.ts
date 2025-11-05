@@ -1,6 +1,6 @@
-// import { EditRoutinesController } from "@/presentation/controllers/routines/editRoutinesController";
-// import { makeEditRoutinesUseCaseFactory } from "../../usecase/routines/editRoutinesUseCaseFactory";
+import { EditNotesController } from "@/presentation/controllers/notes/editNotesController";
+import { makeEditNotesUseCaseFactory } from "../../usecase/notes/editNotesUseCaseFactory";
 
-// export const makeEditNotesControllerFactory = () => {
-//   return new EditNotesController(makeEditNotesUseCaseFactory());
-// };
+export const makeEditNotesControllerFactory = () => {
+  return new EditNotesController(makeEditNotesUseCaseFactory());
+};

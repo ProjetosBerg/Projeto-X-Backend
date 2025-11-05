@@ -1,105 +1,117 @@
 import { ServerError } from "@/data/errors/ServerError";
 import { BusinessRuleError } from "@/data/errors/BusinessRuleError";
 import { NotFoundError } from "@/data/errors/NotFoundError";
+import { NotesModel } from "@/domain/models/postgres/NotesModel";
+import { NotesRepositoryProtocol } from "@/infra/db/interfaces/notesRepositoryProtocol";
 import { RoutinesRepositoryProtocol } from "@/infra/db/interfaces/routinesRepositoryProtocol";
-import { RoutineModel } from "@/domain/models/postgres/RoutinModel";
-import { EditRoutinesUseCaseProtocol } from "../interfaces/routines/editRoutinesUseCaseProtocol";
-import { editRoutinesValidationSchema } from "../validation/routines/editRoutinesValidationSchema";
+import { CategoryRepositoryProtocol } from "@/infra/db/interfaces/categoryRepositoryProtocol";
+import { EditNotesUseCaseProtocol } from "../interfaces/notes/editNotesUseCaseProtocol";
+import { editNotesValidationSchema } from "../validation/notes/editNotesValidationSchema";
 
 /**
- * Edita uma rotina existente para um usuário
+ * Edita uma nota existente para um usuário
  *
- * @param {EditRoutinesUseCaseProtocol.Params} data - Os dados de entrada para a edição da rotina
- * @param {string} [data.type] - O novo tipo da rotina (opcional)
- * @param {Period} [data.period] - O novo período da rotina (opcional)
- * @param {string} data.routineId - O ID da rotina a ser editada
- * @param {string} data.userId - O ID do usuário proprietário da rotina
+ * @param {EditNotesUseCaseProtocol.Params} data - Os dados de entrada para a edição da nota
+ * @param {string} [data.status] - O novo status da nota (opcional)
+ * @param {string[]} [data.collaborators] - Novos colaboradores (opcional)
+ * @param {string} [data.priority] - Nova prioridade (opcional)
+ * @param {string} [data.category_id] - Novo ID da categoria (opcional)
+ * @param {string} [data.activity] - Nova atividade (opcional)
+ * @param {string} [data.activityType] - Novo tipo de atividade (opcional)
+ * @param {string} [data.description] - Nova descrição (opcional)
+ * @param {string} [data.startTime] - Nova hora de início (opcional)
+ * @param {string} [data.endTime] - Nova hora de fim (opcional)
+ * @param {Comment[]} [data.comments] - Novos comentários (opcional)
+ * @param {string} [data.routine_id] - Novo ID da rotina (opcional)
+ * @param {string} data.noteId - O ID da nota a ser editada
+ * @param {string} data.userId - O ID do usuário proprietário da nota
  *
- * @returns {Promise<RoutineModel>} A rotina editada
+ * @returns {Promise<NotesModel>} A nota editada
  *
  * @throws {ValidationError} Se os dados fornecidos forem inválidos
- * @throws {NotFoundError} Se a rotina não for encontrada para o usuário
- * @throws {BusinessRuleError} Se o novo tipo e período já existirem para o usuário (excluindo a atual) OU se o novo período já tiver uma rotina no dia atual (excluindo a atual)
+ * @throws {NotFoundError} Se a nota não for encontrada para o usuário
+ * @throws {BusinessRuleError} Se o novo routine_id ou category_id não existirem para o usuário
  * @throws {ServerError} Se ocorrer um erro inesperado durante a edição
  */
 
-export class EditRoutinesUseCase implements EditRoutinesUseCaseProtocol {
+export class EditNotesUseCase implements EditNotesUseCaseProtocol {
   constructor(
-    private readonly routinesRepository: RoutinesRepositoryProtocol
+    private readonly notesRepository: NotesRepositoryProtocol,
+    private readonly routinesRepository: RoutinesRepositoryProtocol,
+    private readonly categoryRepository: CategoryRepositoryProtocol
   ) {}
 
-  async handle(
-    data: EditRoutinesUseCaseProtocol.Params
-  ): Promise<RoutineModel> {
+  async handle(data: EditNotesUseCaseProtocol.Params): Promise<NotesModel> {
     try {
-      await editRoutinesValidationSchema.validate(data, {
+      await editNotesValidationSchema.validate(data, {
         abortEarly: false,
       });
 
-      const existingRoutine = await this.routinesRepository.findByIdAndUserId({
-        id: data.routineId,
+      const existingNote = await this.notesRepository.findByIdAndUserId({
+        id: data.noteId,
         userId: data.userId,
       });
 
-      if (!existingRoutine) {
+      if (!existingNote) {
         throw new NotFoundError(
-          `Rotina com ID ${data.routineId} não encontrada para este usuário`
+          `Nota com ID ${data.noteId} não encontrada para este usuário`
         );
       }
 
-      const newType = data.type || existingRoutine.type;
-      const newPeriod =
-        data.period !== undefined ? data.period : existingRoutine.period;
-      const hasChanges =
-        data.type !== existingRoutine.type ||
-        data.period !== existingRoutine.period;
-
-      if (hasChanges) {
-        const existingDuplicate =
-          await this.routinesRepository.findByTypeAndPeriodAndUserId({
-            type: newType,
-            period: newPeriod,
+      const newRoutineId = data.routine_id || existingNote.routine_id;
+      if (data.routine_id !== existingNote.routine_id) {
+        const existingRoutine = await this.routinesRepository.findByIdAndUserId(
+          {
+            id: newRoutineId,
             userId: data.userId,
-            excludeId: data.routineId,
-          });
-
-        if (existingDuplicate) {
-          throw new BusinessRuleError(
-            `Já existe uma rotina com o tipo "${newType}"${newPeriod ? ` e período "${newPeriod}"` : " sem período"} para este usuário`
-          );
-        }
-
-        if (newPeriod) {
-          const todayStart = new Date();
-          todayStart.setHours(0, 0, 0, 0);
-          const todayEnd = new Date();
-          todayEnd.setHours(23, 59, 59, 999);
-
-          const existingToday =
-            await this.routinesRepository.findByPeriodAndUserIdAndDateRange({
-              period: newPeriod,
-              userId: data.userId,
-              startDate: todayStart,
-              endDate: todayEnd,
-              excludeId: data.routineId,
-            });
-
-          if (existingToday) {
-            throw new BusinessRuleError(
-              `Já existe uma rotina para o período "${newPeriod}" neste dia para este usuário`
-            );
           }
+        );
+
+        if (!existingRoutine) {
+          throw new BusinessRuleError(
+            `Nenhuma rotina encontrada com o ID ${newRoutineId} para este usuário`
+          );
         }
       }
 
-      const updatedRoutine = await this.routinesRepository.updateRoutine({
-        id: String(data.routineId),
-        type: data.type,
-        period: data.period,
+      const newCategoryId =
+        data.category_id !== undefined
+          ? data.category_id
+          : existingNote.category_id;
+      if (
+        data.category_id !== undefined &&
+        data.category_id !== existingNote.category_id
+      ) {
+        const existingCategory =
+          await this.categoryRepository.findByIdAndUserId({
+            id: newCategoryId!,
+            userId: data.userId,
+          });
+
+        if (!existingCategory) {
+          throw new BusinessRuleError(
+            `Nenhuma categoria encontrada com o ID ${newCategoryId} para este usuário`
+          );
+        }
+      }
+
+      const updatedNote = await this.notesRepository.updateNote({
+        status: data.status,
+        collaborators: data.collaborators,
+        priority: data.priority,
+        category_id: data.category_id,
+        activity: data.activity,
+        activityType: data.activityType,
+        description: data.description,
+        startTime: data.startTime,
+        endTime: data.endTime,
+        comments: data.comments,
+        routine_id: data.routine_id,
+        id: data.noteId,
         userId: data.userId,
       });
 
-      return updatedRoutine;
+      return updatedNote;
     } catch (error: any) {
       if (error.name === "ValidationError") {
         throw error;
@@ -114,7 +126,7 @@ export class EditRoutinesUseCase implements EditRoutinesUseCaseProtocol {
 
       const errorMessage =
         error.message || "Erro interno do servidor durante a edição";
-      throw new ServerError(`Falha na edição de rotina: ${errorMessage}`);
+      throw new ServerError(`Falha na edição de nota: ${errorMessage}`);
     }
   }
 }

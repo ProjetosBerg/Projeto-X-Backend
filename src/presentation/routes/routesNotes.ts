@@ -2,6 +2,7 @@ import { makeGetLoginMiddleware } from "@/main/factories/middleware/getLogin";
 import { adapterMiddleware } from "@/utils/adapterMiddleware";
 import { Router, Request, Response } from "express";
 import { makeCreateNotesControllerFactory } from "@/main/factories/controllers/notes/createNotesControllerFactory";
+import { makeEditNotesControllerFactory } from "@/main/factories/controllers/notes/editNotesControllerFactory";
 
 export const routesNotes = (router: Router) => {
   router.get(
@@ -26,7 +27,9 @@ export const routesNotes = (router: Router) => {
   router.patch(
     "/notes/edit/:id",
     adapterMiddleware(makeGetLoginMiddleware()),
-    (req: Request, res: Response) => {}
+    (req: Request, res: Response) => {
+      makeEditNotesControllerFactory().handle(req, res);
+    }
   );
 
   router.delete(
