@@ -1,6 +1,6 @@
-// import { DeleteRoutinesController } from "@/presentation/controllers/routines/deleteRoutinesController";
-// import { makeDeleteRoutinesUseCaseFactory } from "../../usecase/routines/deleteRoutinesUseCaseFactory";
+import { DeleteNotesController } from "@/presentation/controllers/notes/deleteNotesController";
+import { makeDeleteNotesUseCaseFactory } from "../../usecase/notes/deleteNotesUseCaseFactory";
 
-// export const makeDeleteNotesControllerFactory = () => {
-//   return new DeleteNotesController(makeDeleteNotesUseCaseFactory());
-// };
+export const makeDeleteNotesControllerFactory = () => {
+  return new DeleteNotesController(makeDeleteNotesUseCaseFactory());
+};

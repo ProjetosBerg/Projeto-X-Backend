@@ -1,6 +1,6 @@
-// import { DeleteRoutinesUseCase } from "@/data/usecases/routines/deleteRoutinesUseCase";
-// import { RoutinesRepository } from "@/infra/db/postgres/routinesRepository";
+import { DeleteNotesUseCase } from "@/data/usecases/notes/deleteNotesUseCase";
+import { NotesRepository } from "@/infra/db/postgres/notesRepository";
 
-// export const makeDeleteNotesUseCaseFactory = () => {
-//   return new DeleteNotesUseCase(new NotesRepository());
-// };
+export const makeDeleteNotesUseCaseFactory = () => {
+  return new DeleteNotesUseCase(new NotesRepository());
+};

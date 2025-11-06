@@ -12,6 +12,7 @@ export interface NotesRepositoryProtocol {
   findByUserId(
     data: NotesRepositoryProtocol.FindByUserIdParams
   ): Promise<{ notes: NotesModel[]; total: number }>;
+  deleteNote(data: NotesRepositoryProtocol.DeleteNoteParams): Promise<void>;
 }
 
 export namespace NotesRepositoryProtocol {
@@ -58,5 +59,10 @@ export namespace NotesRepositoryProtocol {
     search?: string;
     sortBy?: string;
     order?: string;
+  };
+
+  export type DeleteNoteParams = {
+    id: NotesModel["id"];
+    userId: NotesModel["user_id"];
   };
 }

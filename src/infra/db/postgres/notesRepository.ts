@@ -223,4 +223,34 @@ export class NotesRepository implements NotesRepositoryProtocol {
       updated_at: updatedNote.updated_at,
     };
   }
+
+  /**
+   * Deleta uma nota do banco de dados
+   * @param {NotesRepositoryProtocol.DeleteNoteParams} data - Os dados para deleção
+   * @param {string} data.id - ID da nota
+   * @param {string} data.userId - ID do usuário
+   * @returns {Promise<void>} Não retorna valor
+   * @throws {NotFoundError} Quando a nota não é encontrada
+   */
+  async deleteNote(
+    data: NotesRepositoryProtocol.DeleteNoteParams
+  ): Promise<void> {
+    const note = await this.repository.findOne({
+      where: {
+        id: data.id,
+        user: { id: data.userId },
+      },
+    });
+
+    if (!note) {
+      throw new NotFoundError(
+        `Anotação com ID ${data.id} não encontrada para este usuário`
+      );
+    }
+
+    await this.repository.delete({
+      id: data.id,
+      user: { id: data.userId },
+    });
+  }
 }

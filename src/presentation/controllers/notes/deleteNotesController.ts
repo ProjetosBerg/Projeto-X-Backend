@@ -2,11 +2,11 @@ import { Request, Response } from "express";
 import { ValidationError } from "yup";
 import { IResponse, ResponseStatus, getError } from "@/utils/service";
 import { Controller } from "@/presentation/protocols/controller";
-import { DeleteRoutinesUseCase } from "@/data/usecases/routines/deleteRoutinesUseCase";
+import { DeleteNotesUseCase } from "@/data/usecases/notes/deleteNotesUseCase";
 
-export class DeleteRoutinesController implements Controller {
-  constructor(private readonly deleteRoutinesService: DeleteRoutinesUseCase) {
-    this.deleteRoutinesService = deleteRoutinesService;
+export class DeleteNotesController implements Controller {
+  constructor(private readonly deleteNotesService: DeleteNotesUseCase) {
+    this.deleteNotesService = deleteNotesService;
   }
 
   async handle(
@@ -15,13 +15,13 @@ export class DeleteRoutinesController implements Controller {
   ): Promise<Response<IResponse>> {
     try {
       const { id } = req.params;
-      await this.deleteRoutinesService.handle({
-        routineId: String(id),
+      await this.deleteNotesService.handle({
+        noteId: String(id),
         userId: req.user!.id,
       });
       return res.status(201).json({
         status: ResponseStatus.OK,
-        message: "Rotina excluída com sucesso",
+        message: "Anotação excluída com sucesso",
       });
     } catch (error) {
       if (error instanceof ValidationError) {

@@ -5,6 +5,7 @@ import { makeCreateNotesControllerFactory } from "@/main/factories/controllers/n
 import { makeEditNotesControllerFactory } from "@/main/factories/controllers/notes/editNotesControllerFactory";
 import { makeGetByUserIdNotesControllerFactory } from "@/main/factories/controllers/notes/getByUserIdNotesControllerFactory";
 import { makeGetByIdNotesControllerFactory } from "@/main/factories/controllers/notes/getByIdNotesControllerFactory";
+import { makeDeleteNotesControllerFactory } from "@/main/factories/controllers/notes/deleteNotesControllerFactory";
 
 export const routesNotes = (router: Router) => {
   router.get(
@@ -41,6 +42,8 @@ export const routesNotes = (router: Router) => {
   router.delete(
     "/notes/delete/:id",
     adapterMiddleware(makeGetLoginMiddleware()),
-    (req: Request, res: Response) => {}
+    (req: Request, res: Response) => {
+      makeDeleteNotesControllerFactory().handle(req, res);
+    }
   );
 };
