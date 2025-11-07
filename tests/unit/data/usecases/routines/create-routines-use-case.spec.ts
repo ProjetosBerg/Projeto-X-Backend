@@ -40,6 +40,7 @@ describe("CreateRoutinesUseCase", () => {
       type: mockRoutine.type,
       period: mockRoutine.period,
       userId: mockRoutine.user_id,
+      createdAt: mockRoutine.created_at,
     };
 
     const result = await sut.handle(input);
@@ -51,6 +52,8 @@ describe("CreateRoutinesUseCase", () => {
       type: input.type,
       period: input.period,
       userId: input.userId,
+      startDate: expect.any(Date),
+      endDate: expect.any(Date),
     });
     expect(
       routinesRepositorySpy.findByTypeAndPeriodAndUserId
@@ -80,6 +83,7 @@ describe("CreateRoutinesUseCase", () => {
       type: mockRoutine.type,
       period: undefined,
       userId: mockRoutine.user_id,
+      createdAt: mockRoutine.created_at,
     };
 
     const result = await sut.handle(input);
@@ -91,6 +95,8 @@ describe("CreateRoutinesUseCase", () => {
       type: input.type,
       period: input.period,
       userId: input.userId,
+      startDate: expect.any(Date),
+      endDate: expect.any(Date),
     });
     expect(
       routinesRepositorySpy.findByTypeAndPeriodAndUserId
@@ -198,6 +204,7 @@ describe("CreateRoutinesUseCase", () => {
       type: mockRoutine.type,
       period: mockRoutine.period,
       userId: mockRoutine.user_id,
+      createdAt: mockRoutine.created_at,
     };
 
     await expect(sut.handle(input)).rejects.toThrow(
@@ -211,6 +218,8 @@ describe("CreateRoutinesUseCase", () => {
       type: input.type,
       period: input.period,
       userId: input.userId,
+      startDate: expect.any(Date),
+      endDate: expect.any(Date),
     });
     expect(
       routinesRepositorySpy.findByTypeAndPeriodAndUserId
@@ -245,6 +254,8 @@ describe("CreateRoutinesUseCase", () => {
       type: input.type,
       period: input.period,
       userId: input.userId,
+      startDate: expect.any(Date),
+      endDate: expect.any(Date),
     });
     expect(
       routinesRepositorySpy.findByTypeAndPeriodAndUserId
@@ -284,6 +295,8 @@ describe("CreateRoutinesUseCase", () => {
       type: input.type,
       period: input.period,
       userId: input.userId,
+      startDate: expect.any(Date),
+      endDate: expect.any(Date),
     });
     expect(
       routinesRepositorySpy.findByTypeAndPeriodAndUserId
