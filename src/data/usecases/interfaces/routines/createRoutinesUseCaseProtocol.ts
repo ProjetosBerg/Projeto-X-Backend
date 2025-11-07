@@ -9,5 +9,6 @@ export namespace CreateRoutinesUseCaseProtocol {
     type: RoutineModel["type"];
     period?: RoutineModel["period"];
     userId: RoutineModel["user_id"];
+    createdAt?: Date;
   };
 }

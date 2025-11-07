@@ -34,6 +34,8 @@ export class RoutinesRepository implements RoutinesRepositoryProtocol {
       type: data.type,
       period: data.period,
       user: { id: data.userId } as User,
+      created_at: data.createdAt || new Date(),
+      updated_at: new Date(),
     });
 
     const savedRoutine = await this.repository.save(routine);
@@ -62,6 +64,7 @@ export class RoutinesRepository implements RoutinesRepositoryProtocol {
     const where: any = {
       type: data.type,
       user: { id: data.userId },
+      created_at: Between(data.startDate, data.endDate),
     };
 
     if (data.period !== undefined) {

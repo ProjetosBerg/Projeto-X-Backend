@@ -14,11 +14,12 @@ export class CreateRoutinesController implements Controller {
     res: Response<IResponse>
   ): Promise<Response<IResponse>> {
     try {
-      const { type, period } = req.body;
+      const { type, period, createdAt } = req.body;
 
       const data = {
         type,
         period,
+        createdAt,
       };
 
       const createRoutine = await this.createRoutinesService.handle({

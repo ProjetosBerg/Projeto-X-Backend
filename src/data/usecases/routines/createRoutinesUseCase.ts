@@ -33,11 +33,19 @@ export class CreateRoutinesUseCase implements CreateRoutinesUseCaseProtocol {
         abortEarly: false,
       });
 
+      const intendedDate = new Date(data.createdAt || new Date());
+      intendedDate.setHours(0, 0, 0, 0);
+      const startDate = new Date(intendedDate);
+      const endDate = new Date(intendedDate);
+      endDate.setHours(23, 59, 59, 999);
+
       const existingRoutine =
         await this.routinesRepository.findByTypeAndPeriodAndUserId({
           type: data.type,
           period: data.period,
           userId: data.userId,
+          startDate,
+          endDate,
         });
 
       if (existingRoutine) {
@@ -47,17 +55,12 @@ export class CreateRoutinesUseCase implements CreateRoutinesUseCaseProtocol {
       }
 
       if (data.period) {
-        const todayStart = new Date();
-        todayStart.setHours(0, 0, 0, 0);
-        const todayEnd = new Date();
-        todayEnd.setHours(23, 59, 59, 999);
-
         const existingTodayRoutine =
           await this.routinesRepository.findByPeriodAndUserIdAndDateRange({
             period: data.period,
             userId: data.userId,
-            startDate: todayStart,
-            endDate: todayEnd,
+            startDate,
+            endDate,
           });
 
         if (existingTodayRoutine) {
@@ -71,6 +74,7 @@ export class CreateRoutinesUseCase implements CreateRoutinesUseCaseProtocol {
         type: data.type,
         period: data.period,
         userId: data.userId,
+        createdAt: data.createdAt,
       });
 
       return createdRoutine;

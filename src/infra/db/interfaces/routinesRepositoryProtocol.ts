@@ -27,6 +27,7 @@ export namespace RoutinesRepositoryProtocol {
     type: RoutineModel["type"];
     period?: RoutineModel["period"];
     userId: RoutineModel["user_id"];
+    createdAt?: Date;
   };
 
   export type FindByTypeAndPeriodAndUserIdParams = {
@@ -34,6 +35,8 @@ export namespace RoutinesRepositoryProtocol {
     period?: RoutineModel["period"];
     userId: RoutineModel["user_id"];
     excludeId?: RoutineModel["id"];
+    startDate?: Date;
+    endDate?: Date;
   };
 
   export type FindByPeriodAndUserIdAndDateRangeParams = {
