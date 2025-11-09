@@ -154,6 +154,15 @@ export class RoutinesRepository implements RoutinesRepositoryProtocol {
       ? { type: ILike(`%${search}%`), user: { id: data.userId } }
       : { user: { id: data.userId } };
 
+    if (data.year && data.month) {
+      const startDate = new Date(data.year, data.month - 1, 1);
+      const endDate = new Date(data.year, data.month, 0, 23, 59, 59, 999);
+
+      Object.assign(whereCondition, {
+        created_at: Between(startDate, endDate),
+      });
+    }
+
     const [routines, total] = await this.repository.findAndCount({
       where: whereCondition,
       relations: ["user", "notes"],

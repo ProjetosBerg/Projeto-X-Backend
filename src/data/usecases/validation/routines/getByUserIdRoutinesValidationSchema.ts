@@ -16,4 +16,10 @@ export const getByUserIdRoutinesValidationSchema = yup.object().shape({
     .string()
     .oneOf(["ASC", "DESC"], "Ordem deve ser ASC ou DESC")
     .default("ASC"),
+  year: yup.number().min(2000, "Ano deve ser maior ou igual a 2000").optional(),
+  month: yup
+    .number()
+    .min(1, "Mês deve ser entre 1 e 12")
+    .max(12, "Mês deve ser entre 1 e 12")
+    .optional(),
 });

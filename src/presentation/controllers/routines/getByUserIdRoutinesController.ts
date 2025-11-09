@@ -23,16 +23,22 @@ export class GetByUserIdRoutinesController implements Controller {
         sortBy = "",
         order,
         isCalendar = false,
+        year,
+        month,
       } = req.query;
+
+      const limitValue = isCalendar ? 1000 : Number(limit);
 
       const { routines: result, total } =
         await this.getByUserIdRoutinesService.handle({
           userId: req.user!.id,
           page: isCalendar ? 1 : Number(page),
-          limit: isCalendar ? 1000000000000 : Number(limit),
+          limit: limitValue,
           search: String(search),
           sortBy: sortBy as any,
           order: String(order || "ASC") || "ASC",
+          year: year ? Number(year) : undefined,
+          month: month ? Number(month) : undefined,
         });
       return res.status(200).json({
         status: ResponseStatus.OK,

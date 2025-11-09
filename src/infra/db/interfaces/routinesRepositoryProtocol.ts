@@ -54,6 +54,8 @@ export namespace RoutinesRepositoryProtocol {
     search?: string;
     sortBy?: string;
     order?: string;
+    year?: number;
+    month?: number;
   };
 
   export type FindByIdAndUserIdParams = {

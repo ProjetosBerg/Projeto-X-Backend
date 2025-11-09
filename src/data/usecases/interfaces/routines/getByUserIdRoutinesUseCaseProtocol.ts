@@ -14,5 +14,7 @@ export namespace GetByUserIdRoutinesUseCaseProtocol {
     search?: string;
     sortBy?: string;
     order?: string;
+    year?: number;
+    month?: number;
   };
 }
