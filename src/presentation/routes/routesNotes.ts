@@ -6,6 +6,7 @@ import { makeEditNotesControllerFactory } from "@/main/factories/controllers/not
 import { makeGetByUserIdNotesControllerFactory } from "@/main/factories/controllers/notes/getByUserIdNotesControllerFactory";
 import { makeGetByIdNotesControllerFactory } from "@/main/factories/controllers/notes/getByIdNotesControllerFactory";
 import { makeDeleteNotesControllerFactory } from "@/main/factories/controllers/notes/deleteNotesControllerFactory";
+import { makeCreateSummaryDayNotesControllerFactory } from "@/main/factories/controllers/notes/createSummaryDayNotesControllerFactory";
 
 export const routesNotes = (router: Router) => {
   router.get(
@@ -28,6 +29,14 @@ export const routesNotes = (router: Router) => {
     adapterMiddleware(makeGetLoginMiddleware()),
     (req: Request, res: Response) => {
       makeCreateNotesControllerFactory().handle(req, res);
+    }
+  );
+
+  router.post(
+    "/notes/create/summary-day",
+    adapterMiddleware(makeGetLoginMiddleware()),
+    (req: Request, res: Response) => {
+      makeCreateSummaryDayNotesControllerFactory().handle(req, res);
     }
   );
 

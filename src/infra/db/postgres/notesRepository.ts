@@ -1,4 +1,4 @@
-import { ILike, Repository, getRepository } from "typeorm";
+import { Between, ILike, Not, Repository, getRepository } from "typeorm";
 import { Notes } from "@/domain/entities/postgres/Notes";
 import { NotesModel } from "@/domain/models/postgres/NotesModel";
 import { User } from "@/domain/entities/postgres/User";
@@ -29,6 +29,7 @@ export class NotesRepository implements NotesRepositoryProtocol {
       startTime: data.startTime,
       endTime: data.endTime,
       comments: data.comments,
+      summaryDay: data.summaryDay,
       routine: { id: data.routine_id } as Routines,
       user: { id: data.userId } as User,
       ...(data.category_id && {
@@ -49,6 +50,7 @@ export class NotesRepository implements NotesRepositoryProtocol {
       startTime: savedNote.startTime,
       endTime: savedNote.endTime,
       comments: savedNote.comments,
+      summaryDay: savedNote.summaryDay,
       routine_id: savedNote.routine.id,
       user_id: savedNote.user.id,
       created_at: savedNote.created_at,
@@ -88,6 +90,7 @@ export class NotesRepository implements NotesRepositoryProtocol {
       startTime: note.startTime,
       endTime: note.endTime,
       comments: note.comments,
+      summaryDay: note.summaryDay,
       routine_id: note.routine.id,
       user_id: note.user.id,
       created_at: note.created_at,
@@ -138,6 +141,7 @@ export class NotesRepository implements NotesRepositoryProtocol {
       startTime: note.startTime,
       endTime: note.endTime,
       comments: note.comments,
+      summaryDay: note.summaryDay,
       routine_id: note.routine.id,
       user_id: note.user.id,
       created_at: note.created_at,
@@ -252,5 +256,92 @@ export class NotesRepository implements NotesRepositoryProtocol {
       id: data.id,
       user: { id: data.userId },
     });
+  }
+
+  /**
+   * Busca notas por ID do usuário e data específica (excluindo notas de resumo)
+   * @param {NotesRepositoryProtocol.FindByUserIdAndDateParams} data - Os dados para busca
+   * @param {string} data.userId - ID do usuário
+   * @param {string} data.date - Data no formato YYYY-MM-DD
+   * @returns {Promise<{ notes: NotesModel[]; total: number }>} Lista de notas e total
+   */
+  async findByUserIdAndDate(
+    data: NotesRepositoryProtocol.FindByUserIdAndDateParams
+  ): Promise<{ notes: NotesModel[]; total: number }> {
+    const startDate = new Date(data.date + "T00:00:00.000Z");
+    const endDate = new Date(data.date + "T23:59:59.999Z");
+
+    const [notes, total] = await this.repository.findAndCount({
+      where: {
+        user: { id: data.userId },
+        created_at: Between(startDate, endDate),
+        activity: Not(ILike("Resumo do Dia - %")), // Exclui resumos
+      },
+      relations: ["user", "routine", "category"],
+    });
+
+    const formattedNotes = notes.map((note) => ({
+      id: note.id,
+      status: note.status,
+      collaborators: note.collaborators,
+      priority: note.priority,
+      category_id: note.category?.id,
+      activity: note.activity,
+      activityType: note.activityType,
+      description: note.description,
+      startTime: note.startTime,
+      endTime: note.endTime,
+      comments: note.comments,
+      routine_id: note.routine.id,
+      user_id: note.user.id,
+      summaryDay: note.summaryDay,
+      created_at: note.created_at,
+      updated_at: note.updated_at,
+    }));
+
+    return {
+      notes: formattedNotes,
+      total,
+    };
+  }
+
+  /**
+   * Busca nota de resumo por ID do usuário e data formatada (ex: "09/11/2025")
+   * @param {NotesRepositoryProtocol.FindByUserIdAndSummaryDateParams} data - Os dados para busca
+   * @param {string} data.userId - ID do usuário
+   * @param {string} data.formattedDate - Data formatada pt-BR
+   * @returns {Promise<NotesModel | null>} A nota de resumo ou null
+   */
+  async findByUserIdAndSummaryDate(
+    data: NotesRepositoryProtocol.FindByUserIdAndSummaryDateParams
+  ): Promise<NotesModel | null> {
+    const note = await this.repository.findOne({
+      where: {
+        user: { id: data.userId },
+        activity: ILike(`Resumo do Dia - ${data.formattedDate}`),
+      },
+      relations: ["user", "routine", "category"],
+    });
+
+    if (!note) return null;
+
+    return {
+      id: note.id,
+      status: note.status,
+      collaborators: note.collaborators,
+      priority: note.priority,
+      category_id: note.category?.id,
+      activity: note.activity,
+      activityType: note.activityType,
+      description: note.description,
+      startTime: note.startTime,
+      endTime: note.endTime,
+      comments: note.comments,
+      routine_id: note.routine.id,
+      user_id: note.user.id,
+      summaryDay: note.summaryDay,
+      created_at: note.created_at,
+      updated_at: note.updated_at,
+    };
   }
 }
