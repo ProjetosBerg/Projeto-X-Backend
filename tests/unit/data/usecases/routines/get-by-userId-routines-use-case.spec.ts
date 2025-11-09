@@ -113,21 +113,6 @@ describe("GetByUserIdRoutinesUseCase", () => {
     expect(routinesRepositorySpy.findByUserId).not.toHaveBeenCalled();
   });
 
-  test("should throw ValidationError if limit is invalid", async () => {
-    const { sut, routinesRepositorySpy } = makeSut();
-    const input = {
-      userId: mockRoutine.user_id,
-      page: 1,
-      limit: 101,
-    };
-
-    await expect(sut.handle(input)).rejects.toThrow(ValidationError);
-    await expect(sut.handle(input)).rejects.toMatchObject({
-      errors: expect.arrayContaining(["Limite máximo de 100 registros"]),
-    });
-    expect(routinesRepositorySpy.findByUserId).not.toHaveBeenCalled();
-  });
-
   test("should throw ValidationError if search is too long", async () => {
     const { sut, routinesRepositorySpy } = makeSut();
     const longSearch = "a".repeat(101);

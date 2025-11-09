@@ -156,7 +156,7 @@ export class RoutinesRepository implements RoutinesRepositoryProtocol {
 
     const [routines, total] = await this.repository.findAndCount({
       where: whereCondition,
-      relations: ["user"],
+      relations: ["user", "notes"],
       take: limit,
       skip: offset,
       order: { [sortBy]: order },
@@ -167,6 +167,7 @@ export class RoutinesRepository implements RoutinesRepositoryProtocol {
       type: routine.type,
       period: routine.period,
       user_id: routine.user?.id,
+      notes: routine.notes || [],
       created_at: routine.created_at,
       updated_at: routine.updated_at,
     }));
@@ -192,7 +193,7 @@ export class RoutinesRepository implements RoutinesRepositoryProtocol {
         id: data.id,
         user: { id: data.userId },
       },
-      relations: ["user"],
+      relations: ["user", "notes"],
     });
 
     if (!routine) return null;

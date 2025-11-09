@@ -18,14 +18,14 @@ export class Notes extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
   id!: string;
 
-  @Column({ type: "varchar", length: 50 })
-  status!: string;
+  @Column({ type: "varchar", length: 50, nullable: true })
+  status?: string;
 
   @Column("simple-array", { nullable: true })
   collaborators?: string[];
 
-  @Column({ type: "varchar", length: 50 })
-  priority!: string;
+  @Column({ type: "varchar", length: 50, nullable: true })
+  priority?: string;
 
   @ManyToOne(() => Category, (category) => category.notes, {
     nullable: true,
@@ -33,20 +33,20 @@ export class Notes extends BaseEntity {
   @JoinColumn({ name: "category_id" })
   category?: Category;
 
-  @Column({ type: "varchar", length: 255 })
-  activity!: string;
+  @Column({ type: "varchar", length: 255, nullable: true })
+  activity?: string;
 
-  @Column({ type: "varchar", length: 100 })
-  activityType!: string;
+  @Column({ type: "varchar", length: 100, nullable: true })
+  activityType?: string;
 
-  @Column("text")
-  description!: string;
+  @Column("text", { nullable: true })
+  description?: string;
 
-  @Column({ type: "time" })
-  startTime!: string;
+  @Column({ type: "time", nullable: true })
+  startTime?: string;
 
-  @Column({ type: "time" })
-  endTime!: string;
+  @Column({ type: "time", nullable: true })
+  endTime?: string;
 
   @Column("json", { nullable: true })
   comments?: Comment[];
@@ -58,6 +58,9 @@ export class Notes extends BaseEntity {
   @ManyToOne(() => User, (user) => user.notes, { nullable: false })
   @JoinColumn({ name: "user_id" })
   user!: User;
+
+  @Column("text", { nullable: true })
+  summaryDay?: string;
 
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   created_at!: Date;
