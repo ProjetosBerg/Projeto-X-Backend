@@ -262,18 +262,7 @@ export class GetByUserIdTransactionUseCase
           filter.field,
           fieldTypes
         );
-        console.log(
-          "val",
-          val,
-          "type",
-          type,
-          "filter.value",
-          filter.value,
-          "filter.value2",
-          filter.value2,
-          "filter.field",
-          filter.field
-        );
+
         return this.applyOperator(
           val,
           filter.operator,
@@ -342,7 +331,6 @@ export class GetByUserIdTransactionUseCase
 
     const normValue = this.normalize(value, type);
     if (normValue === null) return false;
-    console.log("normVal", normVal, "normValue", normValue);
 
     switch (operator) {
       case "equals":
