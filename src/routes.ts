@@ -6,9 +6,10 @@ import { routesMonthlyRecord } from "./presentation/routes/routesMonthlyRecord";
 import { routesTransactions } from "./presentation/routes/routesTransactions";
 import { routesCustomFields } from "./presentation/routes/routesCustomFields";
 import { adapterMiddleware } from "./utils/adapterMiddleware";
-import { GetUserLogin } from "./presentation/middlewares/getUserLogin";
 import { routesRoutines } from "./presentation/routes/routesRoutines";
 import { routesNotes } from "./presentation/routes/routesNotes";
+import { makeValidateTokenControllerFactory } from "./main/factories/controllers/user/validateTokenControllerFactory";
+import { makeGetLoginMiddleware } from "./main/factories/middleware/getLogin";
 
 const router = Router();
 
@@ -16,12 +17,13 @@ router.get("/health", (_req: Request, res: Response) => {
   res.status(200).json({ message: "ok" });
 });
 
-router.get("/auth/validate", adapterMiddleware(new GetUserLogin()), ((
-  req: Request,
-  res: Response
-) => {
-  res.status(200).json({ message: "Token válido", user: req.user });
-}) as import("express").RequestHandler);
+router.post(
+  "/auth/validate",
+  adapterMiddleware(makeGetLoginMiddleware()),
+  (req: Request, res: Response) => {
+    makeValidateTokenControllerFactory().handle(req, res);
+  }
+);
 
 routesUser(router);
 routesRecordTypes(router);

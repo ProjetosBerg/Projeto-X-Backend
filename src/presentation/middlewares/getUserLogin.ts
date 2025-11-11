@@ -8,6 +8,7 @@ export type JwtPayload = {
   name: string;
   email: string;
   profile: string;
+  sessionId: string;
   iat: number;
   exp: number;
 };
@@ -40,6 +41,7 @@ export class GetUserLogin implements Middleware {
         login: verified.login,
         name: verified.name,
         email: verified.email,
+        sessionId: verified.sessionId,
       };
 
       req.user = user;

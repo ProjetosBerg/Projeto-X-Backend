@@ -7,12 +7,14 @@ class UserAuth implements IUserAuth {
     process.env.JWT_SECRET || "your-secret-key";
 
   /**
-   * Cria um token JWT para um usuário
+   * Cria um token JWT para um usuário, incluindo o sessionId no payload
    * @param {IUser} user - Os dados do usuário para criação do token
    * @param {string} user.id - Identificador único do usuário
    * @param {string} user.name - Nome do usuário
+   * @param {string} user.login - Login do usuário
    * @param {string} user.email - Endereço de e-mail do usuário
-   * @returns {Promise<{ message: string; token: string; user: IUser}>} Mensagem de autenticação, token e ID do usuário
+   * @param {string} [user.sessionId] - ID da sessão (opcional, mas incluído no token se fornecido)
+   * @returns {Promise<{ message: string; token: string | null; user: IUser}>} Mensagem de autenticação, token e ID do usuário
    */
   async createUserToken(
     user: IUser
@@ -23,6 +25,7 @@ class UserAuth implements IUserAuth {
         name: user.name,
         login: user.login,
         email: user.email,
+        sessionId: user.sessionId || "",
       };
 
       const token = jwt.sign(payload, this.JWT_SECRET, { expiresIn: "30d" });
@@ -34,6 +37,7 @@ class UserAuth implements IUserAuth {
           name: user.name,
           login: user.login,
           email: user.email,
+          sessionId: user.sessionId,
         },
       };
     } catch (error) {
@@ -59,7 +63,7 @@ class UserAuth implements IUserAuth {
   }
 
   /**
-   * Recupera os dados do usuário a partir de um token válido
+   * Recupera os dados do usuário a partir de um token válido, incluindo sessionId
    * @param {string} token - O token JWT a ser decodificado
    * @returns {Promise<ITokenPayload | null>} Os dados do usuário decodificados ou null se inválido
    */
@@ -71,6 +75,7 @@ class UserAuth implements IUserAuth {
         name: decoded.name,
         login: decoded.login,
         email: decoded.email,
+        sessionId: decoded.sessionId,
       };
     } catch (error) {
       return null;

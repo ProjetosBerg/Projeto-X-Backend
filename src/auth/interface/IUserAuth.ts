@@ -3,6 +3,7 @@ export interface IUser {
   name: string;
   login: string;
   email: string;
+  sessionId?: string;
 }
 
 export interface ITokenPayload {
@@ -12,6 +13,7 @@ export interface ITokenPayload {
   email: string;
   iat?: number;
   exp?: number;
+  sessionId?: string;
 }
 
 export interface IUserAuth {
