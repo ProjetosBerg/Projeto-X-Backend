@@ -33,12 +33,23 @@ export const makeUserAuthRepositoryRepository = (): jest.Mocked<UserAuth> => {
   return userAuth;
 };
 
+export const makeAuthenticationRepositoryRepository = () => {
+  return {
+    create: jest.fn().mockResolvedValue(undefined),
+    hasLoginToday: jest.fn().mockResolvedValue(false),
+    ...({} as any),
+  };
+};
+
 const makeSut = () => {
   const userAuthRepositoryRepositorySpy = makeUserAuthRepositoryRepository();
   const userRepositoryRepositorySpy = makeUserRepositoryRepository();
+  const authenticationRepositoryRepositorySpy =
+    makeAuthenticationRepositoryRepository();
   const sut = new LoginUserUseCase(
     userRepositoryRepositorySpy,
-    userAuthRepositoryRepositorySpy
+    userAuthRepositoryRepositorySpy,
+    authenticationRepositoryRepositorySpy
   );
 
   const loginData = {
@@ -50,6 +61,7 @@ const makeSut = () => {
     sut,
     userRepositoryRepositorySpy,
     userAuthRepositoryRepositorySpy,
+    authenticationRepositoryRepositorySpy,
     loginData,
   };
 };
@@ -64,6 +76,7 @@ describe("LoginUserUseCase", () => {
       sut,
       userRepositoryRepositorySpy,
       userAuthRepositoryRepositorySpy,
+      authenticationRepositoryRepositorySpy,
       loginData,
     } = makeSut();
 
@@ -83,14 +96,25 @@ describe("LoginUserUseCase", () => {
     expect(
       userAuthRepositoryRepositorySpy.comparePassword
     ).toHaveBeenCalledWith(loginData.password, mockUser.password);
+    expect(authenticationRepositoryRepositorySpy.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: mockUser.id,
+        loginAt: expect.any(Date),
+        sessionId: expect.any(String),
+        isOffensive: expect.any(Boolean),
+      })
+    );
     expect(
       userAuthRepositoryRepositorySpy.createUserToken
-    ).toHaveBeenCalledWith({
-      id: mockUser.id,
-      name: mockUser.name,
-      login: mockUser.login,
-      email: mockUser.email,
-    });
+    ).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: mockUser.id,
+        name: mockUser.name,
+        login: mockUser.login,
+        email: mockUser.email,
+        sessionId: expect.any(String),
+      })
+    );
     expect(result).toEqual({
       message: "Token created successfully",
       token: "valid_token",

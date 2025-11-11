@@ -19,6 +19,7 @@ export namespace LoginUserUseCaseProtocol {
       name: string;
       login: string;
       email: string;
+      sessionId?: string;
     };
   };
 }

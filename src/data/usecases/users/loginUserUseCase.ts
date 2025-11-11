@@ -1,4 +1,4 @@
-import { UserModel } from "@/domain/models/postgres/UserModel";
+import { v4 as uuidv4 } from "uuid";
 import { UserRepositoryProtocol } from "@/infra/db/interfaces/userRepositoryProtocol";
 import UserAuth from "@/auth/users/userAuth";
 import { ServerError } from "@/data/errors/ServerError";
@@ -6,15 +6,18 @@ import { BusinessRuleError } from "@/data/errors/BusinessRuleError";
 import { LoginUserUseCaseProtocol } from "@/data/usecases/interfaces/users/loginUserUseCaseProtocol";
 import { loginUserValidationSchema } from "@/data/usecases/validation/users/loginUserValidationSchema";
 import { NotFoundError } from "@/data/errors/NotFoundError";
+import { AuthenticationRepositoryProtocol } from "@/infra/db/interfaces/authenticationRepositoryProtocol";
 
 export class LoginUserUseCase implements LoginUserUseCaseProtocol {
   constructor(
     private readonly userRepository: UserRepositoryProtocol,
-    private readonly userAuth: UserAuth
+    private readonly userAuth: UserAuth,
+    private readonly authenticationRepository: AuthenticationRepositoryProtocol // Novo: injetar repositório de autenticação
   ) {}
 
   /**
    * Autentica um usuário e gera um token JWT após um login bem-sucedido
+   * Além disso, cria um registro de autenticação para monitoramento de presença e ofensiva
    * @param {LoginUserUseCaseProtocol.Params} data - As credenciais de login
    * @param {string} [data.login] - O login do usuário (opcional se o email for fornecido)
    * @param {string} data.password - A senha do usuário
@@ -47,11 +50,23 @@ export class LoginUserUseCase implements LoginUserUseCaseProtocol {
         throw new BusinessRuleError("Senha incorreta");
       }
 
+      const sessionId = uuidv4();
+      const loginAt = new Date();
+      const isOffensive = loginAt.getHours() < 12;
+
+      await this.authenticationRepository.create({
+        userId: user.id!,
+        loginAt,
+        sessionId,
+        isOffensive,
+      });
+
       const authResult = await this.userAuth.createUserToken({
         id: user.id!,
         name: user.name,
         login: user.login,
         email: user.email,
+        sessionId,
       });
 
       return authResult;
@@ -68,7 +83,7 @@ export class LoginUserUseCase implements LoginUserUseCaseProtocol {
       }
 
       const errorMessage =
-        error.message || "Erro interno do servidor durante o cadastro";
+        error.message || "Erro interno do servidor durante o login";
       throw new ServerError(`Falha no login do usuário: ${errorMessage}`);
     }
   }
