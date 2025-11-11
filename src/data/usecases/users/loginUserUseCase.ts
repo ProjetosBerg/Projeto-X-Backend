@@ -12,12 +12,14 @@ export class LoginUserUseCase implements LoginUserUseCaseProtocol {
   constructor(
     private readonly userRepository: UserRepositoryProtocol,
     private readonly userAuth: UserAuth,
-    private readonly authenticationRepository: AuthenticationRepositoryProtocol // Novo: injetar repositório de autenticação
+    private readonly authenticationRepository: AuthenticationRepositoryProtocol
   ) {}
 
   /**
    * Autentica um usuário e gera um token JWT após um login bem-sucedido
-   * Além disso, cria um registro de autenticação para monitoramento de presença e ofensiva
+   * Além disso, gerencia sessões ativas do dia: reutiliza se existir, incrementando entryCount
+   * (exceto se a última entrada foi há menos de 1 minuto); cria nova se não
+   * Isso permite múltiplos logins no mesmo dia (ex.: diferentes navegadores) sem duplicar sessões, rastreando acessos
    * @param {LoginUserUseCaseProtocol.Params} data - As credenciais de login
    * @param {string} [data.login] - O login do usuário (opcional se o email for fornecido)
    * @param {string} data.password - A senha do usuário
@@ -50,16 +52,40 @@ export class LoginUserUseCase implements LoginUserUseCaseProtocol {
         throw new BusinessRuleError("Senha incorreta");
       }
 
-      const sessionId = uuidv4();
-      const loginAt = new Date();
-      const isOffensive = loginAt.getHours() < 12;
+      const now = new Date();
 
-      await this.authenticationRepository.create({
-        userId: user.id!,
-        loginAt,
-        sessionId,
-        isOffensive,
-      });
+      const activeSessionToday =
+        await this.authenticationRepository.findActiveSessionToday({
+          userId: user.id!,
+          date: now,
+        });
+
+      let sessionId: string;
+      const isOffensive = now.getHours() < 12;
+
+      if (activeSessionToday) {
+        sessionId = activeSessionToday.sessionId;
+
+        const timeSinceLastEntry =
+          now.getTime() - new Date(activeSessionToday.lastEntryAt).getTime();
+        const isWithinOneMinute = timeSinceLastEntry < 60000;
+
+        if (!isWithinOneMinute) {
+          await this.authenticationRepository.incrementEntryCount({
+            userId: user.id!,
+            sessionId,
+            now,
+          });
+        }
+      } else {
+        sessionId = uuidv4();
+        await this.authenticationRepository.create({
+          userId: user.id!,
+          loginAt: now,
+          sessionId,
+          isOffensive,
+        });
+      }
 
       const authResult = await this.userAuth.createUserToken({
         id: user.id!,
