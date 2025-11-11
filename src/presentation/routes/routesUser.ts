@@ -10,11 +10,29 @@ import { adapterMiddleware } from "@/utils/adapterMiddleware";
 import { makeDeleteUserByIdControllerFactory } from "@/main/factories/controllers/user/deleteUserControllerFactory";
 import { makeResetPasswordUserControllerFactory } from "@/main/factories/controllers/user/resetPasswordUserControllerFactory";
 import { makeLogoutUserControllerFactory } from "@/main/factories/controllers/user/logoutUserControllerFactory";
+import { makeGetPresenceUserControllerFactory } from "@/main/factories/controllers/user/getPresenceUserControllerFactory";
+import { makeGetStreakUserControllerFactory } from "@/main/factories/controllers/user/getStreakUserControllerFactory";
 
 export const routesUser = (router: Router) => {
   router.get("/user/find-questions", (req: Request, res: Response) => {
     makeFindQuestionsUserControllerFactory().handle(req, res);
   });
+
+  router.get(
+    "/user/get-presence",
+    adapterMiddleware(makeGetLoginMiddleware()),
+    (req: Request, res: Response) => {
+      makeGetPresenceUserControllerFactory().handle(req, res);
+    }
+  );
+
+  router.get(
+    "/user/get-streak",
+    adapterMiddleware(makeGetLoginMiddleware()),
+    (req: Request, res: Response) => {
+      makeGetStreakUserControllerFactory().handle(req, res);
+    }
+  );
 
   router.get(
     "/user/find-user/:id",
