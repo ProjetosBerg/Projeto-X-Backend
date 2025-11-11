@@ -43,10 +43,9 @@ export class AuthenticationRepository
    * @param {string} data.sessionId - ID da sessão
    * @returns {Promise<Authentication | undefined>} A sessão ativa ou undefined
    */
-  async findActiveSession(data: {
-    userId: string;
-    sessionId: string;
-  }): Promise<Authentication | undefined> {
+  async findActiveSession(
+    data: AuthenticationRepositoryProtocol.FindActiveSessionParams
+  ): Promise<Authentication | undefined> {
     try {
       const repository = getRepository(Authentication);
       const session = await repository.findOne({
@@ -78,13 +77,79 @@ export class AuthenticationRepository
         loginAt: data.loginAt || new Date(),
         sessionId: data.sessionId,
         isOffensive: data.isOffensive,
+        lastEntryAt: data.loginAt || new Date(),
+        entryCount: 1,
       });
+      newAuth.setIsOffensive();
       const savedAuth = await repository.save(newAuth);
       return savedAuth;
     } catch (error: any) {
       throw new Error(
         `Erro ao criar registro de autenticação: ${error.message}`
       );
+    }
+  }
+
+  /**
+   * Incrementa o entryCount e atualiza lastEntryAt para uma sessão ativa
+   * @param {Object} data - Dados para incremento
+   * @param {string} data.userId - ID do usuário
+   * @param {string} data.sessionId - ID da sessão
+   * @param {Date} data.now - Data/hora atual para lastEntryAt
+   * @returns {Promise<Authentication>} O registro atualizado
+   */
+  async incrementEntryCount(
+    data: AuthenticationRepositoryProtocol.IncrementEntryCountParams
+  ): Promise<Authentication> {
+    try {
+      const repository = getRepository(Authentication);
+      const auth = await repository.findOne({
+        where: {
+          userId: data.userId,
+          sessionId: data.sessionId,
+          logoutAt: IsNull(),
+        },
+      });
+      if (!auth) {
+        throw new Error("Sessão ativa não encontrada");
+      }
+      auth.entryCount += 1;
+      auth.lastEntryAt = data.now;
+      auth.updatedAt = data.now;
+      const updatedAuth = await repository.save(auth);
+      return updatedAuth;
+    } catch (error: any) {
+      throw new Error(`Erro ao incrementar entryCount: ${error.message}`);
+    }
+  }
+
+  /**
+   * Busca uma sessão ativa (sem logout) do dia atual para um usuário
+   * @param {Object} data - Critérios de busca
+   * @param {string} data.userId - ID do usuário
+   * @param {Date} data.date - Data para verificar (usado para filtrar o dia)
+   * @returns {Promise<Authentication | undefined>} A sessão ativa de hoje ou undefined
+   */
+  async findActiveSessionToday(
+    data: AuthenticationRepositoryProtocol.GetSessionDurationInDayParams
+  ): Promise<Authentication | undefined> {
+    try {
+      const repository = getRepository(Authentication);
+      const startOfDay = new Date(data.date);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(data.date);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      const session = await repository.findOne({
+        where: {
+          userId: data.userId,
+          loginAt: Between(startOfDay, endOfDay),
+          logoutAt: IsNull(),
+        },
+      });
+      return session || undefined;
+    } catch (error: any) {
+      throw new Error(`Erro ao buscar sessão ativa de hoje: ${error.message}`);
     }
   }
 
@@ -173,6 +238,36 @@ export class AuthenticationRepository
       return count;
     } catch (error: any) {
       throw new Error(`Erro ao contar sessões: ${error.message}`);
+    }
+  }
+
+  /**
+   * Soma o total de entradas (entryCount) no dia para um usuário (útil para contagem total de acessos/entradas no dia)
+   * @param {Object} data - Critérios de soma
+   * @param {string} data.userId - ID do usuário
+   * @param {Date} data.date - Data específica do dia
+   * @returns {Promise<number>} Total de entradas no dia (soma de entryCount das sessões iniciadas no dia)
+   */
+  async getTotalEntriesInDay(
+    data: AuthenticationRepositoryProtocol.GetTotalEntriesInDayParams
+  ): Promise<number> {
+    try {
+      const repository = getRepository(Authentication);
+      const startOfDay = new Date(data.date);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(data.date);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      const auths = await repository.find({
+        where: {
+          userId: data.userId,
+          loginAt: Between(startOfDay, endOfDay),
+        },
+      });
+
+      return auths.reduce((total, auth) => total + auth.entryCount, 0);
+    } catch (error: any) {
+      throw new Error(`Erro ao somar entradas do dia: ${error.message}`);
     }
   }
 

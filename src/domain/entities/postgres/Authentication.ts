@@ -37,6 +37,12 @@ export class Authentication extends BaseEntity {
   @Column({ default: false })
   isOffensive!: boolean;
 
+  @Column({ type: "int", default: 1 })
+  entryCount!: number;
+
+  @Column({ type: "timestamp", nullable: false })
+  lastEntryAt!: Date;
+
   @CreateDateColumn({ type: "timestamp" })
   createdAt!: Date;
 

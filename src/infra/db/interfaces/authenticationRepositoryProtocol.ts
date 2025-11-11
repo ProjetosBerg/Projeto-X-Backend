@@ -10,10 +10,9 @@ export interface AuthenticationRepositoryProtocol {
   /**
    * Busca uma sessão ativa (sem logout)
    */
-  findActiveSession(data: {
-    userId: string;
-    sessionId: string;
-  }): Promise<Authentication | undefined>;
+  findActiveSession(
+    data: AuthenticationRepositoryProtocol.FindActiveSessionParams
+  ): Promise<Authentication | undefined>;
 
   /**
    * Cria um novo registro de autenticação
@@ -21,6 +20,13 @@ export interface AuthenticationRepositoryProtocol {
   create(
     data: AuthenticationRepositoryProtocol.CreateParams
   ): Promise<Authentication | undefined>;
+
+  /**
+   * Incrementa o entryCount e atualiza lastEntryAt para uma sessão ativa
+   */
+  incrementEntryCount(
+    data: AuthenticationRepositoryProtocol.IncrementEntryCountParams
+  ): Promise<Authentication>;
 
   /**
    * Atualiza o logout de uma sessão
@@ -44,11 +50,22 @@ export interface AuthenticationRepositoryProtocol {
   ): Promise<number>;
 
   /**
+   * Soma o total de entradas (entryCount) no dia para um usuário
+   */
+  getTotalEntriesInDay(
+    data: AuthenticationRepositoryProtocol.GetTotalEntriesInDayParams
+  ): Promise<number>;
+
+  /**
    * Verifica se há login ofensivo no dia
    */
   hasOffensiveLoginInDay(
     data: AuthenticationRepositoryProtocol.HasOffensiveLoginInDayParams
   ): Promise<boolean>;
+
+  findActiveSessionToday(
+    data: AuthenticationRepositoryProtocol.GetSessionDurationInDayParams
+  ): Promise<Authentication | undefined>;
 }
 
 export namespace AuthenticationRepositoryProtocol {
@@ -79,5 +96,26 @@ export namespace AuthenticationRepositoryProtocol {
   export type HasOffensiveLoginInDayParams = {
     userId: string;
     date: Date;
+  };
+
+  export type GetTotalEntriesInDayParams = {
+    userId: string;
+    date: Date;
+  };
+
+  export type GetSessionDurationInDayParams = {
+    userId: string;
+    date: Date;
+  };
+
+  export type IncrementEntryCountParams = {
+    userId: string;
+    sessionId: string;
+    now: Date;
+  };
+
+  export type FindActiveSessionParams = {
+    userId: string;
+    sessionId: string;
   };
 }
