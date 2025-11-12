@@ -20,8 +20,6 @@ export class GetStreakUserUseCase implements GetStreakUserProtocol {
 
       const streak = await this.calculateStreak(userId, today);
 
-      console.log("streak", streak);
-
       const weekProgressData = await this.getWeekProgress(userId, today);
 
       return {
