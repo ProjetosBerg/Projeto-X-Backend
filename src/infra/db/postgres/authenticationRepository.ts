@@ -167,6 +167,7 @@ export class AuthenticationRepository
       const repository = getRepository(Authentication);
       const auth = await repository.findOne({
         where: { sessionId: data.sessionId },
+        order: { createdAt: "DESC" },
       });
       if (!auth) {
         throw new Error("Sessão de autenticação não encontrada");
