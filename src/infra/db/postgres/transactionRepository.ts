@@ -72,6 +72,7 @@ export class TransactionRepository implements TransactionRepositoryProtocol {
       transaction_date: transaction.transaction_date,
       monthly_record_id: transaction.monthly_record.id,
       category_id: transaction.category.id,
+      category_name: transaction.category.name,
       user_id: transaction.user.id,
       created_at: transaction.created_at,
       updated_at: transaction.updated_at,

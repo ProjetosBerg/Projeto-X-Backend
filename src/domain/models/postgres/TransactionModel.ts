@@ -11,6 +11,7 @@ export interface TransactionModel extends Transaction {
   transaction_date: Transaction["transaction_date"];
   monthly_record_id?: MonthlyRecordModel["id"];
   category_id?: CategoryModel["id"];
+  category_name?: CategoryModel["name"];
   user_id?: UserModel["id"];
   created_at: Transaction["created_at"];
   updated_at: Transaction["updated_at"];

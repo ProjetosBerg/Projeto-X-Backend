@@ -10,6 +10,7 @@ export const mockTransaction: TransactionModelMock = {
   transaction_date: new Date("2025-07-02"),
   monthly_record_id: mockMonthlyRecord.id,
   category_id: mockCategory.id,
+  category_name: mockCategory.name,
   user_id: "user-123",
   created_at: new Date(),
   updated_at: new Date(),
