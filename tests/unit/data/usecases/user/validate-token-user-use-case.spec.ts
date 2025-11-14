@@ -5,8 +5,11 @@ import { ServerError } from "@/data/errors/ServerError";
 export const makeAuthenticationRepositoryRepository =
   (): jest.Mocked<AuthenticationRepositoryProtocol> => {
     return {
-      hasLoginToday: jest.fn().mockResolvedValue(false),
+      findActiveSession: jest.fn().mockResolvedValue(null),
+      incrementEntryCount: jest.fn().mockResolvedValue(undefined),
       create: jest.fn().mockResolvedValue(undefined),
+      findActiveSessionToday: jest.fn().mockResolvedValue(null),
+      findByUserAndPeriod: jest.fn().mockResolvedValue([]),
       ...({} as any),
     };
   };
@@ -36,20 +39,38 @@ describe("ValidateTokenUseCase", () => {
     const { sut, authenticationRepositoryRepositorySpy, validateData } =
       makeSut();
 
-    authenticationRepositoryRepositorySpy.hasLoginToday.mockResolvedValue(true);
+    const sessionId = "existing-session-id";
+    const validateDataWithSession = { ...validateData, sessionId };
 
-    const result = await sut.handle(validateData);
+    const now = new Date();
+    const mockSession = {
+      loginAt: now,
+      lastEntryAt: new Date(now.getTime() - 2 * 60 * 1000),
+    };
+
+    authenticationRepositoryRepositorySpy.findActiveSession.mockResolvedValue(
+      mockSession as any
+    );
+
+    const result = await sut.handle(validateDataWithSession);
 
     expect(
-      authenticationRepositoryRepositorySpy.hasLoginToday
+      authenticationRepositoryRepositorySpy.findActiveSession
     ).toHaveBeenCalledWith({
-      userId: validateData.userId,
-      date: expect.any(Date),
+      userId: validateDataWithSession.userId,
+      sessionId: validateDataWithSession.sessionId,
+    });
+    expect(
+      authenticationRepositoryRepositorySpy.incrementEntryCount
+    ).toHaveBeenCalledWith({
+      userId: validateDataWithSession.userId,
+      sessionId: validateDataWithSession.sessionId,
+      now: expect.any(Date),
     });
     expect(authenticationRepositoryRepositorySpy.create).not.toHaveBeenCalled();
     expect(result).toEqual({
       valid: true,
-      sessionId: expect.any(String),
+      sessionId: validateDataWithSession.sessionId,
     });
   });
 
@@ -57,18 +78,23 @@ describe("ValidateTokenUseCase", () => {
     const { sut, authenticationRepositoryRepositorySpy, validateData } =
       makeSut();
 
-    authenticationRepositoryRepositorySpy.hasLoginToday.mockResolvedValue(
-      false
+    authenticationRepositoryRepositorySpy.findActiveSession.mockResolvedValue(
+      undefined
     );
 
     const result = await sut.handle(validateData);
 
     expect(
-      authenticationRepositoryRepositorySpy.hasLoginToday
-    ).toHaveBeenCalledWith({
-      userId: validateData.userId,
-      date: expect.any(Date),
-    });
+      authenticationRepositoryRepositorySpy.findActiveSession
+    ).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: validateData.userId,
+        sessionId: expect.any(String),
+      })
+    );
+    expect(
+      authenticationRepositoryRepositorySpy.incrementEntryCount
+    ).not.toHaveBeenCalled();
     expect(authenticationRepositoryRepositorySpy.create).toHaveBeenCalledWith(
       expect.objectContaining({
         userId: validateData.userId,
@@ -87,18 +113,21 @@ describe("ValidateTokenUseCase", () => {
     const { sut, authenticationRepositoryRepositorySpy, validateData } =
       makeSut();
 
-    authenticationRepositoryRepositorySpy.hasLoginToday.mockRejectedValue(
-      new Error("Database error")
+    const dbError = new Error("Database error");
+    authenticationRepositoryRepositorySpy.findActiveSession.mockRejectedValue(
+      dbError
     );
 
     await expect(sut.handle(validateData)).rejects.toThrow(
       new ServerError("Falha na validação do token: Database error")
     );
     expect(
-      authenticationRepositoryRepositorySpy.hasLoginToday
-    ).toHaveBeenCalledWith({
-      userId: validateData.userId,
-      date: expect.any(Date),
-    });
+      authenticationRepositoryRepositorySpy.findActiveSession
+    ).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: validateData.userId,
+        sessionId: expect.any(String),
+      })
+    );
   });
 });
