@@ -36,6 +36,12 @@ export class User extends BaseEntity {
   @Column({ type: "varchar", length: 255, nullable: true })
   bio?: string;
 
+  @Column({ type: "varchar", length: 255, nullable: true })
+  imageUrl?: string;
+
+  @Column({ type: "varchar", length: 255, nullable: true })
+  publicId?: string;
+
   @OneToMany(() => SecurityQuestion, (question) => question?.user, {
     cascade: true,
   })

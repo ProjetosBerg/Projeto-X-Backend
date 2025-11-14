@@ -15,6 +15,8 @@ export class UserRepository implements UserRepositoryProtocol {
    * @param {string} user.login - Login do usuário
    * @param {string} user.email - Endereço de e-mail do usuário
    * @param {string} user.password - Senha criptografada do usuário
+   * @param {string} user.imageUrl - URL da imagem do usuário
+   * @param {string} user.publicId - ID publico da imagem do usuário
    * @param {Array<{ question: string; answer: string }>} user.securityQuestions - Lista de questões de segurança
    * @returns {Promise<UserModel | undefined>} O usuário criado
    */
@@ -36,6 +38,8 @@ export class UserRepository implements UserRepositoryProtocol {
             answer: sq.answer as string,
           })
         ),
+        imageUrl: user?.imageUrl || undefined,
+        publicId: user?.publicId || undefined,
       });
 
       const savedUser = await repository.save(newUser);
@@ -129,6 +133,8 @@ export class UserRepository implements UserRepositoryProtocol {
         );
       }
       if (data.bio !== undefined) user.bio = data.bio;
+      if (data.imageUrl !== undefined) user.imageUrl = data.imageUrl;
+      if (data.publicId !== undefined) user.publicId = data.publicId;
       user.updated_at = new Date();
 
       const updatedUser = await repository.save(user);

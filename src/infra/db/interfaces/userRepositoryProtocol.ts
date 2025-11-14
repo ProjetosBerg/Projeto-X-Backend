@@ -27,6 +27,8 @@ export namespace UserRepositoryProtocol {
       question: SecurityQuestionModel["question"];
       answer: SecurityQuestionModel["answer"];
     }>;
+    imageUrl?: UserModel["imageUrl"];
+    publicId?: UserModel["publicId"];
   };
 
   export type FindOneParams = {
@@ -49,6 +51,8 @@ export namespace UserRepositoryProtocol {
       question: SecurityQuestionModel["question"];
       answer: SecurityQuestionModel["answer"];
     }>;
+    imageUrl?: UserModel["imageUrl"];
+    publicId?: UserModel["publicId"];
   };
 
   export type DeleteUserParams = {

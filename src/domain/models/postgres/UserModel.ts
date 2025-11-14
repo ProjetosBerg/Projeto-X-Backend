@@ -9,6 +9,8 @@ export type UserModel = {
   login: string;
   email: string;
   password: string;
+  imageUrl?: string;
+  publicId?: string;
   security_questions: SecurityQuestionModel[];
   categories?: CategoryModel[];
   bio?: string;
