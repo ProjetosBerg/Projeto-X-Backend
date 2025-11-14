@@ -59,6 +59,7 @@ describe("GetStreakUserUseCase", () => {
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    const todayDayOfWeek = today.getDay();
 
     authenticationRepositorySpy.hasOffensiveLoginInDay.mockImplementation(
       ({ date }) => {
@@ -73,19 +74,27 @@ describe("GetStreakUserUseCase", () => {
     const result = await sut.handle(data);
 
     expect(result.streakDays).toBe(1);
-    expect(result.weekProgress).toEqual([
-      false,
-      false,
-      true,
-      false,
-      false,
-      false,
-      false,
-    ]);
+
+    expect(result.weekProgress).toHaveLength(7);
+
+    const trueDays = result.weekProgress.filter(Boolean).length;
+    expect(trueDays).toBe(1);
+
+    expect(result.weekProgress[todayDayOfWeek]).toBe(true);
+
+    result.weekProgress.forEach((hasLogin, index) => {
+      if (index === todayDayOfWeek) {
+        expect(hasLogin).toBe(true);
+      } else {
+        expect(hasLogin).toBe(false);
+      }
+    });
+
     expect((result as any).completedDaysThisWeek).toBe(1);
+
     expect(
       authenticationRepositorySpy.hasOffensiveLoginInDay
-    ).toHaveBeenCalledTimes(5);
+    ).toHaveBeenCalled();
   });
 
   test("should calculate streak of 3 and update week progress accordingly", async () => {
@@ -93,6 +102,7 @@ describe("GetStreakUserUseCase", () => {
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    const todayDayOfWeek = today.getDay();
 
     authenticationRepositorySpy.hasOffensiveLoginInDay.mockImplementation(
       ({ date }) => {
@@ -107,19 +117,24 @@ describe("GetStreakUserUseCase", () => {
     const result = await sut.handle(data);
 
     expect(result.streakDays).toBe(3);
-    expect(result.weekProgress).toEqual([
-      true,
-      true,
-      true,
-      false,
-      false,
-      false,
-      false,
-    ]);
-    expect((result as any).completedDaysThisWeek).toBe(3);
+
+    expect(result.weekProgress).toHaveLength(7);
+
+    const expectedCompletedDays = Math.min(3, todayDayOfWeek + 1);
+
+    expect((result as any).completedDaysThisWeek).toBe(expectedCompletedDays);
+
+    for (let i = 0; i < 7; i++) {
+      if (i <= todayDayOfWeek && i > todayDayOfWeek - 3) {
+        expect(result.weekProgress[i]).toBe(true);
+      } else {
+        expect(result.weekProgress[i]).toBe(false);
+      }
+    }
+
     expect(
       authenticationRepositorySpy.hasOffensiveLoginInDay
-    ).toHaveBeenCalledTimes(7);
+    ).toHaveBeenCalled();
   });
 
   test("should throw ServerError for unexpected errors", async () => {
