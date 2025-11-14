@@ -12,6 +12,7 @@ import { makeResetPasswordUserControllerFactory } from "@/main/factories/control
 import { makeLogoutUserControllerFactory } from "@/main/factories/controllers/user/logoutUserControllerFactory";
 import { makeGetPresenceUserControllerFactory } from "@/main/factories/controllers/user/getPresenceUserControllerFactory";
 import { makeGetStreakUserControllerFactory } from "@/main/factories/controllers/user/getStreakUserControllerFactory";
+import { makeUploadUserMiddleware } from "../middlewares/uploadUserMiddleware";
 
 export const routesUser = (router: Router) => {
   router.get("/user/find-questions", (req: Request, res: Response) => {
@@ -42,9 +43,13 @@ export const routesUser = (router: Router) => {
     }
   );
 
-  router.post("/user/register", (req: Request, res: Response) => {
-    makeRegisterUserControllerFactory().handle(req, res);
-  });
+  router.post(
+    "/user/register",
+    adapterMiddleware(makeUploadUserMiddleware()),
+    (req: Request, res: Response) => {
+      makeRegisterUserControllerFactory().handle(req, res);
+    }
+  );
 
   router.post("/user/login", (req: Request, res: Response) => {
     makeLoginUserControllerFactory().handle(req, res);
@@ -72,6 +77,7 @@ export const routesUser = (router: Router) => {
   router.patch(
     "/user/edit/:id",
     adapterMiddleware(makeGetLoginMiddleware()),
+    adapterMiddleware(makeUploadUserMiddleware()),
     (req: Request, res: Response) => {
       makeEditUserByIdControllerFactory().handle(req, res);
     }
