@@ -70,6 +70,8 @@ describe("RegisterUserUseCase", () => {
         question: sq.question,
         answer: sq.answer,
       })),
+      imageUrl: "https://example.com/image.jpg",
+      publicId: "public_id_123",
     };
 
     const result = await sut.handle(input);
@@ -105,6 +107,8 @@ describe("RegisterUserUseCase", () => {
         question: q.question,
         answer: "hashed_answer",
       })),
+      imageUrl: input.imageUrl,
+      publicId: input.publicId,
     });
     expect(
       userAuthRepositoryRepositorySpy.createUserToken
@@ -126,6 +130,8 @@ describe("RegisterUserUseCase", () => {
       password: mockUser.password,
       confirmpassword: mockUser.password,
       securityQuestions: mockUser.security_questions,
+      imageUrl: "https://example.com/image.jpg",
+      publicId: "public_id_123",
     };
 
     userRepositoryRepositorySpy.findOne.mockResolvedValueOnce(mockUser);
@@ -149,6 +155,8 @@ describe("RegisterUserUseCase", () => {
       password: mockUser.password,
       confirmpassword: mockUser.password,
       securityQuestions: mockUser.security_questions,
+      imageUrl: "https://example.com/image.jpg",
+      publicId: "public_id_123",
     };
 
     userRepositoryRepositorySpy.findOne
@@ -178,6 +186,8 @@ describe("RegisterUserUseCase", () => {
       password: mockUser.password,
       confirmpassword: mockUser.password,
       securityQuestions: mockUser.security_questions,
+      imageUrl: "https://example.com/image.jpg",
+      publicId: "public_id_123",
     };
 
     userRepositoryRepositorySpy.create.mockResolvedValueOnce(undefined);
@@ -205,6 +215,8 @@ describe("RegisterUserUseCase", () => {
         question: q.question,
         answer: "hashed_answer",
       })),
+      imageUrl: input.imageUrl,
+      publicId: input.publicId,
     });
   });
 
@@ -218,6 +230,8 @@ describe("RegisterUserUseCase", () => {
       password: mockUser.password,
       confirmpassword: mockUser.password,
       securityQuestions: mockUser.security_questions,
+      imageUrl: "https://example.com/image.jpg",
+      publicId: "public_id_123",
     };
 
     userAuthRepositoryRepositorySpy.createUserToken.mockResolvedValueOnce({
