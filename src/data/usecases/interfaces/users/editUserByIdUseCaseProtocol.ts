@@ -14,6 +14,8 @@ export namespace EditUserByIdUseCaseProtocol {
     email?: UserModel["email"];
     securityQuestions?: SecurityQuestionModel[];
     bio?: UserModel["bio"];
+    imageUrl?: UserModel["imageUrl"];
+    publicId?: UserModel["publicId"];
   };
   export type Result = UserModel;
 }

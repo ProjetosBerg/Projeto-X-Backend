@@ -5,6 +5,9 @@ import { NotFoundError } from "@/data/errors/NotFoundError";
 import { EditUserByIdUseCaseProtocol } from "../interfaces/users/editUserByIdUseCaseProtocol";
 import { editUserByIdValidationSchema } from "../validation/users/editUserByIdValidationSchema";
 import UserAuth from "@/auth/users/userAuth";
+import cloudinary from "@/config/cloudinary";
+import { th } from "@faker-js/faker";
+import e from "express";
 
 export class EditUserByIdUseCase implements EditUserByIdUseCaseProtocol {
   constructor(
@@ -56,12 +59,25 @@ export class EditUserByIdUseCase implements EditUserByIdUseCaseProtocol {
           )
         : undefined;
 
+      if (data.publicId && user.publicId && user.publicId !== data.publicId) {
+        try {
+          await cloudinary.uploader.destroy(user.publicId);
+          console.log(`Imagem antiga deletada: ${user.publicId}`);
+        } catch (e) {
+          const message = e instanceof Error ? e.message : String(e);
+
+          throw new ServerError(`Falha ao deletar a imagem antiga: ${message}`);
+        }
+      }
+
       const updatedUser = await this.userRepository.updateUser({
         id: data?.id,
         name: data?.name,
         email: data?.email,
         securityQuestions: hashedSecurityQuestions,
         bio: data?.bio,
+        imageUrl: data?.imageUrl,
+        publicId: data?.publicId,
       });
 
       if (!updatedUser) {

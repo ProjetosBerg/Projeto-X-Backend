@@ -28,4 +28,6 @@ export const editUserByIdValidationSchema = yup.object().shape({
     .string()
     .max(200, "Bio deve ter no máximo 200 caracteres")
     .nullable(),
+  imageUrl: yup.string().url("URL da imagem inválida").optional(),
+  publicId: yup.string().optional(),
 });
