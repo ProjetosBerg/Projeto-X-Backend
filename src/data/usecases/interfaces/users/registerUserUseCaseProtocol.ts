@@ -18,6 +18,8 @@ export namespace RegisterUserUseCaseProtocol {
       question: SecurityQuestionModel["question"];
       answer: SecurityQuestionModel["answer"];
     }>;
+    imageUrl?: UserModel["imageUrl"];
+    publicId?: UserModel["publicId"];
   };
   export type Result = {
     user: UserModel;

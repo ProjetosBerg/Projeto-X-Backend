@@ -3,6 +3,7 @@ import { ValidationError } from "yup";
 import { IResponse, ResponseStatus, getError } from "@/utils/service";
 import { Controller } from "@/presentation/protocols/controller";
 import { RegisterUserUseCase } from "@/data/usecases/users/registerUserUseCase";
+import cloudinary from "@/config/cloudinary";
 
 export class RegisterUserController implements Controller {
   constructor(private readonly createUserService: RegisterUserUseCase) {
@@ -13,6 +14,7 @@ export class RegisterUserController implements Controller {
     req: Request,
     res: Response<IResponse>
   ): Promise<Response<IResponse>> {
+    let publicIdToDelete: string | null = null;
     try {
       const {
         name,
@@ -21,15 +23,38 @@ export class RegisterUserController implements Controller {
         password,
         confirmpassword,
         securityQuestions,
+        imageUrl,
+        publicId,
       } = req.body;
+
+      let parsedSecurityQuestions = securityQuestions;
+      if (typeof securityQuestions === "string") {
+        try {
+          parsedSecurityQuestions = JSON.parse(securityQuestions);
+        } catch (parseError) {
+          return res.status(400).json({
+            status: ResponseStatus.BAD_REQUEST,
+            message:
+              "Formato inválido para securityQuestions. Deve ser um JSON válido.",
+          });
+        }
+      }
+
       const data = {
         name,
         login,
         email,
         password,
         confirmpassword,
-        securityQuestions,
+        securityQuestions: parsedSecurityQuestions,
+        imageUrl,
+        publicId,
       };
+
+      if (publicId) {
+        publicIdToDelete = publicId;
+      }
+
       const createUser = await this.createUserService.handle({ ...data });
       return res.status(201).json({
         status: ResponseStatus.OK,
@@ -37,6 +62,20 @@ export class RegisterUserController implements Controller {
         message: "Usuário criado com sucesso",
       });
     } catch (error) {
+      if (publicIdToDelete) {
+        try {
+          await cloudinary.uploader.destroy(publicIdToDelete);
+        } catch (deleteError) {
+          const message =
+            deleteError instanceof Error
+              ? deleteError.message
+              : String(deleteError);
+          throw new Error(
+            `Erro ao deletar imagem após falha no cadastro: ${message}`
+          );
+        }
+      }
+
       if (error instanceof ValidationError) {
         return res.status(400).json({
           status: ResponseStatus.BAD_REQUEST,

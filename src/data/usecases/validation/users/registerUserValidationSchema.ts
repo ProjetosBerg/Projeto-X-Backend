@@ -47,4 +47,6 @@ export const registerUserValidationSchema = yup.object().shape({
         answer: yup.string().required("Resposta de segurança é obrigatória"),
       })
     ),
+  imageUrl: yup.string().url("URL da imagem inválida").optional(),
+  publicId: yup.string().optional(),
 });

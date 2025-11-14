@@ -1,11 +1,11 @@
 import { UserModel } from "@/domain/models/postgres/UserModel";
 import { SecurityQuestionModel } from "@/domain/models/postgres/SecurityQuestionModel";
-import { registerUserValidationSchema } from "../validation/users/registerUserValidationSchema";
 import { RegisterUserUseCaseProtocol } from "../interfaces/users/registerUserUseCaseProtocol";
 import { UserRepositoryProtocol } from "@/infra/db/interfaces/userRepositoryProtocol";
 import UserAuth from "@/auth/users/userAuth";
 import { ServerError } from "@/data/errors/ServerError";
 import { BusinessRuleError } from "@/data/errors/BusinessRuleError";
+import { registerUserValidationSchema } from "../validation/users/registerUserValidationSchema";
 
 export class RegisterUserUseCase implements RegisterUserUseCaseProtocol {
   constructor(
@@ -21,6 +21,8 @@ export class RegisterUserUseCase implements RegisterUserUseCaseProtocol {
    * @param {string} data.email - O endereço de email do usuário
    * @param {string} data.password - A senha da conta do usuário
    * @param {string} data.confirmpassword - A confirmação da senha do usuário
+   * @param {string} user.imageUrl - URL da imagem do usuário
+   * @param {string} user.publicId - ID publico da imagem do usuário
    * @param {Array<{ question: string; answer: string }>} data.securityQuestions - Lista de questões de segurança
    * @returns {Promise<RegisterUserUseCaseProtocol.Result | undefined>} O usuário registrado e o token de autenticação
    * @throws {BusinessRuleError} Se as credenciais forem inválidas ou as questões de segurança forem insuficientes
@@ -69,6 +71,8 @@ export class RegisterUserUseCase implements RegisterUserUseCaseProtocol {
         email: data?.email,
         password: hashedPassword,
         securityQuestions: hashedSecurityQuestions,
+        imageUrl: data?.imageUrl,
+        publicId: data?.publicId,
       });
 
       if (!newUser || !newUser.id) {
