@@ -37,6 +37,7 @@ export const makeAuthenticationRepositoryRepository = () => {
   return {
     create: jest.fn().mockResolvedValue(undefined),
     hasLoginToday: jest.fn().mockResolvedValue(false),
+    findActiveSessionToday: jest.fn().mockResolvedValue(null),
     ...({} as any),
   };
 };
