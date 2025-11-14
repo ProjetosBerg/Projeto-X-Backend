@@ -48,13 +48,19 @@ export class AuthenticationRepository
   ): Promise<Authentication | undefined> {
     try {
       const repository = getRepository(Authentication);
-      const session = await repository.findOne({
+
+      const findOptions: any = {
         where: {
           userId: data.userId,
           sessionId: data.sessionId,
           logoutAt: IsNull(),
         },
-      });
+      };
+      if (data?.isOrder) {
+        findOptions.order = { createdAt: "DESC" };
+      }
+
+      const session = await repository.findOne(findOptions);
       return session || undefined;
     } catch (error: any) {
       throw new Error(`Erro ao buscar sessão ativa: ${error.message}`);

@@ -117,5 +117,6 @@ export namespace AuthenticationRepositoryProtocol {
   export type FindActiveSessionParams = {
     userId: string;
     sessionId: string;
+    isOrder?: boolean;
   };
 }

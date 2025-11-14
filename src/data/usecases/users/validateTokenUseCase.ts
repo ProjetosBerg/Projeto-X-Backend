@@ -31,6 +31,7 @@ export class ValidateTokenUseCase implements ValidateTokenUseCaseProtocol {
         await this.authenticationRepository.findActiveSession({
           userId: data.userId,
           sessionId,
+          isOrder: true,
         });
 
       let shouldCreateNew = true;

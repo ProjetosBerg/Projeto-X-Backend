@@ -59,6 +59,7 @@ describe("ValidateTokenUseCase", () => {
     ).toHaveBeenCalledWith({
       userId: validateDataWithSession.userId,
       sessionId: validateDataWithSession.sessionId,
+      isOrder: true,
     });
     expect(
       authenticationRepositoryRepositorySpy.incrementEntryCount
@@ -90,6 +91,7 @@ describe("ValidateTokenUseCase", () => {
       expect.objectContaining({
         userId: validateData.userId,
         sessionId: expect.any(String),
+        isOrder: true,
       })
     );
     expect(
