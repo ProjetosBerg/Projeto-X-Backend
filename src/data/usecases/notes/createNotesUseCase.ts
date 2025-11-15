@@ -3,15 +3,17 @@ import { BusinessRuleError } from "@/data/errors/BusinessRuleError";
 import { NotesModel } from "@/domain/models/postgres/NotesModel";
 import { RoutinesRepositoryProtocol } from "@/infra/db/interfaces/routinesRepositoryProtocol";
 import { CategoryRepositoryProtocol } from "@/infra/db/interfaces/categoryRepositoryProtocol";
+import { NotificationRepositoryProtocol } from "@/infra/db/interfaces/notificationRepositoryProtocol";
 import { createNotesValidationSchema } from "../validation/notes/createNotesValidationSchema";
 import { CreateNotesUseCaseProtocol } from "../interfaces/notes/createNotesUseCaseProtocol";
 import { NotesRepositoryProtocol } from "@/infra/db/interfaces/notesRepositoryProtocol";
+import { NotificationModel } from "@/domain/models/postgres/NotificationModel";
 
 /**
- * Cria uma nova AAnotaçãoção para um usuário
+ * Cria uma nova Anotação para um usuário
  *
  * @param {CreateNotesUseCaseProtocol.Params} data - Os dados de entrada para a criação da Anotação
- * @param {string} data.status - O status da AAnotaçãoção
+ * @param {string} data.status - O status da Anotação
  * @param {string[]} [data.collaborators] - Colaboradores da Anotação (opcional)
  * @param {string} data.priority - A prioridade da Anotação
  * @param {string} [data.category_id] - O ID da categoria associada (opcional)
@@ -35,7 +37,8 @@ export class CreateNotesUseCase implements CreateNotesUseCaseProtocol {
   constructor(
     private readonly notesRepository: NotesRepositoryProtocol,
     private readonly routinesRepository: RoutinesRepositoryProtocol,
-    private readonly categoryRepository: CategoryRepositoryProtocol
+    private readonly categoryRepository: CategoryRepositoryProtocol,
+    private readonly notificationRepository: NotificationRepositoryProtocol
   ) {}
 
   async handle(data: CreateNotesUseCaseProtocol.Params): Promise<NotesModel> {
@@ -82,6 +85,25 @@ export class CreateNotesUseCase implements CreateNotesUseCaseProtocol {
         comments: data.comments,
         routine_id: data.routine_id,
         userId: data.userId,
+      });
+
+      await this.notificationRepository.create({
+        title: `Nova anotação criada: ${data.activity}`,
+        entity: "Notes",
+        idEntity: createdNote.id,
+        userId: data.userId,
+        path: `/anotacoes`,
+        payload: {
+          activity: data.activity,
+          activityType: data.activityType,
+          priority: data.priority,
+          startTime: data.startTime,
+          endTime: data.endTime,
+          routine_id: data.routine_id,
+          category_id: data.category_id,
+          routine: existingRoutine,
+        } as NotificationModel["payload"],
+        typeOfAction: "Criação",
       });
 
       return createdNote;

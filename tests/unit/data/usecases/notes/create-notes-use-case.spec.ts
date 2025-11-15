@@ -8,6 +8,7 @@ import { ValidationError } from "yup";
 import { NotesRepositoryProtocol } from "@/infra/db/interfaces/notesRepositoryProtocol";
 import { CreateNotesUseCase } from "@/data/usecases/notes/createNotesUseCase";
 import { mockRoutine } from "@/tests/unit/mocks/routines/mockRoutines";
+import { NotificationRepositoryProtocol } from "@/infra/db/interfaces/notificationRepositoryProtocol";
 
 export const makeNotesRepository =
   (): jest.Mocked<NotesRepositoryProtocol> => ({
@@ -27,14 +28,23 @@ export const makeCategoryRepository =
     ...({} as any),
   });
 
+export const makeNotificationRepository =
+  (): jest.Mocked<NotificationRepositoryProtocol> => ({
+    create: jest.fn().mockResolvedValue(null),
+    ...({} as any),
+  });
+
 const makeSut = () => {
   const notesRepositorySpy = makeNotesRepository();
   const routinesRepositorySpy = makeRoutinesRepository();
   const categoryRepositorySpy = makeCategoryRepository();
+  const notificationRepositorySpy = makeNotificationRepository();
+
   const sut = new CreateNotesUseCase(
     notesRepositorySpy,
     routinesRepositorySpy,
-    categoryRepositorySpy
+    categoryRepositorySpy,
+    notificationRepositorySpy
   );
 
   return {

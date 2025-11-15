@@ -4,6 +4,7 @@ import { ServerError } from "@/data/errors/ServerError";
 import { mockNotes } from "@/tests/unit/mocks/notes/mockNotes";
 import { ValidationError } from "yup";
 import { CreateSummaryDayNotesUseCase } from "@/data/usecases/notes/createSummaryDayNotesUseCase";
+import { NotificationRepositoryProtocol } from "@/infra/db/interfaces/notificationRepositoryProtocol";
 
 export const makeNotesRepository =
   (): jest.Mocked<NotesRepositoryProtocol> => ({
@@ -20,12 +21,21 @@ export const makeRoutinesRepository =
     ...({} as any),
   });
 
+export const makeNotificationRepository =
+  (): jest.Mocked<NotificationRepositoryProtocol> => ({
+    create: jest.fn().mockResolvedValue(null),
+    ...({} as any),
+  });
+
 const makeSut = () => {
   const notesRepositorySpy = makeNotesRepository();
   const routinesRepositorySpy = makeRoutinesRepository();
+  const notificationRepositorySpy = makeNotificationRepository();
+
   const sut = new CreateSummaryDayNotesUseCase(
     notesRepositorySpy,
-    routinesRepositorySpy
+    routinesRepositorySpy,
+    notificationRepositorySpy
   );
 
   return {

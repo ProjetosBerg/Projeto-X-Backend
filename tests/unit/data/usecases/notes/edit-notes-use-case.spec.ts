@@ -9,6 +9,7 @@ import { mockCategory } from "@/tests/unit/mocks/category/mockCategory";
 import { ValidationError } from "yup";
 import { EditNotesUseCase } from "@/data/usecases/notes/editNotesUseCase";
 import { mockRoutine } from "@/tests/unit/mocks/routines/mockRoutines";
+import { NotificationRepositoryProtocol } from "@/infra/db/interfaces/notificationRepositoryProtocol";
 
 export const makeNotesRepository =
   (): jest.Mocked<NotesRepositoryProtocol> => ({
@@ -29,14 +30,23 @@ export const makeCategoryRepository =
     ...({} as any),
   });
 
+export const makeNotificationRepository =
+  (): jest.Mocked<NotificationRepositoryProtocol> => ({
+    create: jest.fn().mockResolvedValue(null),
+    ...({} as any),
+  });
+
 const makeSut = () => {
   const notesRepositorySpy = makeNotesRepository();
   const routinesRepositorySpy = makeRoutinesRepository();
   const categoryRepositorySpy = makeCategoryRepository();
+  const notificationRepositorySpy = makeNotificationRepository();
+
   const sut = new EditNotesUseCase(
     notesRepositorySpy,
     routinesRepositorySpy,
-    categoryRepositorySpy
+    categoryRepositorySpy,
+    notificationRepositorySpy
   );
 
   return {

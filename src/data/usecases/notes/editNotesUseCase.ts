@@ -5,8 +5,10 @@ import { NotesModel } from "@/domain/models/postgres/NotesModel";
 import { NotesRepositoryProtocol } from "@/infra/db/interfaces/notesRepositoryProtocol";
 import { RoutinesRepositoryProtocol } from "@/infra/db/interfaces/routinesRepositoryProtocol";
 import { CategoryRepositoryProtocol } from "@/infra/db/interfaces/categoryRepositoryProtocol";
+import { NotificationRepositoryProtocol } from "@/infra/db/interfaces/notificationRepositoryProtocol";
 import { EditNotesUseCaseProtocol } from "../interfaces/notes/editNotesUseCaseProtocol";
 import { editNotesValidationSchema } from "../validation/notes/editNotesValidationSchema";
+import { NotificationModel } from "@/domain/models/postgres/NotificationModel";
 
 /**
  * Edita uma Anotação existente para um usuário
@@ -38,7 +40,8 @@ export class EditNotesUseCase implements EditNotesUseCaseProtocol {
   constructor(
     private readonly notesRepository: NotesRepositoryProtocol,
     private readonly routinesRepository: RoutinesRepositoryProtocol,
-    private readonly categoryRepository: CategoryRepositoryProtocol
+    private readonly categoryRepository: CategoryRepositoryProtocol,
+    private readonly notificationRepository: NotificationRepositoryProtocol
   ) {}
 
   async handle(data: EditNotesUseCaseProtocol.Params): Promise<NotesModel> {
@@ -46,6 +49,8 @@ export class EditNotesUseCase implements EditNotesUseCaseProtocol {
       await editNotesValidationSchema.validate(data, {
         abortEarly: false,
       });
+
+      let routineModel;
 
       const existingNote = await this.notesRepository.findByIdAndUserId({
         id: data.noteId,
@@ -66,6 +71,8 @@ export class EditNotesUseCase implements EditNotesUseCaseProtocol {
             userId: data.userId,
           }
         );
+
+        routineModel = existingRoutine;
 
         if (!existingRoutine) {
           throw new BusinessRuleError(
@@ -109,6 +116,26 @@ export class EditNotesUseCase implements EditNotesUseCaseProtocol {
         routine_id: data.routine_id,
         id: data.noteId,
         userId: data.userId,
+      });
+
+      await this.notificationRepository.create({
+        title: `Anotação atualizada: ${updatedNote.activity}`,
+        entity: "Notes",
+        idEntity: data.noteId,
+        userId: data.userId,
+        path: `/anotacoes`,
+        payload: {
+          activity: updatedNote.activity,
+          status: updatedNote.status,
+          priority: updatedNote.priority,
+          activityType: updatedNote.activityType,
+          startTime: updatedNote.startTime,
+          endTime: updatedNote.endTime,
+          routine_id: updatedNote.routine_id,
+          category_id: updatedNote.category_id,
+          routine: routineModel,
+        } as NotificationModel["payload"],
+        typeOfAction: "Atualização",
       });
 
       return updatedNote;

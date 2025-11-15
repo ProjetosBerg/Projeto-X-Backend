@@ -1,9 +1,10 @@
 import { ServerError } from "@/data/errors/ServerError";
 import { NotFoundError } from "@/data/errors/NotFoundError";
-
 import { NotesRepositoryProtocol } from "@/infra/db/interfaces/notesRepositoryProtocol";
+import { NotificationRepositoryProtocol } from "@/infra/db/interfaces/notificationRepositoryProtocol";
 import { DeleteNotesUseCaseProtocol } from "../interfaces/notes/deleteNotesUseCaseProtocol";
 import { deleteNotesValidationSchema } from "../validation/notes/deleteNotesValidationSchema";
+import { NotificationModel } from "@/domain/models/postgres/NotificationModel";
 
 /**
  * Deleta uma Anotação existente para um usuário
@@ -20,7 +21,10 @@ import { deleteNotesValidationSchema } from "../validation/notes/deleteNotesVali
  */
 
 export class DeleteNotesUseCase implements DeleteNotesUseCaseProtocol {
-  constructor(private readonly notesRepository: NotesRepositoryProtocol) {}
+  constructor(
+    private readonly notesRepository: NotesRepositoryProtocol,
+    private readonly notificationRepository: NotificationRepositoryProtocol
+  ) {}
 
   async handle(data: DeleteNotesUseCaseProtocol.Params): Promise<void> {
     try {
@@ -28,9 +32,29 @@ export class DeleteNotesUseCase implements DeleteNotesUseCaseProtocol {
         abortEarly: false,
       });
 
+      const existingNote = await this.notesRepository.findByIdAndUserId({
+        id: data.noteId,
+        userId: data.userId,
+      });
+
+      if (!existingNote) {
+        throw new NotFoundError(
+          `Anotação com ID ${data.noteId} não encontrada para este usuário`
+        );
+      }
+
       await this.notesRepository.deleteNote({
         id: data.noteId,
         userId: data.userId,
+      });
+
+      await this.notificationRepository.create({
+        title: `Anotação excluída: ${existingNote.activity}`,
+        entity: "Notes",
+        idEntity: data.noteId,
+        userId: data.userId,
+        path: `/anotacoes`,
+        typeOfAction: "Exclusão",
       });
     } catch (error: any) {
       if (error.name === "ValidationError") {

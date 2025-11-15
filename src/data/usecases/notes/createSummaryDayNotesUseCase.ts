@@ -1,8 +1,10 @@
 import { ServerError } from "@/data/errors/ServerError";
 import { NotesRepositoryProtocol } from "@/infra/db/interfaces/notesRepositoryProtocol";
 import { RoutinesRepositoryProtocol } from "@/infra/db/interfaces/routinesRepositoryProtocol";
+import { NotificationRepositoryProtocol } from "@/infra/db/interfaces/notificationRepositoryProtocol";
 import { CreateSummaryDayNotesUseCaseProtocol } from "../interfaces/notes/createSummaryDayNotesUseCaseProtocol";
 import { createSummaryDayNotesValidationSchema } from "../validation/notes/createSummaryDayNotesValidationSchema";
+import { NotificationModel } from "@/domain/models/postgres/NotificationModel";
 
 /**
  * Cria um resumo do dia baseado nas notas do usuário de forma estruturada e bonita,
@@ -16,7 +18,8 @@ export class CreateSummaryDayNotesUseCase
 {
   constructor(
     private readonly notesRepository: NotesRepositoryProtocol,
-    private readonly routinesRepository: RoutinesRepositoryProtocol
+    private readonly routinesRepository: RoutinesRepositoryProtocol,
+    private readonly notificationRepository: NotificationRepositoryProtocol
   ) {}
 
   async handle(
@@ -44,6 +47,7 @@ export class CreateSummaryDayNotesUseCase
       const summary = this.generateStructuredSummary(notes, validatedData.date);
 
       let routineId = validatedData.routine_id;
+      let routineModel;
       if (!routineId) {
         const { routines } = await this.routinesRepository.findByUserId({
           userId: validatedData.userId,
@@ -56,6 +60,7 @@ export class CreateSummaryDayNotesUseCase
           );
         }
         routineId = routines[0].id;
+        routineModel = routines[0];
       }
 
       const dateParts = validatedData.date.split("-");
@@ -86,6 +91,24 @@ export class CreateSummaryDayNotesUseCase
         userId: validatedData.userId,
         status: "",
         priority: "",
+      });
+
+      await this.notificationRepository.create({
+        title: `Resumo do dia gerado: ${formattedDate}`,
+        entity: "Notes",
+        idEntity: summaryNote.id,
+        userId: validatedData.userId,
+        path: `/anotacoes`,
+        payload: {
+          date: validatedData.date,
+          formattedDate: formattedDate,
+          routine_id: routineId,
+          totalNotes: notes.length,
+          summaryPreview: summary.substring(0, 200) + "...",
+          summary: summary,
+          routines: routineModel,
+        } as NotificationModel["payload"],
+        typeOfAction: "Criação",
       });
 
       return summary;
