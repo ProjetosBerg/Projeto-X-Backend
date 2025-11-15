@@ -23,7 +23,10 @@ export class NotificationRepository implements NotificationRepositoryProtocol {
       title: data.title,
       entity: data.entity,
       idEntity: data.idEntity,
-      isRead: false,
+      isRead: false, // Default para não lida
+      path: data.path,
+      payload: data.payload,
+      typeOfAction: data.typeOfAction,
       user: { id: data.userId } as User,
     });
 
@@ -34,6 +37,9 @@ export class NotificationRepository implements NotificationRepositoryProtocol {
       entity: savedNotification.entity,
       idEntity: savedNotification.idEntity,
       isRead: savedNotification.isRead,
+      path: savedNotification.path,
+      payload: savedNotification.payload,
+      typeOfAction: savedNotification.typeOfAction,
       user_id: savedNotification.user.id,
       created_at: savedNotification.created_at,
       updated_at: savedNotification.updated_at,
@@ -66,6 +72,9 @@ export class NotificationRepository implements NotificationRepositoryProtocol {
       entity: notification.entity,
       idEntity: notification.idEntity,
       isRead: notification.isRead,
+      path: notification.path,
+      payload: notification.payload,
+      typeOfAction: notification.typeOfAction,
       user_id: notification.user.id,
       created_at: notification.created_at,
       updated_at: notification.updated_at,
@@ -89,6 +98,9 @@ export class NotificationRepository implements NotificationRepositoryProtocol {
     const order = data.order?.toUpperCase() === "DESC" ? "DESC" : "ASC";
     const isReadFilter =
       data.isRead !== undefined ? { isRead: data.isRead } : {};
+    const typeOfActionFilter = data.typeOfAction
+      ? { typeOfAction: data.typeOfAction }
+      : {};
 
     const whereCondition = search
       ? [
@@ -96,9 +108,10 @@ export class NotificationRepository implements NotificationRepositoryProtocol {
             title: ILike(`%${search}%`),
             user: { id: data.userId },
             ...isReadFilter,
+            ...typeOfActionFilter,
           },
         ]
-      : { user: { id: data.userId }, ...isReadFilter };
+      : { user: { id: data.userId }, ...isReadFilter, ...typeOfActionFilter };
 
     const [notifications, total] = await this.repository.findAndCount({
       where: whereCondition,
@@ -114,6 +127,9 @@ export class NotificationRepository implements NotificationRepositoryProtocol {
       entity: notification.entity,
       idEntity: notification.idEntity,
       isRead: notification.isRead,
+      path: notification.path,
+      payload: notification.payload,
+      typeOfAction: notification.typeOfAction,
       user_id: notification.user.id,
       created_at: notification.created_at,
       updated_at: notification.updated_at,
@@ -131,6 +147,7 @@ export class NotificationRepository implements NotificationRepositoryProtocol {
    * @param {string} data.id - ID da Notificação
    * @param {string} data.userId - ID do usuário
    * @param {boolean} [data.isRead] - Novo status de lida
+   * @param {string} [data.typeOfAction] - Novo tipo de ação (raro, mas possível)
    * @returns {Promise<NotificationModel>} A Notificação atualizada
    * @throws {NotFoundError} Quando a Notificação não é encontrada
    */
@@ -152,6 +169,8 @@ export class NotificationRepository implements NotificationRepositoryProtocol {
     }
 
     if (data.isRead !== undefined) notification.isRead = data.isRead;
+    if (data.typeOfAction !== undefined)
+      notification.typeOfAction = data.typeOfAction;
 
     const updatedNotification = await this.repository.save(notification);
     return {
@@ -160,6 +179,9 @@ export class NotificationRepository implements NotificationRepositoryProtocol {
       entity: updatedNotification.entity,
       idEntity: updatedNotification.idEntity,
       isRead: updatedNotification.isRead,
+      path: updatedNotification.path,
+      payload: updatedNotification.payload,
+      typeOfAction: updatedNotification.typeOfAction,
       user_id: updatedNotification.user.id,
       created_at: updatedNotification.created_at,
       updated_at: updatedNotification.updated_at,

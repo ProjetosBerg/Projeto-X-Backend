@@ -8,6 +8,7 @@ export type NotificationModel = {
   isRead?: boolean;
   path?: string;
   payload?: Record<string, any>;
+  typeOfAction?: string;
   user_id?: UserModel["id"];
   created_at?: Date;
   updated_at?: Date;

@@ -24,6 +24,9 @@ export namespace NotificationRepositoryProtocol {
     entity: NotificationModel["entity"];
     idEntity: NotificationModel["idEntity"];
     userId: NotificationModel["user_id"];
+    path?: NotificationModel["path"];
+    payload?: NotificationModel["payload"];
+    typeOfAction?: NotificationModel["typeOfAction"];
   };
 
   export type FindByIdAndUserIdParams = {
@@ -35,6 +38,8 @@ export namespace NotificationRepositoryProtocol {
     isRead?: NotificationModel["isRead"];
     id: NotificationModel["id"];
     userId: NotificationModel["user_id"];
+    path?: NotificationModel["path"];
+    typeOfAction?: NotificationModel["typeOfAction"];
   };
 
   export type FindByUserIdParams = {
@@ -45,6 +50,7 @@ export namespace NotificationRepositoryProtocol {
     sortBy?: string;
     order?: string;
     isRead?: boolean;
+    typeOfAction?: string;
   };
 
   export type DeleteNotificationParams = {
