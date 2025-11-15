@@ -3,6 +3,7 @@ import UserAuth from "@/auth/users/userAuth";
 import { ServerError } from "@/data/errors/ServerError";
 import { BusinessRuleError } from "@/data/errors/BusinessRuleError";
 import { NotFoundError } from "@/data/errors/NotFoundError";
+import { NotificationRepositoryProtocol } from "@/infra/db/interfaces/notificationRepositoryProtocol";
 import { resetPasswordUserValidationSchema } from "../validation/users/resetPasswordUserValidationSchema";
 import { ResetPasswordUserUseCaseProtocol } from "../interfaces/users/resetPasswordUseCaseProtocol";
 
@@ -11,7 +12,8 @@ export class ResetPasswordUserUseCase
 {
   constructor(
     private readonly userRepository: UserRepositoryProtocol,
-    private readonly userAuth: UserAuth
+    private readonly userAuth: UserAuth,
+    private readonly notificationRepository: NotificationRepositoryProtocol
   ) {}
 
   /**
@@ -58,6 +60,14 @@ export class ResetPasswordUserUseCase
       if (!updatedUser) {
         throw new BusinessRuleError("Falha ao atualizar a senha do usuário");
       }
+
+      await this.notificationRepository.create({
+        title: "Senha atualizada",
+        entity: "User",
+        idEntity: user.id,
+        userId: user.id,
+        typeOfAction: "Atualização",
+      });
 
       return { message: "Senha redefinida com sucesso" };
     } catch (error: any) {

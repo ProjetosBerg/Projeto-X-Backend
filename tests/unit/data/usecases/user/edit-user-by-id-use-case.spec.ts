@@ -6,6 +6,7 @@ import { NotFoundError } from "@/data/errors/NotFoundError";
 import { ValidationError } from "yup";
 import { faker } from "@faker-js/faker";
 import UserAuth from "@/auth/users/userAuth";
+import { NotificationRepositoryProtocol } from "@/infra/db/interfaces/notificationRepositoryProtocol";
 
 export const makeUserRepositoryRepository =
   (): jest.Mocked<UserRepositoryProtocol> => ({
@@ -35,13 +36,21 @@ export const makeUserAuthRepositoryRepository = (): jest.Mocked<UserAuth> => {
   return userAuth;
 };
 
+export const makeNotificationRepository =
+  (): jest.Mocked<NotificationRepositoryProtocol> => ({
+    create: jest.fn().mockResolvedValue(null),
+    ...({} as any),
+  });
+
 const makeSut = () => {
   const userRepositoryRepositorySpy = makeUserRepositoryRepository();
   const userAuthRepositoryRepositorySpy = makeUserAuthRepositoryRepository();
+  const notificationRepositorySpy = makeNotificationRepository();
 
   const sut = new EditUserByIdUseCase(
     userRepositoryRepositorySpy,
-    userAuthRepositoryRepositorySpy
+    userAuthRepositoryRepositorySpy,
+    notificationRepositorySpy
   );
 
   return {

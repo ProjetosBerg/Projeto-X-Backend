@@ -2,17 +2,17 @@ import { UserRepositoryProtocol } from "@/infra/db/interfaces/userRepositoryProt
 import { ServerError } from "@/data/errors/ServerError";
 import { BusinessRuleError } from "@/data/errors/BusinessRuleError";
 import { NotFoundError } from "@/data/errors/NotFoundError";
+import { NotificationRepositoryProtocol } from "@/infra/db/interfaces/notificationRepositoryProtocol";
 import { EditUserByIdUseCaseProtocol } from "../interfaces/users/editUserByIdUseCaseProtocol";
 import { editUserByIdValidationSchema } from "../validation/users/editUserByIdValidationSchema";
 import UserAuth from "@/auth/users/userAuth";
 import cloudinary from "@/config/cloudinary";
-import { th } from "@faker-js/faker";
-import e from "express";
 
 export class EditUserByIdUseCase implements EditUserByIdUseCaseProtocol {
   constructor(
     private readonly userRepository: UserRepositoryProtocol,
-    private readonly userAuth: UserAuth
+    private readonly userAuth: UserAuth,
+    private readonly notificationRepository: NotificationRepositoryProtocol
   ) {}
 
   /**
@@ -83,6 +83,14 @@ export class EditUserByIdUseCase implements EditUserByIdUseCaseProtocol {
       if (!updatedUser) {
         throw new BusinessRuleError("Falha ao atualizar os dados do usuário");
       }
+
+      await this.notificationRepository.create({
+        title: "Perfil atualizado",
+        entity: "User",
+        idEntity: data.id,
+        userId: data.id,
+        typeOfAction: "Atualização",
+      });
 
       return updatedUser;
     } catch (error: any) {

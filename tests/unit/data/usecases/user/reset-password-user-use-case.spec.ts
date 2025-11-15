@@ -6,6 +6,7 @@ import { BusinessRuleError } from "@/data/errors/BusinessRuleError";
 import { NotFoundError } from "@/data/errors/NotFoundError";
 import { ServerError } from "@/data/errors/ServerError";
 import { resetPasswordUserValidationSchema } from "@/data/usecases/validation/users/resetPasswordUserValidationSchema";
+import { NotificationRepositoryProtocol } from "@/infra/db/interfaces/notificationRepositoryProtocol";
 
 jest.mock("@/data/usecases/validation/users/resetPasswordUserValidationSchema");
 
@@ -23,10 +24,22 @@ export const makeUserAuthSpy = (): jest.Mocked<UserAuth> => {
   return userAuth;
 };
 
+export const makeNotificationRepository =
+  (): jest.Mocked<NotificationRepositoryProtocol> => ({
+    create: jest.fn().mockResolvedValue(null),
+    ...({} as any),
+  });
+
 const makeSut = () => {
   const userRepositorySpy = makeUserRepositorySpy();
   const userAuthSpy = makeUserAuthSpy();
-  const sut = new ResetPasswordUserUseCase(userRepositorySpy, userAuthSpy);
+  const notificationRepositorySpy = makeNotificationRepository();
+
+  const sut = new ResetPasswordUserUseCase(
+    userRepositorySpy,
+    userAuthSpy,
+    notificationRepositorySpy
+  );
 
   return {
     sut,
