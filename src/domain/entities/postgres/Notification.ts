@@ -27,6 +27,12 @@ export class Notification extends BaseEntity {
   @Column({ type: "boolean", default: false })
   isRead!: boolean;
 
+  @Column({ type: "varchar", nullable: true })
+  path?: string;
+
+  @Column("json", { nullable: true })
+  payload?: Record<string, any>;
+
   @ManyToOne(() => User, (user) => user.notifications, { nullable: false })
   @JoinColumn({ name: "user_id" })
   user!: User;
