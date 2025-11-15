@@ -13,8 +13,8 @@ export interface NotificationRepositoryProtocol {
   findByUserId(
     data: NotificationRepositoryProtocol.FindByUserIdParams
   ): Promise<{ notifications: NotificationModel[]; total: number }>;
-  deleteNotification(
-    data: NotificationRepositoryProtocol.DeleteNotificationParams
+  deleteNotifications(
+    data: NotificationRepositoryProtocol.DeleteNotificationsParams
   ): Promise<void>;
 }
 
@@ -53,8 +53,8 @@ export namespace NotificationRepositoryProtocol {
     typeOfAction?: string;
   };
 
-  export type DeleteNotificationParams = {
-    id: NotificationModel["id"];
+  export type DeleteNotificationsParams = {
+    ids: NotificationModel["id"][];
     userId: NotificationModel["user_id"];
   };
 }

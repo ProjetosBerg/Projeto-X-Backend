@@ -1,4 +1,4 @@
-import { ILike, Repository, getRepository } from "typeorm";
+import { ILike, In, Repository, getRepository } from "typeorm";
 import { Notification } from "@/domain/entities/postgres/Notification";
 import { NotificationModel } from "@/domain/models/postgres/NotificationModel";
 import { User } from "@/domain/entities/postgres/User";
@@ -189,32 +189,25 @@ export class NotificationRepository implements NotificationRepositoryProtocol {
   }
 
   /**
-   * Deleta uma notificação do banco de dados
-   * @param {NotificationRepositoryProtocol.DeleteNotificationParams} data - Os dados para deleção
-   * @param {string} data.id - ID da notificação
+   * Deleta múltiplas notificações do banco de dados por IDs e ID do usuário
+   * @param {NotificationRepositoryProtocol.DeleteNotificationsParams} data - Os dados para deleção
    * @param {string} data.userId - ID do usuário
+   * @param {string[]} data.ids - Array de IDs das notificações
    * @returns {Promise<void>} Não retorna valor
-   * @throws {NotFoundError} Quando a notificação não é encontrada
+   * @throws {NotFoundError} Quando nenhuma das notificações é encontrada (opcional, dependendo da lógica desejada)
    */
-  async deleteNotification(
-    data: NotificationRepositoryProtocol.DeleteNotificationParams
+  async deleteNotifications(
+    data: NotificationRepositoryProtocol.DeleteNotificationsParams
   ): Promise<void> {
-    const notification = await this.repository.findOne({
-      where: {
-        id: data.id,
-        user: { id: data.userId },
-      },
-    });
-
-    if (!notification) {
-      throw new NotFoundError(
-        `Notificação com ID ${data.id} não encontrada para este usuário`
-      );
-    }
-
-    await this.repository.delete({
-      id: data.id,
+    const { affected } = await this.repository.delete({
+      id: In(data.ids),
       user: { id: data.userId },
     });
+
+    if (affected === 0) {
+      throw new NotFoundError(
+        `Nenhuma notificação encontrada para os IDs fornecidos para este usuário`
+      );
+    }
   }
 }

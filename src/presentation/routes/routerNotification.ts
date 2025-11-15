@@ -1,3 +1,4 @@
+import { makeDeleteNotificationControllerFactory } from "@/main/factories/controllers/notification/deleteNotificationControllerFactory";
 import { makeGetByUserIdNotificationControllerFactory } from "@/main/factories/controllers/notification/getByUserIdNotificationControllerFactory";
 import { makeGetLoginMiddleware } from "@/main/factories/middleware/getLogin";
 import { adapterMiddleware } from "@/utils/adapterMiddleware";
@@ -17,21 +18,12 @@ export const routesNotification = (router: Router) => {
     adapterMiddleware(makeGetLoginMiddleware()),
     (req: Request, res: Response) => {}
   );
-  router.post(
-    "/notification/create",
-    adapterMiddleware(makeGetLoginMiddleware()),
-    (req: Request, res: Response) => {}
-  );
-
-  router.patch(
-    "/notification/edit/:id",
-    adapterMiddleware(makeGetLoginMiddleware()),
-    (req: Request, res: Response) => {}
-  );
 
   router.delete(
-    "/notification/delete/:id",
+    "/notification/delete",
     adapterMiddleware(makeGetLoginMiddleware()),
-    (req: Request, res: Response) => {}
+    (req: Request, res: Response) => {
+      makeDeleteNotificationControllerFactory().handle(req, res);
+    }
   );
 };
