@@ -15,6 +15,7 @@ import { Transaction } from "./Transaction";
 import { Routines } from "./Routines";
 import { Notes } from "./Notes";
 import { Authentication } from "./Authentication";
+import { Notification } from "./Notification";
 
 @Entity("users")
 export class User extends BaseEntity {
@@ -68,6 +69,11 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Authentication, (auth) => auth.user, { cascade: true })
   authentications!: Authentication[];
+
+  @OneToMany(() => Notification, (notification) => notification.user, {
+    cascade: true,
+  })
+  notifications!: Notification[];
 
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   created_at!: Date;

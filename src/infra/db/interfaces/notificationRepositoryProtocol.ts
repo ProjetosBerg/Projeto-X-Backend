@@ -1,0 +1,54 @@
+import { NotificationModel } from "@/domain/models/postgres/NotificationModel";
+
+export interface NotificationRepositoryProtocol {
+  create(
+    data: NotificationRepositoryProtocol.CreateNotification
+  ): Promise<NotificationModel>;
+  findByIdAndUserId(
+    data: NotificationRepositoryProtocol.FindByIdAndUserIdParams
+  ): Promise<NotificationModel | null>;
+  updateNotification(
+    data: NotificationRepositoryProtocol.UpdateNotificationParams
+  ): Promise<NotificationModel>;
+  findByUserId(
+    data: NotificationRepositoryProtocol.FindByUserIdParams
+  ): Promise<{ notifications: NotificationModel[]; total: number }>;
+  deleteNotification(
+    data: NotificationRepositoryProtocol.DeleteNotificationParams
+  ): Promise<void>;
+}
+
+export namespace NotificationRepositoryProtocol {
+  export type CreateNotification = {
+    title: NotificationModel["title"];
+    entity: NotificationModel["entity"];
+    idEntity: NotificationModel["idEntity"];
+    userId: NotificationModel["user_id"];
+  };
+
+  export type FindByIdAndUserIdParams = {
+    id: NotificationModel["id"];
+    userId: NotificationModel["user_id"];
+  };
+
+  export type UpdateNotificationParams = {
+    isRead?: NotificationModel["isRead"];
+    id: NotificationModel["id"];
+    userId: NotificationModel["user_id"];
+  };
+
+  export type FindByUserIdParams = {
+    userId: NotificationModel["user_id"];
+    page?: number;
+    limit?: number;
+    search?: string;
+    sortBy?: string;
+    order?: string;
+    isRead?: boolean;
+  };
+
+  export type DeleteNotificationParams = {
+    id: NotificationModel["id"];
+    userId: NotificationModel["user_id"];
+  };
+}

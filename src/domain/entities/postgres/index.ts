@@ -7,6 +7,7 @@ import { Transaction } from "@/domain/entities/postgres/Transaction";
 import { Routines } from "@/domain/entities/postgres/Routines";
 import { Notes } from "@/domain/entities/postgres/Notes";
 import { Authentication } from "@/domain/entities/postgres/Authentication";
+import { Notification } from "@/domain/entities/postgres/Notification";
 
 export default {
   User,
@@ -18,4 +19,5 @@ export default {
   Routines,
   Notes,
   Authentication,
+  Notification,
 };
