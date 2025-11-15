@@ -103,7 +103,7 @@ export class EditMonthlyRecordUseCase
 
       await this.notificationRepository.create({
         title: `Registro mensal atualizado: ${updatedMonthlyRecord.title}`,
-        entity: "MonthlyRecord",
+        entity: "Registro Mensal",
         idEntity: data.monthlyRecordId,
         userId: data.userId,
         path: `/relatorios/categoria/relatorio-mesal/${updatedMonthlyRecord?.category?.id}`,

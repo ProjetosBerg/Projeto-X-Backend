@@ -89,7 +89,7 @@ export class CreateNotesUseCase implements CreateNotesUseCaseProtocol {
 
       await this.notificationRepository.create({
         title: `Nova anotação criada: ${data.activity}`,
-        entity: "Notes",
+        entity: "Anotação",
         idEntity: createdNote.id,
         userId: data.userId,
         path: `/anotacoes`,

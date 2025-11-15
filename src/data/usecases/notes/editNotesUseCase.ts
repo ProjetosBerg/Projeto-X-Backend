@@ -120,7 +120,7 @@ export class EditNotesUseCase implements EditNotesUseCaseProtocol {
 
       await this.notificationRepository.create({
         title: `Anotação atualizada: ${updatedNote.activity}`,
-        entity: "Notes",
+        entity: "Anotação",
         idEntity: data.noteId,
         userId: data.userId,
         path: `/anotacoes`,

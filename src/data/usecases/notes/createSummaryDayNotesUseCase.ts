@@ -95,7 +95,7 @@ export class CreateSummaryDayNotesUseCase
 
       await this.notificationRepository.create({
         title: `Resumo do dia gerado: ${formattedDate}`,
-        entity: "Notes",
+        entity: "Anotação",
         idEntity: summaryNote.id,
         userId: validatedData.userId,
         path: `/anotacoes`,

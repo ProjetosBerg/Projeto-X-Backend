@@ -60,7 +60,7 @@ export class DeleteMonthlyRecordUseCase
 
       await this.notificationRepository.create({
         title: `Registro mensal excluído: ${monthlyRecord.title}`,
-        entity: "MonthlyRecord",
+        entity: "Registro Mensal",
         idEntity: data.monthlyRecordId,
         userId: data.userId,
         path: `/relatorios/categoria/relatorio-mesal/${monthlyRecord?.category?.id}`,

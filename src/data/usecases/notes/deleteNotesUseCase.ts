@@ -50,7 +50,7 @@ export class DeleteNotesUseCase implements DeleteNotesUseCaseProtocol {
 
       await this.notificationRepository.create({
         title: `Anotação excluída: ${existingNote.activity}`,
-        entity: "Notes",
+        entity: "Anotação",
         idEntity: data.noteId,
         userId: data.userId,
         path: `/anotacoes`,

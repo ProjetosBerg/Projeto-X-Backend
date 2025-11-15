@@ -86,7 +86,7 @@ export class EditUserByIdUseCase implements EditUserByIdUseCaseProtocol {
 
       await this.notificationRepository.create({
         title: "Perfil atualizado",
-        entity: "User",
+        entity: "Usuario",
         idEntity: data.id,
         userId: data.id,
         typeOfAction: "Atualização",

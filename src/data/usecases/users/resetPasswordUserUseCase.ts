@@ -63,7 +63,7 @@ export class ResetPasswordUserUseCase
 
       await this.notificationRepository.create({
         title: "Senha atualizada",
-        entity: "User",
+        entity: "Usuario",
         idEntity: user.id,
         userId: user.id,
         typeOfAction: "Atualização",
