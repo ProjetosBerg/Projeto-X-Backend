@@ -6,6 +6,7 @@ import { ValidationError } from "yup";
 import { mockMonthlyRecord } from "@/tests/unit/mocks/monthlyRecord/mockMonthlyRecord";
 import { DeleteMonthlyRecordUseCase } from "@/data/usecases/monthlyRecord/deleteMonthlyRecordyUseCase";
 import { mockUser } from "@/tests/unit/mocks/user/mockUser";
+import { NotificationRepositoryProtocol } from "@/infra/db/interfaces/notificationRepositoryProtocol";
 
 export const makeMonthlyRecordRepository =
   (): jest.Mocked<MonthlyRecordRepositoryProtocol> => ({
@@ -22,12 +23,21 @@ export const makeUserRepository = (): jest.Mocked<UserRepositoryProtocol> => ({
   ...({} as any),
 });
 
+export const makeNotificationRepository =
+  (): jest.Mocked<NotificationRepositoryProtocol> => ({
+    create: jest.fn().mockResolvedValue(null),
+    ...({} as any),
+  });
+
 const makeSut = () => {
   const monthlyRecordRepositorySpy = makeMonthlyRecordRepository();
   const userRepositorySpy = makeUserRepository();
+  const notificationRepositorySpy = makeNotificationRepository();
+
   const sut = new DeleteMonthlyRecordUseCase(
     monthlyRecordRepositorySpy,
-    userRepositorySpy
+    userRepositorySpy,
+    notificationRepositorySpy
   );
 
   return {

@@ -4,11 +4,13 @@ import { NotFoundError } from "@/data/errors/NotFoundError";
 import { MonthlyRecordRepositoryProtocol } from "@/infra/db/interfaces/monthlyRecordRepositoryProtocol";
 import { UserRepositoryProtocol } from "@/infra/db/interfaces/userRepositoryProtocol";
 import { CategoryRepositoryProtocol } from "@/infra/db/interfaces/categoryRepositoryProtocol";
+import { NotificationRepositoryProtocol } from "@/infra/db/interfaces/notificationRepositoryProtocol";
 import { CreateMonthlyRecordUseCaseProtocol } from "@/data/usecases/interfaces/monthlyRecord/createMonthlyRecordUseCaseProtocol";
 import {
   MonthlyRecordMock,
   MonthlyRecordModel,
 } from "@/domain/models/postgres/MonthlyRecordModel";
+import { NotificationModel } from "@/domain/models/postgres/NotificationModel";
 import { createMonthlyRecordValidationSchema } from "@/data/usecases/validation/monthlyRecord/createMonthlyRecordValidationSchema";
 
 /**
@@ -39,7 +41,8 @@ export class CreateMonthlyRecordUseCase
   constructor(
     private readonly monthlyRecordRepository: MonthlyRecordRepositoryProtocol,
     private readonly userRepository: UserRepositoryProtocol,
-    private readonly categoryRepository: CategoryRepositoryProtocol
+    private readonly categoryRepository: CategoryRepositoryProtocol,
+    private readonly notificationRepository: NotificationRepositoryProtocol
   ) {}
 
   async handle(
@@ -89,6 +92,15 @@ export class CreateMonthlyRecordUseCase
         categoryId: data.categoryId,
         userId: data.userId,
         status: data.status,
+      });
+
+      await this.notificationRepository.create({
+        title: `Um novo registro mensal (${data.title}) foi criado na categoria ${category.name}`,
+        entity: "Registro Mensal",
+        idEntity: createdMonthlyRecord.id,
+        userId: data.userId,
+        path: `/relatorios/categoria/relatorio-mesal/${category.id}`,
+        typeOfAction: "Criação",
       });
 
       return createdMonthlyRecord;

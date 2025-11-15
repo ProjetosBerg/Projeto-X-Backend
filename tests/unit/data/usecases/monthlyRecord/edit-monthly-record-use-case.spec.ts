@@ -10,6 +10,7 @@ import { mockMonthlyRecord } from "@/tests/unit/mocks/monthlyRecord/mockMonthlyR
 import { mockCategory } from "@/tests/unit/mocks/category/mockCategory";
 import { mockUser } from "@/tests/unit/mocks/user/mockUser";
 import { EditMonthlyRecordUseCase } from "@/data/usecases/monthlyRecord/editMonthlyRecordUseCase";
+import { NotificationRepositoryProtocol } from "@/infra/db/interfaces/notificationRepositoryProtocol";
 
 export const makeMonthlyRecordRepository =
   (): jest.Mocked<MonthlyRecordRepositoryProtocol> => ({
@@ -39,14 +40,23 @@ export const makeCategoryRepository =
     ...({} as any),
   });
 
+export const makeNotificationRepository =
+  (): jest.Mocked<NotificationRepositoryProtocol> => ({
+    create: jest.fn().mockResolvedValue(null),
+    ...({} as any),
+  });
+
 const makeSut = () => {
   const monthlyRecordRepositorySpy = makeMonthlyRecordRepository();
   const userRepositorySpy = makeUserRepository();
   const categoryRepositorySpy = makeCategoryRepository();
+  const notificationRepositorySpy = makeNotificationRepository();
+
   const sut = new EditMonthlyRecordUseCase(
     monthlyRecordRepositorySpy,
     userRepositorySpy,
-    categoryRepositorySpy
+    categoryRepositorySpy,
+    notificationRepositorySpy
   );
 
   return {

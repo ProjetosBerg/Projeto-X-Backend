@@ -2,7 +2,9 @@ import { ServerError } from "@/data/errors/ServerError";
 import { NotFoundError } from "@/data/errors/NotFoundError";
 import { MonthlyRecordRepositoryProtocol } from "@/infra/db/interfaces/monthlyRecordRepositoryProtocol";
 import { UserRepositoryProtocol } from "@/infra/db/interfaces/userRepositoryProtocol";
+import { NotificationRepositoryProtocol } from "@/infra/db/interfaces/notificationRepositoryProtocol";
 import { DeleteMonthlyRecordUseCaseProtocol } from "@/data/usecases/interfaces/monthlyRecord/deleteMonthlyRecordUseCaseProtocol";
+import { NotificationModel } from "@/domain/models/postgres/NotificationModel";
 import { deleteMonthlyRecordValidationSchema } from "@/data/usecases/validation/monthlyRecord/deleteMonthlyRecordValidationSchema";
 
 /**
@@ -24,7 +26,8 @@ export class DeleteMonthlyRecordUseCase
 {
   constructor(
     private readonly monthlyRecordRepository: MonthlyRecordRepositoryProtocol,
-    private readonly userRepository: UserRepositoryProtocol
+    private readonly userRepository: UserRepositoryProtocol,
+    private readonly notificationRepository: NotificationRepositoryProtocol
   ) {}
 
   async handle(data: DeleteMonthlyRecordUseCaseProtocol.Params): Promise<void> {
@@ -53,6 +56,15 @@ export class DeleteMonthlyRecordUseCase
       await this.monthlyRecordRepository.delete({
         id: data.monthlyRecordId,
         userId: data.userId,
+      });
+
+      await this.notificationRepository.create({
+        title: `Registro mensal excluído: ${monthlyRecord.title}`,
+        entity: "MonthlyRecord",
+        idEntity: data.monthlyRecordId,
+        userId: data.userId,
+        path: `/relatorios/categoria/relatorio-mesal/${monthlyRecord?.category?.id}`,
+        typeOfAction: "Exclusão",
       });
     } catch (error: any) {
       if (error.name === "ValidationError") {
