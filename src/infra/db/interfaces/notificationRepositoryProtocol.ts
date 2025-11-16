@@ -16,6 +16,9 @@ export interface NotificationRepositoryProtocol {
   deleteNotifications(
     data: NotificationRepositoryProtocol.DeleteNotificationsParams
   ): Promise<void>;
+  markAsReadNotifications(
+    data: NotificationRepositoryProtocol.MarkAsReadNotificationsParams
+  ): Promise<void>;
 }
 
 export namespace NotificationRepositoryProtocol {
@@ -54,6 +57,11 @@ export namespace NotificationRepositoryProtocol {
   };
 
   export type DeleteNotificationsParams = {
+    ids: NotificationModel["id"][];
+    userId: NotificationModel["user_id"];
+  };
+
+  export type MarkAsReadNotificationsParams = {
     ids: NotificationModel["id"][];
     userId: NotificationModel["user_id"];
   };

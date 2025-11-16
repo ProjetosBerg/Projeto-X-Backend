@@ -1,6 +1,7 @@
 import { makeDeleteNotificationControllerFactory } from "@/main/factories/controllers/notification/deleteNotificationControllerFactory";
 import { makeGetByIdNotificationControllerFactory } from "@/main/factories/controllers/notification/getByIdNotificationControllerFactory";
 import { makeGetByUserIdNotificationControllerFactory } from "@/main/factories/controllers/notification/getByUserIdNotificationControllerFactory";
+import { makeMarkReadNotificationControllerFactory } from "@/main/factories/controllers/notification/markReadNotificationControllerFactory";
 import { makeGetLoginMiddleware } from "@/main/factories/middleware/getLogin";
 import { adapterMiddleware } from "@/utils/adapterMiddleware";
 import { Router, Request, Response } from "express";
@@ -27,6 +28,13 @@ export const routesNotification = (router: Router) => {
     adapterMiddleware(makeGetLoginMiddleware()),
     (req: Request, res: Response) => {
       makeDeleteNotificationControllerFactory().handle(req, res);
+    }
+  );
+  router.patch(
+    "/notification/mark-read",
+    adapterMiddleware(makeGetLoginMiddleware()),
+    (req: Request, res: Response) => {
+      makeMarkReadNotificationControllerFactory().handle(req, res);
     }
   );
 };

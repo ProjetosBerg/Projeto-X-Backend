@@ -23,7 +23,7 @@ export class NotificationRepository implements NotificationRepositoryProtocol {
       title: data.title,
       entity: data.entity,
       idEntity: data.idEntity,
-      isRead: false, // Default para não lida
+      isRead: false,
       path: data.path,
       payload: data.payload,
       typeOfAction: data.typeOfAction,
@@ -203,6 +203,32 @@ export class NotificationRepository implements NotificationRepositoryProtocol {
       id: In(data.ids),
       user: { id: data.userId },
     });
+
+    if (affected === 0) {
+      throw new NotFoundError(
+        `Nenhuma notificação encontrada para os IDs fornecidos para este usuário`
+      );
+    }
+  }
+
+  /**
+   * Marca múltiplas notificações como lidas no banco de dados por IDs e ID do usuário
+   * @param {NotificationRepositoryProtocol.MarkAsReadNotificationsParams} data - Os dados para marcação
+   * @param {string} data.userId - ID do usuário
+   * @param {string[]} data.ids - Array de IDs das notificações
+   * @returns {Promise<void>} Não retorna valor
+   * @throws {NotFoundError} Quando nenhuma das notificações é encontrada
+   */
+  async markAsReadNotifications(
+    data: NotificationRepositoryProtocol.MarkAsReadNotificationsParams
+  ): Promise<void> {
+    const { affected } = await this.repository.update(
+      {
+        id: In(data.ids),
+        user: { id: data.userId },
+      },
+      { isRead: true }
+    );
 
     if (affected === 0) {
       throw new NotFoundError(
