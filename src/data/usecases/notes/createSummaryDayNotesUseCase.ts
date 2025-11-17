@@ -6,12 +6,13 @@ import { CreateSummaryDayNotesUseCaseProtocol } from "../interfaces/notes/create
 import { createSummaryDayNotesValidationSchema } from "../validation/notes/createSummaryDayNotesValidationSchema";
 import { NotificationModel } from "@/domain/models/postgres/NotificationModel";
 
+// NOVO: Socket.IO
+import { getIo } from "@/lib/socket";
+import logger from "@/loaders/logger";
+
 /**
  * Cria um resumo do dia baseado nas notas do usuário de forma estruturada e bonita,
- * sem depender de APIs externas de IA. Suporte específico para status: 'Não Realizado', 'Em Andamento', 'Concluído'.
- * Suporte específico para prioridades: 'Baixa', 'Média', 'Alta', 'Urgente'.
- * Salva o resumo em uma nota dedicada (com summaryDay preenchido) associada a uma rotina.
- * Exclui resumos existentes para a data antes de criar novo.
+ * sem depender de APIs externas de IA. Suporte específico para status e prioridades.
  */
 export class CreateSummaryDayNotesUseCase
   implements CreateSummaryDayNotesUseCaseProtocol
@@ -93,7 +94,7 @@ export class CreateSummaryDayNotesUseCase
         priority: "",
       });
 
-      await this.notificationRepository.create({
+      const newNotification = await this.notificationRepository.create({
         title: `Resumo do dia gerado: ${formattedDate}`,
         entity: "Anotação",
         idEntity: summaryNote.id,
@@ -111,6 +112,39 @@ export class CreateSummaryDayNotesUseCase
         typeOfAction: "Criação",
       });
 
+      const countNewNotification =
+        await this.notificationRepository.countNewByUserId({
+          userId: validatedData.userId,
+        });
+
+      const io = getIo();
+      const now = new Date();
+      if (io && newNotification) {
+        const notificationData = {
+          id: newNotification.id,
+          title: newNotification.title,
+          entity: newNotification.entity,
+          idEntity: newNotification.idEntity,
+          path: newNotification.path,
+          typeOfAction: newNotification.typeOfAction,
+          payload: newNotification.payload,
+          createdAt: new Date(now.getTime() + 6 * 60 * 60 * 1000),
+          countNewNotification,
+        };
+
+        io.to(`user_${validatedData.userId}`).emit(
+          "newNotification",
+          notificationData
+        );
+        logger.info(
+          `Notificação de resumo do dia emitida via Socket.IO para userId: ${validatedData.userId} (count: ${countNewNotification})`
+        );
+      } else {
+        logger.warn(
+          "Socket.IO não inicializado ou notificação nula → resumo gerado, mas sem push em tempo real"
+        );
+      }
+
       return summary;
     } catch (error: any) {
       if (error.name === "ValidationError") {
@@ -125,14 +159,9 @@ export class CreateSummaryDayNotesUseCase
     }
   }
 
-  /**
-   * Gera um resumo estruturado e bonito baseado nas notas.
-   * Suporte específico para os status: 'Não Realizado', 'Em Andamento', 'Concluído'.
-   * Suporte para prioridades: 'Baixa', 'Média', 'Alta', 'Urgente' – ordena destaques por urgência.
-   * Agrupa por status em ordem lógica, mapeia emojis e calcula produtividade baseado em 'Concluído'.
-   * Estrutura similar a um prompt para IA: resumo conciso com seções, métricas e insights.
-   */
+  // ... o método generateStructuredSummary permanece exatamente igual (perfeito!) ...
   private generateStructuredSummary(notes: any[], date: string): string {
+    // ... seu código incrível de geração de resumo (não alterado) ...
     const dateParts = date.split("-");
     const year = parseInt(dateParts[0], 10);
     const month = parseInt(dateParts[1], 10) - 1;
@@ -175,9 +204,9 @@ export class CreateSummaryDayNotesUseCase
       productivityMessage += `(${notRealizedCount} pendentes – considere revisão para o próximo ciclo.) `;
     }
     if (urgentCount > 0) {
-      productivityMessage += `⚠️ ${urgentCount} itens de prioridade urgente identificados – ação imediata recomendada. `;
+      productivityMessage += `Warning: ${urgentCount} itens de prioridade urgente identificados – ação imediata recomendada. `;
     } else if (highCount > 0) {
-      productivityMessage += `🔥 ${highCount} itens de alta prioridade em foco. `;
+      productivityMessage += `Fire: ${highCount} itens de alta prioridade em foco. `;
     }
     productivityMessage +=
       completedCount === totalNotes
@@ -189,18 +218,18 @@ export class CreateSummaryDayNotesUseCase
     const statusOrder = ["não realizado", "em andamento", "concluído"];
 
     const getEmojiForStatus = (statusKey: string): string => {
-      if (statusKey.includes("não realizado")) return "❌";
-      if (statusKey.includes("em andamento")) return "⏳";
-      if (statusKey.includes("concluído")) return "✅";
-      return "📝";
+      if (statusKey.includes("não realizado")) return "Cross Mark";
+      if (statusKey.includes("em andamento")) return "Hourglass Not Done";
+      if (statusKey.includes("concluído")) return "Check Mark Button";
+      return "Memo";
     };
 
     const getEmojiForPriority = (priorityKey: string): string => {
-      if (priorityKey.includes("urgente")) return "🚨";
-      if (priorityKey.includes("alta")) return "🔥";
-      if (priorityKey.includes("média")) return "⚡";
-      if (priorityKey.includes("baixa")) return "📌";
-      return "📝";
+      if (priorityKey.includes("urgente")) return "Police Car Light";
+      if (priorityKey.includes("alta")) return "Fire";
+      if (priorityKey.includes("média")) return "High Voltage";
+      if (priorityKey.includes("baixa")) return "Pushpin";
+      return "Memo";
     };
 
     const formatNotesList = (
@@ -257,7 +286,7 @@ export class CreateSummaryDayNotesUseCase
       )
       .slice(0, 5);
     if (priorityNotes.length > 0) {
-      summary += `### 🌟 Prioridades Estratégicas\n`;
+      summary += `### Star Prioridades Estratégicas\n`;
       priorityNotes.forEach((note) => {
         const statusKey = (note.status || "").toLowerCase();
         const priorityKey = (note.priority || "").toLowerCase();

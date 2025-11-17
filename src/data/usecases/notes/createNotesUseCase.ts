@@ -9,30 +9,12 @@ import { CreateNotesUseCaseProtocol } from "../interfaces/notes/createNotesUseCa
 import { NotesRepositoryProtocol } from "@/infra/db/interfaces/notesRepositoryProtocol";
 import { NotificationModel } from "@/domain/models/postgres/NotificationModel";
 
+import { getIo } from "@/lib/socket";
+import logger from "@/loaders/logger";
+
 /**
  * Cria uma nova Anotação para um usuário
- *
- * @param {CreateNotesUseCaseProtocol.Params} data - Os dados de entrada para a criação da Anotação
- * @param {string} data.status - O status da Anotação
- * @param {string[]} [data.collaborators] - Colaboradores da Anotação (opcional)
- * @param {string} data.priority - A prioridade da Anotação
- * @param {string} [data.category_id] - O ID da categoria associada (opcional)
- * @param {string} data.activity - A atividade da Anotação
- * @param {string} data.activityType - O tipo de atividade
- * @param {string} data.description - A descrição da Anotação
- * @param {string} data.startTime - Hora de início
- * @param {string} data.endTime - Hora de fim
- * @param {Comment[]} [data.comments] - Comentários iniciais (opcional)
- * @param {string} data.routine_id - O ID da rotina associada
- * @param {string} data.userId - O ID do usuário proprietário da Anotação
- *
- * @returns {Promise<NotesModel>} A Anotação criada
- *
- * @throws {ValidationError} Se os dados fornecidos forem inválidos
- * @throws {BusinessRuleError} Se a rotina ou categoria não existirem para o usuário
- * @throws {ServerError} Se ocorrer um erro inesperado durante a criação
  */
-
 export class CreateNotesUseCase implements CreateNotesUseCaseProtocol {
   constructor(
     private readonly notesRepository: NotesRepositoryProtocol,
@@ -87,7 +69,7 @@ export class CreateNotesUseCase implements CreateNotesUseCaseProtocol {
         userId: data.userId,
       });
 
-      await this.notificationRepository.create({
+      const newNotification = await this.notificationRepository.create({
         title: `Nova anotação criada: ${data.activity}`,
         entity: "Anotação",
         idEntity: createdNote.id,
@@ -105,6 +87,36 @@ export class CreateNotesUseCase implements CreateNotesUseCaseProtocol {
         } as NotificationModel["payload"],
         typeOfAction: "Criação",
       });
+
+      const countNewNotification =
+        await this.notificationRepository.countNewByUserId({
+          userId: data.userId,
+        });
+
+      const io = getIo();
+      const now = new Date();
+      if (io && newNotification) {
+        const notificationData = {
+          id: newNotification.id,
+          title: newNotification.title,
+          entity: newNotification.entity,
+          idEntity: newNotification.idEntity,
+          path: newNotification.path,
+          typeOfAction: newNotification.typeOfAction,
+          payload: newNotification.payload,
+          createdAt: new Date(now.getTime() + 6 * 60 * 60 * 1000),
+          countNewNotification,
+        };
+
+        io.to(`user_${data.userId}`).emit("newNotification", notificationData);
+        logger.info(
+          `Notificação de criação de anotação emitida via Socket.IO para userId: ${data.userId} (count: ${countNewNotification})`
+        );
+      } else {
+        logger.warn(
+          "Socket.IO não inicializado ou notificação nula → notificação não enviada em tempo real"
+        );
+      }
 
       return createdNote;
     } catch (error: any) {

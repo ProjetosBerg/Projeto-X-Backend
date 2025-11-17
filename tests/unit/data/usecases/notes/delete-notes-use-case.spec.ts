@@ -16,6 +16,7 @@ export const makeNotesRepository =
 export const makeNotificationRepository =
   (): jest.Mocked<NotificationRepositoryProtocol> => ({
     create: jest.fn().mockResolvedValue(null),
+    countNewByUserId: jest.fn().mockResolvedValue(0),
     ...({} as any),
   });
 

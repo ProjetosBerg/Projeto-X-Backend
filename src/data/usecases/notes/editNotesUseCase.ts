@@ -10,32 +10,12 @@ import { EditNotesUseCaseProtocol } from "../interfaces/notes/editNotesUseCasePr
 import { editNotesValidationSchema } from "../validation/notes/editNotesValidationSchema";
 import { NotificationModel } from "@/domain/models/postgres/NotificationModel";
 
+import { getIo } from "@/lib/socket";
+import logger from "@/loaders/logger";
+
 /**
  * Edita uma Anotação existente para um usuário
- *
- * @param {EditNotesUseCaseProtocol.Params} data - Os dados de entrada para a edição da Anotação
- * @param {string} [data.status] - O novo status da Anotação (opcional)
- * @param {string[]} [data.collaborators] - Novos colaboradores (opcional)
- * @param {string} [data.priority] - Nova prioridade (opcional)
- * @param {string} [data.category_id] - Novo ID da categoria (opcional)
- * @param {string} [data.activity] - Nova atividade (opcional)
- * @param {string} [data.activityType] - Novo tipo de atividade (opcional)
- * @param {string} [data.description] - Nova descrição (opcional)
- * @param {string} [data.startTime] - Nova hora de início (opcional)
- * @param {string} [data.endTime] - Nova hora de fim (opcional)
- * @param {Comment[]} [data.comments] - Novos comentários (opcional)
- * @param {string} [data.routine_id] - Novo ID da rotina (opcional)
- * @param {string} data.noteId - O ID da Anotação a ser editada
- * @param {string} data.userId - O ID do usuário proprietário da Anotação
- *
- * @returns {Promise<NotesModel>} A Anotação editada
- *
- * @throws {ValidationError} Se os dados fornecidos forem inválidos
- * @throws {NotFoundError} Se a Anotação não for encontrada para o usuário
- * @throws {BusinessRuleError} Se o novo routine_id ou category_id não existirem para o usuário
- * @throws {ServerError} Se ocorrer um erro inesperado durante a edição
  */
-
 export class EditNotesUseCase implements EditNotesUseCaseProtocol {
   constructor(
     private readonly notesRepository: NotesRepositoryProtocol,
@@ -50,7 +30,7 @@ export class EditNotesUseCase implements EditNotesUseCaseProtocol {
         abortEarly: false,
       });
 
-      let routineModel;
+      let routineModel: any;
 
       const existingNote = await this.notesRepository.findByIdAndUserId({
         id: data.noteId,
@@ -64,7 +44,7 @@ export class EditNotesUseCase implements EditNotesUseCaseProtocol {
       }
 
       const newRoutineId = data.routine_id || existingNote.routine_id;
-      if (data.routine_id !== existingNote.routine_id) {
+      if (data.routine_id && data.routine_id !== existingNote.routine_id) {
         const existingRoutine = await this.routinesRepository.findByIdAndUserId(
           {
             id: newRoutineId,
@@ -118,7 +98,7 @@ export class EditNotesUseCase implements EditNotesUseCaseProtocol {
         userId: data.userId,
       });
 
-      await this.notificationRepository.create({
+      const newNotification = await this.notificationRepository.create({
         title: `Anotação atualizada: ${updatedNote.activity}`,
         entity: "Anotação",
         idEntity: data.noteId,
@@ -133,10 +113,40 @@ export class EditNotesUseCase implements EditNotesUseCaseProtocol {
           endTime: updatedNote.endTime,
           routine_id: updatedNote.routine_id,
           category_id: updatedNote.category_id,
-          routine: routineModel,
+          routine: routineModel || null,
         } as NotificationModel["payload"],
         typeOfAction: "Atualização",
       });
+
+      const countNewNotification =
+        await this.notificationRepository.countNewByUserId({
+          userId: data.userId,
+        });
+
+      const io = getIo();
+      const now = new Date();
+      if (io && newNotification) {
+        const notificationData = {
+          id: newNotification.id,
+          title: newNotification.title,
+          entity: newNotification.entity,
+          idEntity: newNotification.idEntity,
+          path: newNotification.path,
+          typeOfAction: newNotification.typeOfAction,
+          payload: newNotification.payload,
+          createdAt: new Date(now.getTime() + 6 * 60 * 60 * 1000),
+          countNewNotification,
+        };
+
+        io.to(`user_${data.userId}`).emit("newNotification", notificationData);
+        logger.info(
+          `Notificação de atualização de anotação emitida via Socket.IO para userId: ${data.userId} (count: ${countNewNotification})`
+        );
+      } else {
+        logger.warn(
+          "Socket.IO não inicializado ou notificação nula → edição realizada, mas sem push em tempo real"
+        );
+      }
 
       return updatedNote;
     } catch (error: any) {

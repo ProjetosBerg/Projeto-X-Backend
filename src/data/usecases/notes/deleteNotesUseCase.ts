@@ -6,20 +6,13 @@ import { DeleteNotesUseCaseProtocol } from "../interfaces/notes/deleteNotesUseCa
 import { deleteNotesValidationSchema } from "../validation/notes/deleteNotesValidationSchema";
 import { NotificationModel } from "@/domain/models/postgres/NotificationModel";
 
+// NOVO: Socket.IO
+import { getIo } from "@/lib/socket";
+import logger from "@/loaders/logger";
+
 /**
  * Deleta uma Anotação existente para um usuário
- *
- * @param {DeleteNotesUseCaseProtocol.Params} data - Os dados de entrada para a deleção da Anotação
- * @param {string} data.noteId - O ID da Anotação a ser deletada
- * @param {string} data.userId - O ID do usuário proprietário da nota
- *
- * @returns {Promise<void>} Não retorna valor
- *
- * @throws {ValidationError} Se os dados fornecidos forem inválidos
- * @throws {NotFoundError} Se a Anotação não for encontrada para o usuário
- * @throws {ServerError} Se ocorrer um erro inesperado durante a deleção
  */
-
 export class DeleteNotesUseCase implements DeleteNotesUseCaseProtocol {
   constructor(
     private readonly notesRepository: NotesRepositoryProtocol,
@@ -48,14 +41,52 @@ export class DeleteNotesUseCase implements DeleteNotesUseCaseProtocol {
         userId: data.userId,
       });
 
-      await this.notificationRepository.create({
+      const newNotification = await this.notificationRepository.create({
         title: `Anotação excluída: ${existingNote.activity}`,
         entity: "Anotação",
         idEntity: data.noteId,
         userId: data.userId,
         path: `/anotacoes`,
         typeOfAction: "Exclusão",
+        payload: {
+          activity: existingNote.activity,
+          activityType: existingNote.activityType,
+          priority: existingNote.priority,
+          startTime: existingNote.startTime,
+          endTime: existingNote.endTime,
+          routine_id: existingNote.routine_id,
+        } as NotificationModel["payload"],
       });
+
+      const countNewNotification =
+        await this.notificationRepository.countNewByUserId({
+          userId: data.userId,
+        });
+
+      const io = getIo();
+      const now = new Date();
+      if (io && newNotification) {
+        const notificationData = {
+          id: newNotification.id,
+          title: newNotification.title,
+          entity: newNotification.entity,
+          idEntity: newNotification.idEntity,
+          path: newNotification.path,
+          typeOfAction: newNotification.typeOfAction,
+          payload: newNotification.payload,
+          createdAt: new Date(now.getTime() + 6 * 60 * 60 * 1000),
+          countNewNotification,
+        };
+
+        io.to(`user_${data.userId}`).emit("newNotification", notificationData);
+        logger.info(
+          `Notificação de exclusão de anotação emitida via Socket.IO para userId: ${data.userId} (count: ${countNewNotification})`
+        );
+      } else {
+        logger.warn(
+          "Socket.IO não inicializado ou notificação nula → exclusão realizada, mas sem push em tempo real"
+        );
+      }
     } catch (error: any) {
       if (error.name === "ValidationError") {
         throw error;
