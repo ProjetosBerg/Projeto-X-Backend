@@ -23,7 +23,7 @@ export const routesNotification = (router: Router) => {
     }
   );
 
-  router.delete(
+  router.post(
     "/notification/delete",
     adapterMiddleware(makeGetLoginMiddleware()),
     (req: Request, res: Response) => {

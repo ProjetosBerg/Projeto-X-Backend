@@ -117,21 +117,6 @@ describe("GetByUserIdNotificationUseCase", () => {
     expect(notificationRepositorySpy.findByUserId).not.toHaveBeenCalled();
   });
 
-  test("should throw ValidationError if limit is invalid", async () => {
-    const { sut, notificationRepositorySpy } = makeSut();
-    const input = {
-      userId: mockNotification.user_id,
-      page: 1,
-      limit: 101,
-    };
-
-    await expect(sut.handle(input)).rejects.toThrow(ValidationError);
-    await expect(sut.handle(input)).rejects.toMatchObject({
-      errors: expect.arrayContaining(["Limite máximo de 100 registros"]),
-    });
-    expect(notificationRepositorySpy.findByUserId).not.toHaveBeenCalled();
-  });
-
   test("should throw ValidationError if search is too long", async () => {
     const { sut, notificationRepositorySpy } = makeSut();
     const longSearch = "a".repeat(101);

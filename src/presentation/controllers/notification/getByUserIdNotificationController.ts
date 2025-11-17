@@ -38,6 +38,7 @@ export class GetByUserIdNotificationController implements Controller {
           isRead: isRead !== undefined ? Boolean(isRead) : undefined,
           typeOfAction: String(typeOfAction || ""),
         });
+
       return res.status(200).json({
         status: ResponseStatus.OK,
         data: result,
