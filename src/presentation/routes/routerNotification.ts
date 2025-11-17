@@ -2,6 +2,7 @@ import { makeDeleteNotificationControllerFactory } from "@/main/factories/contro
 import { makeGetByIdNotificationControllerFactory } from "@/main/factories/controllers/notification/getByIdNotificationControllerFactory";
 import { makeGetByUserIdNotificationControllerFactory } from "@/main/factories/controllers/notification/getByUserIdNotificationControllerFactory";
 import { makeGetCountNewNotificationControllerFactory } from "@/main/factories/controllers/notification/getCountNewNotificationControllerFactory";
+import { makeGetUpdateAllNewNotificationControllerFactory } from "@/main/factories/controllers/notification/getUpdateAllNewNotificationControllerFactory";
 import { makeMarkReadNotificationControllerFactory } from "@/main/factories/controllers/notification/markReadNotificationControllerFactory";
 import { makeGetLoginMiddleware } from "@/main/factories/middleware/getLogin";
 import { adapterMiddleware } from "@/utils/adapterMiddleware";
@@ -44,6 +45,13 @@ export const routesNotification = (router: Router) => {
     adapterMiddleware(makeGetLoginMiddleware()),
     (req: Request, res: Response) => {
       makeMarkReadNotificationControllerFactory().handle(req, res);
+    }
+  );
+  router.put(
+    "/notification/mark-read-new-notification-all",
+    adapterMiddleware(makeGetLoginMiddleware()),
+    (req: Request, res: Response) => {
+      makeGetUpdateAllNewNotificationControllerFactory().handle(req, res);
     }
   );
 };

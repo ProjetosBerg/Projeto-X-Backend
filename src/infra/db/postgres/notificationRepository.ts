@@ -253,4 +253,29 @@ export class NotificationRepository implements NotificationRepositoryProtocol {
       },
     });
   }
+
+  /**
+   * Atualiza todas as notificações novas (isNew = true) para isNew = false por ID do usuário
+   * @param {NotificationRepositoryProtocol.UpdateAllNewToFalseByUserIdParams} data - Os dados para atualização
+   * @param {string} data.userId - ID do usuário
+   * @returns {Promise<void>} Não retorna valor
+   * @throws {NotFoundError} Quando nenhuma notificação nova é encontrada
+   */
+  async updateAllNewToFalseByUserId(
+    data: NotificationRepositoryProtocol.UpdateAllNewToFalseByUserIdParams
+  ): Promise<void> {
+    const { affected } = await this.repository.update(
+      {
+        user: { id: data.userId },
+        isNew: true,
+      },
+      { isNew: false }
+    );
+
+    if (affected === 0) {
+      throw new NotFoundError(
+        `Nenhuma notificação nova encontrada para este usuário`
+      );
+    }
+  }
 }

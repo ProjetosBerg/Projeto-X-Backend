@@ -22,6 +22,9 @@ export interface NotificationRepositoryProtocol {
   countNewByUserId(
     data: NotificationRepositoryProtocol.CountNewByUserIdParams
   ): Promise<number>;
+  updateAllNewToFalseByUserId(
+    data: NotificationRepositoryProtocol.UpdateAllNewToFalseByUserIdParams
+  ): Promise<void>;
 }
 
 export namespace NotificationRepositoryProtocol {
@@ -70,6 +73,10 @@ export namespace NotificationRepositoryProtocol {
   };
 
   export type CountNewByUserIdParams = {
+    userId: NotificationModel["user_id"];
+  };
+
+  export type UpdateAllNewToFalseByUserIdParams = {
     userId: NotificationModel["user_id"];
   };
 }
