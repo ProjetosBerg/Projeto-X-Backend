@@ -47,6 +47,7 @@
     "typescript-eslint": "^8.35.1"
   },
   "dependencies": {
+    "@types/socket.io": "^3.0.2",
     "bcrypt": "^6.0.0",
     "cloudinary": "^2.8.0",
     "cors": "^2.8.5",
@@ -63,6 +64,7 @@
     "pdfkit": "^0.17.2",
     "pg": "^8.16.3",
     "reflect-metadata": "^0.2.2",
+    "socket.io": "^4.8.1",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
     "tsconfig-paths": "^4.2.0",
