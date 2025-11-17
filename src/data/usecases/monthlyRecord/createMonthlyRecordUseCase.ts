@@ -12,6 +12,9 @@ import {
 } from "@/domain/models/postgres/MonthlyRecordModel";
 import { NotificationModel } from "@/domain/models/postgres/NotificationModel";
 import { createMonthlyRecordValidationSchema } from "@/data/usecases/validation/monthlyRecord/createMonthlyRecordValidationSchema";
+import { getIo } from "@/lib/socket";
+import { logger } from "@/loaders";
+import { now } from "mongoose";
 
 /**
  * Cria um novo registro mensal para um usuário
@@ -94,7 +97,7 @@ export class CreateMonthlyRecordUseCase
         status: data.status,
       });
 
-      await this.notificationRepository.create({
+      const newNotification = await this.notificationRepository.create({
         title: `Um novo registro mensal (${data.title}) foi criado na categoria ${category.name}`,
         entity: "Registro Mensal",
         idEntity: createdMonthlyRecord.id,
@@ -102,6 +105,35 @@ export class CreateMonthlyRecordUseCase
         path: `/relatorios/categoria/relatorio-mesal/${category.id}`,
         typeOfAction: "Criação",
       });
+
+      const countNewNotification =
+        await this.notificationRepository.countNewByUserId({
+          userId: data.userId,
+        });
+
+      const io = getIo();
+      const now = new Date();
+      if (io && newNotification) {
+        const notificationData = {
+          id: newNotification.id,
+          title: newNotification.title,
+          entity: newNotification.entity,
+          idEntity: newNotification.idEntity,
+          path: newNotification.path,
+          typeOfAction: newNotification.typeOfAction,
+          createdAt: new Date(now.getTime() + 6 * 60 * 60 * 1000),
+          countNewNotification: countNewNotification,
+        };
+
+        io.to(`user_${data.userId}`).emit("newNotification", notificationData);
+        logger.info(
+          `Notificação emitida via Socket.IO para userId: ${data.userId}`
+        );
+      } else {
+        logger.warn(
+          "Socket.IO não inicializado ou notificação nula; notificação não emitida em tempo real"
+        );
+      }
 
       return createdMonthlyRecord;
     } catch (error: any) {

@@ -7,8 +7,9 @@ import { CategoryRepositoryProtocol } from "@/infra/db/interfaces/categoryReposi
 import { NotificationRepositoryProtocol } from "@/infra/db/interfaces/notificationRepositoryProtocol";
 import { EditMonthlyRecordUseCaseProtocol } from "@/data/usecases/interfaces/monthlyRecord/editMonthlyRecordUseCaseProtocol";
 import { MonthlyRecordMock } from "@/domain/models/postgres/MonthlyRecordModel";
-import { NotificationModel } from "@/domain/models/postgres/NotificationModel";
 import { editMonthlyRecordValidationSchema } from "@/data/usecases/validation/monthlyRecord/editMonthlyRecordValidationSchema";
+import { getIo } from "@/lib/socket"; // Adicionado: acesso ao io
+import logger from "@/loaders/logger"; // Adicionado: para logs (assumindo que você tem)
 
 /**
  * Atualiza um registro mensal existente para um usuário específico
@@ -101,7 +102,7 @@ export class EditMonthlyRecordUseCase
         status: data.status,
       });
 
-      await this.notificationRepository.create({
+      const newNotification = await this.notificationRepository.create({
         title: `Registro mensal atualizado: ${updatedMonthlyRecord.title}`,
         entity: "Registro Mensal",
         idEntity: data.monthlyRecordId,
@@ -109,6 +110,35 @@ export class EditMonthlyRecordUseCase
         path: `/relatorios/categoria/relatorio-mesal/${updatedMonthlyRecord?.category?.id}`,
         typeOfAction: "Atualização",
       });
+
+      const countNewNotification =
+        await this.notificationRepository.countNewByUserId({
+          userId: data.userId,
+        });
+
+      const io = getIo();
+      const now = new Date();
+      if (io && newNotification) {
+        const notificationData = {
+          id: newNotification.id,
+          title: newNotification.title,
+          entity: newNotification.entity,
+          idEntity: newNotification.idEntity,
+          path: newNotification.path,
+          typeOfAction: newNotification.typeOfAction,
+          createdAt: new Date(now.getTime() + 6 * 60 * 60 * 1000),
+          countNewNotification: countNewNotification,
+        };
+
+        io.to(`user_${data.userId}`).emit("newNotification", notificationData);
+        logger.info(
+          `Notificação de atualização emitida via Socket.IO para userId: ${data.userId} (count: ${countNewNotification})`
+        );
+      } else {
+        logger.warn(
+          "Socket.IO não inicializado ou notificação nula; notificação não emitida em tempo real"
+        );
+      }
 
       return updatedMonthlyRecord;
     } catch (error: any) {

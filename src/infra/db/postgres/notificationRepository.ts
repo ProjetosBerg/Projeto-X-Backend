@@ -271,11 +271,5 @@ export class NotificationRepository implements NotificationRepositoryProtocol {
       },
       { isNew: false }
     );
-
-    if (affected === 0) {
-      throw new NotFoundError(
-        `Nenhuma notificação nova encontrada para este usuário`
-      );
-    }
   }
 }
