@@ -1,6 +1,7 @@
 import { makeDeleteNotificationControllerFactory } from "@/main/factories/controllers/notification/deleteNotificationControllerFactory";
 import { makeGetByIdNotificationControllerFactory } from "@/main/factories/controllers/notification/getByIdNotificationControllerFactory";
 import { makeGetByUserIdNotificationControllerFactory } from "@/main/factories/controllers/notification/getByUserIdNotificationControllerFactory";
+import { makeGetCountNewNotificationControllerFactory } from "@/main/factories/controllers/notification/getCountNewNotificationControllerFactory";
 import { makeMarkReadNotificationControllerFactory } from "@/main/factories/controllers/notification/markReadNotificationControllerFactory";
 import { makeGetLoginMiddleware } from "@/main/factories/middleware/getLogin";
 import { adapterMiddleware } from "@/utils/adapterMiddleware";
@@ -12,6 +13,14 @@ export const routesNotification = (router: Router) => {
     adapterMiddleware(makeGetLoginMiddleware()),
     (req: Request, res: Response) => {
       makeGetByUserIdNotificationControllerFactory().handle(req, res);
+    }
+  );
+
+  router.get(
+    "/notification/count/new-notification",
+    adapterMiddleware(makeGetLoginMiddleware()),
+    (req: Request, res: Response) => {
+      makeGetCountNewNotificationControllerFactory().handle(req, res);
     }
   );
 

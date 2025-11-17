@@ -236,4 +236,21 @@ export class NotificationRepository implements NotificationRepositoryProtocol {
       );
     }
   }
+
+  /**
+   * Conta o número de notificações novas (isNew = true) por ID do usuário
+   * @param {NotificationRepositoryProtocol.CountNewByUserIdParams} data - Os dados para contagem
+   * @param {string} data.userId - ID do usuário
+   * @returns {Promise<number>} O número de notificações novas
+   */
+  async countNewByUserId(
+    data: NotificationRepositoryProtocol.CountNewByUserIdParams
+  ): Promise<number> {
+    return await this.repository.count({
+      where: {
+        user: { id: data.userId },
+        isNew: true,
+      },
+    });
+  }
 }

@@ -19,6 +19,9 @@ export interface NotificationRepositoryProtocol {
   markAsReadNotifications(
     data: NotificationRepositoryProtocol.MarkAsReadNotificationsParams
   ): Promise<void>;
+  countNewByUserId(
+    data: NotificationRepositoryProtocol.CountNewByUserIdParams
+  ): Promise<number>;
 }
 
 export namespace NotificationRepositoryProtocol {
@@ -63,6 +66,10 @@ export namespace NotificationRepositoryProtocol {
 
   export type MarkAsReadNotificationsParams = {
     ids: NotificationModel["id"][];
+    userId: NotificationModel["user_id"];
+  };
+
+  export type CountNewByUserIdParams = {
     userId: NotificationModel["user_id"];
   };
 }
