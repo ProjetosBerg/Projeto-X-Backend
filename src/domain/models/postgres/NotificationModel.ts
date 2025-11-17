@@ -6,6 +6,7 @@ export type NotificationModel = {
   entity?: string;
   idEntity?: string;
   isRead?: boolean;
+  isNew?: boolean;
   path?: string;
   payload?: Record<string, any>;
   typeOfAction?: string;

@@ -27,6 +27,9 @@ export class Notification extends BaseEntity {
   @Column({ type: "boolean", default: false })
   isRead!: boolean;
 
+  @Column({ type: "boolean", default: true })
+  isNew!: boolean;
+
   @Column({ type: "varchar", nullable: true })
   path?: string;
 
