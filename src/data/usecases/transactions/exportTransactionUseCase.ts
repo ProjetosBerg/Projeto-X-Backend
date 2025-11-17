@@ -10,6 +10,9 @@ import { TransactionModelMock } from "@/domain/models/postgres/TransactionModel"
 import { CustomFieldValueWithMetadata } from "./utils/customFieldValueWithMetadata";
 import { ExportTransactionUseCaseProtocol } from "../interfaces/transactions/exportTransactionUseCaseProtocol";
 import { GenericExportUseCaseProtocol } from "../interfaces/export/genericExportUseCaseProtocol";
+import { getIo } from "@/lib/socket";
+import { logger } from "@/loaders";
+import { NotificationRepositoryProtocol } from "@/infra/db/interfaces/notificationRepositoryProtocol";
 
 /**
  * Exporta transações enriquecidas chamando o GetByUserIdTransactionUseCase e delegando a exportação genérica.
@@ -37,7 +40,8 @@ export class ExportTransactionUseCase
     private readonly getByUserIdTransactionUseCase: GetByUserIdTransactionUseCaseProtocol,
     private readonly userRepository: UserRepositoryProtocol,
     private readonly monthlyRecordRepository: MonthlyRecordRepositoryProtocol,
-    private readonly genericExportUseCase: GenericExportUseCaseProtocol
+    private readonly genericExportUseCase: GenericExportUseCaseProtocol,
+    private readonly notificationRepository: NotificationRepositoryProtocol
   ) {}
 
   async handle(
@@ -109,6 +113,55 @@ export class ExportTransactionUseCase
         format: data.format,
         metadata,
       });
+
+      const formatLabel = data.format.toUpperCase();
+      const transactionCount = enrichedTransactions.length;
+
+      const newNotification = await this.notificationRepository.create({
+        title: `Exportação de transações do registro mensal ${monthlyRecord.title} concluída (${formatLabel})`,
+        entity: "Transação",
+        idEntity: data.monthlyRecordId,
+        userId: data.userId,
+        typeOfAction: "Exportação",
+        payload: {
+          format: data.format,
+          transactionCount,
+          totalExported: transactionCount,
+          exportedAt: new Date().toISOString(),
+          monthlyRecordTitle: monthlyRecord.title,
+          stream: stream,
+        },
+      });
+
+      const countNewNotification =
+        await this.notificationRepository.countNewByUserId({
+          userId: data.userId,
+        });
+
+      const io = getIo();
+      const now = new Date();
+      if (io && newNotification) {
+        const notificationData = {
+          id: newNotification.id,
+          title: newNotification.title,
+          entity: newNotification.entity,
+          idEntity: newNotification.idEntity,
+          path: newNotification.path,
+          typeOfAction: newNotification.typeOfAction,
+          payload: newNotification.payload,
+          createdAt: new Date(now.getTime() + 6 * 60 * 60 * 1000),
+          countNewNotification,
+        };
+
+        io.to(`user_${data.userId}`).emit("newNotification", notificationData);
+        logger.info(
+          `Notificação de exportação (${formatLabel}, ${transactionCount} transações) emitida via Socket.IO para userId: ${data.userId}`
+        );
+      } else {
+        logger.warn(
+          "Socket.IO não inicializado → notificação de exportação não enviada em tempo real"
+        );
+      }
 
       return stream;
     } catch (error: any) {

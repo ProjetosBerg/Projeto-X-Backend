@@ -10,6 +10,7 @@ import { ExportTransactionUseCase } from "@/data/usecases/transactions/exportTra
 import { GenericExportUseCaseProtocol } from "@/data/usecases/interfaces/export/genericExportUseCaseProtocol";
 import { Readable } from "stream";
 import { mockTransaction } from "@/tests/unit/mocks/transaction/mockTransaction";
+import { NotificationRepositoryProtocol } from "@/infra/db/interfaces/notificationRepositoryProtocol";
 
 const mockEnrichedTransaction = {
   transaction: mockTransaction,
@@ -44,16 +45,25 @@ export const makeGenericExportUseCase =
     ...({} as any),
   });
 
+export const makeNotificationRepository =
+  (): jest.Mocked<NotificationRepositoryProtocol> => ({
+    create: jest.fn().mockResolvedValue(null),
+    countNewByUserId: jest.fn().mockResolvedValue(0),
+    ...({} as any),
+  });
+
 const makeSut = () => {
   const userRepositorySpy = makeUserRepository();
   const monthlyRecordRepositorySpy = makeMonthlyRecordRepository();
   const getByUserIdTransactionUseCaseSpy = makeGetByUserIdTransactionUseCase();
   const genericExportUseCaseSpy = makeGenericExportUseCase();
+  const notificationRepositorySpy = makeNotificationRepository();
   const sut = new ExportTransactionUseCase(
     getByUserIdTransactionUseCaseSpy,
     userRepositorySpy,
     monthlyRecordRepositorySpy,
-    genericExportUseCaseSpy
+    genericExportUseCaseSpy,
+    notificationRepositorySpy
   );
 
   return {
