@@ -8,6 +8,9 @@ import { editUserByIdValidationSchema } from "../validation/users/editUserByIdVa
 import UserAuth from "@/auth/users/userAuth";
 import cloudinary from "@/config/cloudinary";
 
+import { getIo } from "@/lib/socket";
+import logger from "@/loaders/logger";
+
 export class EditUserByIdUseCase implements EditUserByIdUseCaseProtocol {
   constructor(
     private readonly userRepository: UserRepositoryProtocol,
@@ -15,19 +18,6 @@ export class EditUserByIdUseCase implements EditUserByIdUseCaseProtocol {
     private readonly notificationRepository: NotificationRepositoryProtocol
   ) {}
 
-  /**
-   * Edita os dados de um usuário específico pelo seu ID
-   * @param {EditUserByIdUseCaseProtocol.Params} data - Os dados do usuário a serem atualizados
-   * @param {string} data.id - O ID do usuário a ser editado
-   * @param {string} [data.name] - O novo nome do usuário (opcional)
-   * @param {string} [data.email] - O novo email do usuário (opcional)
-   * @param {SecurityQuestionModel[]} [data.securityQuestions] - As novas perguntas de segurança (opcional)
-   * @returns {Promise<EditUserByIdUseCaseProtocol.Result>} Os dados atualizados do usuário
-   * @throws {ValidationError} Se os dados fornecidos não passarem na validação
-   * @throws {NotFoundError} Se o usuário não for encontrado
-   * @throws {BusinessRuleError} Se o email fornecido já estiver em uso por outro usuário ou se houver falha na atualização
-   * @throws {ServerError} Se ocorrer um erro inesperado durante a edição
-   */
   async handle(
     data: EditUserByIdUseCaseProtocol.Params
   ): Promise<EditUserByIdUseCaseProtocol.Result> {
@@ -65,7 +55,6 @@ export class EditUserByIdUseCase implements EditUserByIdUseCaseProtocol {
           console.log(`Imagem antiga deletada: ${user.publicId}`);
         } catch (e) {
           const message = e instanceof Error ? e.message : String(e);
-
           throw new ServerError(`Falha ao deletar a imagem antiga: ${message}`);
         }
       }
@@ -84,13 +73,52 @@ export class EditUserByIdUseCase implements EditUserByIdUseCaseProtocol {
         throw new BusinessRuleError("Falha ao atualizar os dados do usuário");
       }
 
-      await this.notificationRepository.create({
-        title: "Perfil atualizado",
+      const newNotification = await this.notificationRepository.create({
+        title: "Perfil atualizado com sucesso",
         entity: "Usuario",
         idEntity: data.id,
         userId: data.id,
         typeOfAction: "Atualização",
+        payload: {
+          updatedFields: Object.keys(data).filter(
+            (key) =>
+              key !== "id" && data[key as keyof typeof data] !== undefined
+          ),
+          name: updatedUser.name,
+          email: updatedUser.email,
+          hasNewAvatar: !!data.imageUrl,
+        },
       });
+
+      const countNewNotification =
+        await this.notificationRepository.countNewByUserId({
+          userId: data.id,
+        });
+
+      const io = getIo();
+      const now = new Date();
+      if (io && newNotification) {
+        const notificationData = {
+          id: newNotification.id,
+          title: newNotification.title,
+          entity: newNotification.entity,
+          idEntity: newNotification.idEntity,
+          path: newNotification.path || "/perfil",
+          typeOfAction: newNotification.typeOfAction,
+          payload: newNotification.payload,
+          createdAt: new Date(now.getTime() + 6 * 60 * 60 * 1000),
+          countNewNotification,
+        };
+
+        io.to(`user_${data.id}`).emit("newNotification", notificationData);
+        logger.info(
+          `Notificação de atualização de perfil emitida via Socket.IO para userId: ${data.id} (count: ${countNewNotification})`
+        );
+      } else {
+        logger.warn(
+          "Socket.IO não inicializado → notificação de perfil não enviada em tempo real"
+        );
+      }
 
       return updatedUser;
     } catch (error: any) {

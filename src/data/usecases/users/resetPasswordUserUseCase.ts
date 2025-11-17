@@ -7,6 +7,9 @@ import { NotificationRepositoryProtocol } from "@/infra/db/interfaces/notificati
 import { resetPasswordUserValidationSchema } from "../validation/users/resetPasswordUserValidationSchema";
 import { ResetPasswordUserUseCaseProtocol } from "../interfaces/users/resetPasswordUseCaseProtocol";
 
+import { getIo } from "@/lib/socket";
+import logger from "@/loaders/logger";
+
 export class ResetPasswordUserUseCase
   implements ResetPasswordUserUseCaseProtocol
 {
@@ -16,19 +19,6 @@ export class ResetPasswordUserUseCase
     private readonly notificationRepository: NotificationRepositoryProtocol
   ) {}
 
-  /**
-   * Redefine a senha de um usuário através da validação das perguntas de segurança
-   * @param {ForgotPasswordUserUseCaseProtocol.Params} data - Os dados necessários para redefinir a senha
-   * @param {string} data.login - O login do usuário que deseja redefinir a senha
-   * @param {string} data.newPassword - A nova senha a ser definida
-   * @param {string} data.oldPassword - A senha antiga
-   * @param {string} data.confirmNewPassword - A confirmação da nova senha
-   * @returns {Promise<ForgotPasswordUserUseCaseProtocol.Result>} Mensagem de confirmação da redefinição da senha
-   * @throws {ValidationError} Se os dados fornecidos não passarem na validação
-   * @throws {NotFoundError} Se o usuário não for encontrado
-   * @throws {BusinessRuleError} Se o usuário não possuir perguntas de segurança, se o número de questões não corresponder, se as respostas estiverem incorretas ou se houver falha na atualização
-   * @throws {ServerError} Se ocorrer um erro inesperado durante a redefinição
-   */
   async handle(
     data: ResetPasswordUserUseCaseProtocol.Params
   ): Promise<ResetPasswordUserUseCaseProtocol.Result> {
@@ -36,10 +26,12 @@ export class ResetPasswordUserUseCase
       await resetPasswordUserValidationSchema.validate(data, {
         abortEarly: false,
       });
+
       const user = await this.userRepository.findOne({ login: data.login });
       if (!user) {
         throw new NotFoundError("Usuário não encontrado");
       }
+
       const isOldPasswordValid = await this.userAuth.comparePassword(
         data.oldPassword,
         user.password
@@ -48,9 +40,7 @@ export class ResetPasswordUserUseCase
         throw new BusinessRuleError("Senha antiga incorreta");
       }
 
-      const hashedPassword = await this.userAuth.hashPassword(
-        data?.newPassword
-      );
+      const hashedPassword = await this.userAuth.hashPassword(data.newPassword);
 
       const updatedUser = await this.userRepository.updatePassword({
         id: user.id,
@@ -61,13 +51,50 @@ export class ResetPasswordUserUseCase
         throw new BusinessRuleError("Falha ao atualizar a senha do usuário");
       }
 
-      await this.notificationRepository.create({
-        title: "Senha atualizada",
+      const newNotification = await this.notificationRepository.create({
+        title: "Senha atualizada com sucesso",
         entity: "Usuario",
         idEntity: user.id,
         userId: user.id,
         typeOfAction: "Atualização",
+        path: "/perfil",
+        payload: {
+          action: "password_updated",
+          timestamp: new Date().toISOString(),
+        },
       });
+
+      const countNewNotification =
+        await this.notificationRepository.countNewByUserId({
+          userId: user.id,
+        });
+
+      const io = getIo();
+      const now = new Date();
+      if (io && newNotification) {
+        const notificationData = {
+          id: newNotification.id,
+          title: newNotification.title,
+          entity: newNotification.entity,
+          idEntity: newNotification.idEntity,
+          path: newNotification.path || "/perfil",
+          typeOfAction: newNotification.typeOfAction,
+          payload: newNotification.payload,
+          createdAt: new Date(now.getTime() + 6 * 60 * 60 * 1000),
+          countNewNotification,
+        };
+
+        io.to(`user_${user.id}`).emit("newNotification", notificationData);
+        logger.info(
+          `Notificação de alteração de senha emitida via Socket.IO para userId: ${user.id} (count: ${countNewNotification})`
+        );
+      } else {
+        if (!io) {
+          logger.warn(
+            "Socket.IO não inicializado → notificação de senha não enviada em tempo real"
+          );
+        }
+      }
 
       return { message: "Senha redefinida com sucesso" };
     } catch (error: any) {
