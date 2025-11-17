@@ -9,6 +9,7 @@ import { NotificationRepositoryProtocol } from "@/infra/db/interfaces/notificati
 export const makeNotesRepository =
   (): jest.Mocked<NotesRepositoryProtocol> => ({
     deleteNote: jest.fn(),
+    findByIdAndUserId: jest.fn().mockResolvedValue(mockNotes),
     ...({} as any),
   });
 
