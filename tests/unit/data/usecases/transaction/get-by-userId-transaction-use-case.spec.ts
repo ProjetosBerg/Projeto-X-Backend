@@ -38,6 +38,7 @@ export const makeMonthlyRecordRepository =
     findByIdAndUserId: jest.fn().mockResolvedValue(mockMonthlyRecord),
     update: jest.fn(),
     delete: jest.fn(),
+    ...({} as any),
   });
 
 export const makeCustomFieldsRepository =

@@ -16,6 +16,7 @@ export const makeMonthlyRecordRepository =
     findByIdAndUserId: jest.fn().mockResolvedValue(mockMonthlyRecord),
     update: jest.fn(),
     delete: jest.fn().mockResolvedValue(undefined),
+    ...({} as any),
   });
 
 export const makeUserRepository = (): jest.Mocked<UserRepositoryProtocol> => ({
