@@ -142,6 +142,51 @@ export class MonthlyRecordRepository
   }
 
   /**
+   * Busca TODOS os registros mensais apenas por ID do usuário (sem filtro de categoria)
+   * Usado para Inbox e resumos gerais
+   * @param {MonthlyRecordRepositoryProtocol.FindAllByUserIdParams} data
+   * @returns {Promise<{ records: MonthlyRecordMock[]; total: number }>}
+   */
+  async findAllByUserId(
+    data: MonthlyRecordRepositoryProtocol.FindAllByUserIdParams
+  ): Promise<{ records: MonthlyRecordMock[]; total: number }> {
+    const page = data.page || 1;
+    const limit = data.limit || 10;
+    const offset = (page - 1) * limit;
+    const sortBy = data.sortBy || "updated_at";
+    const order = data.order?.toUpperCase() === "DESC" ? "DESC" : "ASC";
+
+    const [records, total] = await this.repository.findAndCount({
+      where: {
+        user: { id: data.userId },
+      },
+      relations: ["user", "category", "transactions"],
+      take: limit,
+      skip: offset,
+      order: { [sortBy]: order },
+    });
+
+    const mappedRecords = records.map((record) => ({
+      id: record.id,
+      title: record.title,
+      description: record.description,
+      goal: record.goal,
+      initial_balance: record.initial_balance,
+      month: record.month,
+      year: record.year,
+      status: record.status,
+      category_id: record.category.id,
+      user_id: record.user.id,
+      category: record.category,
+      transactions: record.transactions || [],
+      created_at: record.created_at,
+      updated_at: record.updated_at,
+    }));
+
+    return { records: mappedRecords, total };
+  }
+
+  /**
    * Busca um registro mensal por ID e ID do usuário
    * @param {MonthlyRecordRepositoryProtocol.FindByIdAndUserIdParams} data - Os dados para busca
    * @param {string} data.id - ID do registro mensal

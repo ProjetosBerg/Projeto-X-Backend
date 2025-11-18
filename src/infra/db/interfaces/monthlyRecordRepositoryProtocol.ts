@@ -23,6 +23,9 @@ export interface MonthlyRecordRepositoryProtocol {
   delete(
     data: MonthlyRecordRepositoryProtocol.DeleteMonthlyRecordParams
   ): Promise<void>;
+  findAllByUserId(
+    data: MonthlyRecordRepositoryProtocol.FindAllByUserIdParams
+  ): Promise<{ records: MonthlyRecordMock[]; total: number }>;
 }
 
 export namespace MonthlyRecordRepositoryProtocol {
@@ -58,6 +61,13 @@ export namespace MonthlyRecordRepositoryProtocol {
   export type FindByIdAndUserIdParams = {
     id: MonthlyRecordModel["id"];
     userId: MonthlyRecordModel["user_id"];
+  };
+  export type FindAllByUserIdParams = {
+    userId: MonthlyRecordModel["user_id"];
+    page?: number;
+    limit?: number;
+    sortBy?: string;
+    order?: "ASC" | "DESC";
   };
   export type UpdateMonthlyRecord = {
     id: MonthlyRecordModel["id"];

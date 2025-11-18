@@ -13,6 +13,7 @@ import { makeLogoutUserControllerFactory } from "@/main/factories/controllers/us
 import { makeGetPresenceUserControllerFactory } from "@/main/factories/controllers/user/getPresenceUserControllerFactory";
 import { makeGetStreakUserControllerFactory } from "@/main/factories/controllers/user/getStreakUserControllerFactory";
 import { makeUploadUserMiddleware } from "../middlewares/uploadUserMiddleware";
+import { makeGetInboxControllerFactory } from "@/main/factories/controllers/user/getInboxControllerFactory";
 
 export const routesUser = (router: Router) => {
   router.get("/user/find-questions", (req: Request, res: Response) => {
@@ -40,6 +41,14 @@ export const routesUser = (router: Router) => {
     adapterMiddleware(makeGetLoginMiddleware()),
     (req: Request, res: Response) => {
       makeFindUserByIdControllerFactory().handle(req, res);
+    }
+  );
+
+  router.get(
+    "/user/inbox",
+    adapterMiddleware(makeGetLoginMiddleware()),
+    (req: Request, res: Response) => {
+      makeGetInboxControllerFactory().handle(req, res);
     }
   );
 
