@@ -11,6 +11,7 @@ import { routesNotes } from "./presentation/routes/routesNotes";
 import { makeValidateTokenControllerFactory } from "./main/factories/controllers/user/validateTokenControllerFactory";
 import { makeGetLoginMiddleware } from "./main/factories/middleware/getLogin";
 import { routesNotification } from "./presentation/routes/routerNotification";
+import { routesDashboard } from "./presentation/routes/routerDashboard";
 
 const router = Router();
 
@@ -35,4 +36,5 @@ routesCustomFields(router);
 routesRoutines(router);
 routesNotes(router);
 routesNotification(router);
+routesDashboard(router);
 export default router;
