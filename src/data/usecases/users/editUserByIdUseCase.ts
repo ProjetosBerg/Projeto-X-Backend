@@ -52,7 +52,6 @@ export class EditUserByIdUseCase implements EditUserByIdUseCaseProtocol {
       if (data.publicId && user.publicId && user.publicId !== data.publicId) {
         try {
           await cloudinary.uploader.destroy(user.publicId);
-          console.log(`Imagem antiga deletada: ${user.publicId}`);
         } catch (e) {
           const message = e instanceof Error ? e.message : String(e);
           throw new ServerError(`Falha ao deletar a imagem antiga: ${message}`);

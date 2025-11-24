@@ -99,7 +99,6 @@ export class GetInboxUserUseCase implements GetInboxUserUseCaseProtocol {
 
       // Categories
       categoriesRes.categories.forEach((cat) => {
-        console.log("cat", cat);
         items.push({
           id: String(cat.id),
           title: cat.name,
