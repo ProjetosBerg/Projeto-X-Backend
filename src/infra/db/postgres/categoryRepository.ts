@@ -163,6 +163,7 @@ export class CategoryRepository implements CategoryRepositoryProtocol {
       description: category.description,
       type: category.type,
       record_type_id: category.record_type.id,
+      record_type_name: category.record_type.name,
       user_id: category.user.id,
       monthly_records: category.monthly_records || [],
       transactions: category.transactions || [],

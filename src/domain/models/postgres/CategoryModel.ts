@@ -9,6 +9,7 @@ export type CategoryModel = {
   description?: string;
   type: string;
   record_type_id?: RecordTypeModel["id"];
+  record_type_name?: RecordTypeModel["name"];
   user_id?: UserModel["id"];
   monthly_records?: MonthlyRecordModel[];
   transactions?: TransactionModel[];
