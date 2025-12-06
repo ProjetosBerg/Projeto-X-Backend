@@ -31,7 +31,7 @@ export class GenericExportUseCase implements GenericExportUseCaseProtocol {
         case "xlsx":
           return await this.generateXLSXStream(data.headers, rows);
         case "pdf":
-          return this.generatePDFStream(
+          return await this.generatePDFStream(
             data.headers,
             rows,
             data.metadata || {}
@@ -158,11 +158,11 @@ export class GenericExportUseCase implements GenericExportUseCaseProtocol {
     return stream;
   }
 
-  private generatePDFStream(
+  private async generatePDFStream(
     headers: string[],
     rows: string[][],
     metadata: any
-  ): Readable {
+  ): Promise<Readable> {
     const doc = new PDFDocument({
       margin: 30,
       size: "A4",
@@ -365,6 +365,21 @@ export class GenericExportUseCase implements GenericExportUseCaseProtocol {
     }
 
     doc.end();
-    return doc;
+
+    return new Promise<Readable>((resolve, reject) => {
+      const chunks: Buffer[] = [];
+      doc.on("data", (chunk) => chunks.push(Buffer.from(chunk)));
+      doc.on("end", () => {
+        const buffer = Buffer.concat(chunks);
+        const stream = new Readable({
+          read() {
+            this.push(buffer);
+            this.push(null);
+          },
+        });
+        resolve(stream);
+      });
+      doc.on("error", reject);
+    });
   }
 }

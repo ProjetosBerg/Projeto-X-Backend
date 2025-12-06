@@ -36,7 +36,12 @@ export const makeMonthlyRecordRepository =
 
 export const makeGetByUserIdTransactionUseCase =
   (): jest.Mocked<GetByUserIdTransactionUseCaseProtocol> => ({
-    handle: jest.fn().mockResolvedValue([mockEnrichedTransaction]),
+    handle: jest
+      .fn()
+      .mockResolvedValue({
+        transactions: [mockEnrichedTransaction],
+        totalAmount: mockTransaction.amount,
+      }),
     ...({} as any),
   });
 
@@ -136,7 +141,10 @@ describe("ExportTransactionUseCase", () => {
       getByUserIdTransactionUseCaseSpy,
       genericExportUseCaseSpy,
     } = makeSut();
-    getByUserIdTransactionUseCaseSpy.handle.mockResolvedValue([]);
+    getByUserIdTransactionUseCaseSpy.handle.mockResolvedValue({
+      transactions: [],
+      totalAmount: 0,
+    });
 
     const input = {
       userId: mockUser.id,

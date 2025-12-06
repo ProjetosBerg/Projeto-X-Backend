@@ -6,13 +6,14 @@ import { CustomFieldValueWithMetadata } from "../../transactions/utils/customFie
 import { FilterParam } from "@/presentation/controllers/interfaces/FilterParam";
 
 export interface GetByUserIdTransactionUseCaseProtocol {
-  handle(data: GetByUserIdTransactionUseCaseProtocol.Params): Promise<
-    Array<{
+  handle(data: GetByUserIdTransactionUseCaseProtocol.Params): Promise<{
+    transactions: Array<{
       transaction: TransactionModelMock;
       customFields?: CustomFieldValueWithMetadata[];
       recordTypeId?: number;
-    }>
-  >;
+    }>;
+    totalAmount: number;
+  }>;
 }
 
 export namespace GetByUserIdTransactionUseCaseProtocol {

@@ -88,7 +88,7 @@ export class ExportTransactionUseCase
         );
       }
 
-      const enrichedTransactions =
+      const { transactions: enrichedTransactions } =
         await this.getByUserIdTransactionUseCase.handle({
           userId: data.userId,
           monthlyRecordId: data.monthlyRecordId,

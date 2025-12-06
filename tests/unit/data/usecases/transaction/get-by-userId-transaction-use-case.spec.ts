@@ -124,15 +124,18 @@ describe("GetByUserIdTransactionUseCase", () => {
 
     const result = await sut.handle(input);
 
-    expect(result).toEqual([
-      {
-        transaction: {
-          ...mockTransaction,
+    expect(result).toEqual({
+      transactions: [
+        {
+          transaction: {
+            ...mockTransaction,
+          },
+          customFields: [],
+          recordTypeId: 1,
         },
-        customFields: [],
-        recordTypeId: 1,
-      },
-    ]);
+      ],
+      totalAmount: 150.75,
+    });
 
     expect(userRepositorySpy.findOne).toHaveBeenCalledWith({
       id: input.userId,
@@ -178,7 +181,7 @@ describe("GetByUserIdTransactionUseCase", () => {
 
     const result = await sut.handle(input);
 
-    expect(result).toEqual([]);
+    expect(result).toEqual({ transactions: [], totalAmount: 0 });
     expect(userRepositorySpy.findOne).toHaveBeenCalledWith({
       id: input.userId,
     });

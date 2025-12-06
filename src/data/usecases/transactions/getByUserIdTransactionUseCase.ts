@@ -20,7 +20,7 @@ import { FilterParam } from "@/presentation/controllers/interfaces/FilterParam";
  * @param {string} data.userId - O ID do usuário proprietário das transações
  * @param {string} data.monthlyRecordId - O ID do registro mensal associado às transações
  *
- * @returns {Promise<Array<{ transaction: TransactionModelMock; customFields?: CustomFieldValueWithMetadata[]; }>>} Um array de transações enriquecidas com campos customizados
+ * @returns {Promise<{ transactions: Array<{ transaction: TransactionModelMock; customFields?: CustomFieldValueWithMetadata[]; recordTypeId?: number; }>; totalAmount: number }>} Um array de transações enriquecidas com campos customizados e o valor total somado dos amounts
  *
  * @throws {ValidationError} Se os dados fornecidos forem inválidos
  * @throws {NotFoundError} Se o usuário ou o registro mensal não forem encontrados
@@ -39,12 +39,14 @@ export class GetByUserIdTransactionUseCase
     private readonly categoryRepository: CategoryRepositoryProtocol
   ) {}
 
-  async handle(data: GetByUserIdTransactionUseCaseProtocol.Params): Promise<
-    Array<{
+  async handle(data: GetByUserIdTransactionUseCaseProtocol.Params): Promise<{
+    transactions: Array<{
       transaction: TransactionModelMock;
       customFields?: CustomFieldValueWithMetadata[];
-    }>
-  > {
+      recordTypeId?: number;
+    }>;
+    totalAmount: number;
+  }> {
     let recordTypeId: number | undefined = undefined;
     try {
       await getByUserIdTransactionValidationSchema.validate(data, {
@@ -234,7 +236,13 @@ export class GetByUserIdTransactionUseCase
         );
       }
 
-      return result;
+      const totalAmount = result.reduce(
+        (acc, { transaction }) =>
+          acc + (parseFloat(String(transaction.amount)) || 0),
+        0
+      );
+
+      return { transactions: result, totalAmount };
     } catch (error: any) {
       if (error.name === "ValidationError") {
         throw error;
