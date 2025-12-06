@@ -36,6 +36,7 @@ export namespace NotesRepositoryProtocol {
     routine_id: NotesModel["routine_id"];
     userId: NotesModel["user_id"];
     summaryDay?: NotesModel["summaryDay"];
+    dateOfNote?: NotesModel["dateOfNote"];
   };
 
   export type FindByIdAndUserIdParams = {

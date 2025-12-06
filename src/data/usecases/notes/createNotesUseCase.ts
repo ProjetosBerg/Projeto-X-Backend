@@ -67,6 +67,7 @@ export class CreateNotesUseCase implements CreateNotesUseCaseProtocol {
         comments: data.comments,
         routine_id: data.routine_id,
         userId: data.userId,
+        dateOfNote: data.dateOfNote,
       });
 
       const newNotification = await this.notificationRepository.create({

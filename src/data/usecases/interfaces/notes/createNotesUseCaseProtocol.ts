@@ -18,5 +18,6 @@ export namespace CreateNotesUseCaseProtocol {
     comments?: NotesModel["comments"];
     routine_id: NotesModel["routine_id"];
     userId: NotesModel["user_id"];
+    dateOfNote?: NotesModel["dateOfNote"];
   };
 }

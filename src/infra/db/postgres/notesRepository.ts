@@ -35,6 +35,7 @@ export class NotesRepository implements NotesRepositoryProtocol {
       ...(data.category_id && {
         category: { id: data.category_id } as Category,
       }),
+      dateOfNote: data.dateOfNote,
     });
 
     const savedNote = await this.repository.save(note);
@@ -95,6 +96,7 @@ export class NotesRepository implements NotesRepositoryProtocol {
       user_id: note.user.id,
       created_at: note.created_at,
       updated_at: note.updated_at,
+      dateOfNote: note.dateOfNote,
     };
   }
 
@@ -274,8 +276,8 @@ export class NotesRepository implements NotesRepositoryProtocol {
     const [notes, total] = await this.repository.findAndCount({
       where: {
         user: { id: data.userId },
-        created_at: Between(startDate, endDate),
-        activity: Not(ILike("Resumo do Dia - %")), // Exclui resumos
+        dateOfNote: Between(startDate, endDate),
+        activity: Not(ILike("Resumo do Dia - %")),
       },
       relations: ["user", "routine", "category"],
     });

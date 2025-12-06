@@ -48,6 +48,9 @@ export class Notes extends BaseEntity {
   @Column({ type: "time", nullable: true })
   endTime?: string;
 
+  @Column({ type: "timestamp", nullable: true })
+  dateOfNote?: Date;
+
   @Column("json", { nullable: true })
   comments?: Comment[];
 
