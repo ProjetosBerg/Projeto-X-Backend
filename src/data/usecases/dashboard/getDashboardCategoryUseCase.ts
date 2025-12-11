@@ -11,7 +11,6 @@ import {
   DashboardData,
 } from "../interfaces/dashboard/getDashboardCategoryUseCaseProtocol";
 import { getDashboardCategoryValidationSchema } from "../validation/dashboard/getDashboardCategoryValidationSchema";
-
 /**
  * Recupera dados agregados do dashboard para visualização em diversos tipos de gráficos
  * Inclui categorias, registros mensais e transações com suporte a filtros
@@ -27,7 +26,6 @@ export class GetDashboardCategoryUseCase
     private readonly customFieldRepository: CustomFieldsRepositoryProtocol,
     private readonly transactionCustomFieldRepository: TransactionCustomFieldRepositoryProtocol
   ) {}
-
   async handle(
     data: GetDashboardCategoryUseCaseProtocol.Params
   ): Promise<DashboardData> {
@@ -35,12 +33,10 @@ export class GetDashboardCategoryUseCase
       await getDashboardCategoryValidationSchema.validate(data, {
         abortEarly: false,
       });
-
       const user = await this.userRepository.findOne({ id: data.userId });
       if (!user) {
         throw new NotFoundError(`Usuário com ID ${data.userId} não encontrado`);
       }
-
       const categories = data.categoryId
         ? [
             await this.categoryRepository.findByIdAndUserId({
@@ -53,11 +49,9 @@ export class GetDashboardCategoryUseCase
               userId: data.userId,
             })
           ).categories;
-
       if (categories.length === 0) {
         throw new NotFoundError("Nenhuma categoria encontrada");
       }
-
       const allMonthlyRecords: any = [];
       for (const category of categories) {
         const { records } = await this.monthlyRecordRepository.findByUserId({
@@ -71,7 +65,6 @@ export class GetDashboardCategoryUseCase
         }
         allMonthlyRecords.push(...records);
       }
-
       let filteredRecords = allMonthlyRecords;
       if (data.startDate || data.endDate) {
         filteredRecords = this.filterRecordsByDate(
@@ -80,13 +73,11 @@ export class GetDashboardCategoryUseCase
           data.endDate
         );
       }
-
       const detailedData = await this.buildDetailedData(
         categories,
         filteredRecords,
         data.userId
       );
-
       const summary = this.calculateSummary(detailedData);
       const pieChartData = this.generatePieChartData(detailedData);
       const barChartData = this.generateBarChartData(detailedData);
@@ -95,26 +86,37 @@ export class GetDashboardCategoryUseCase
         data.groupBy || "month"
       );
       const scatterData = this.generateScatterData(detailedData);
-
       const customFieldPieCharts =
         this.generateCustomFieldPieCharts(detailedData);
       const topTransactions = this.generateTopTransactions(detailedData);
       const transactionHistogram =
         this.generateTransactionHistogram(detailedData);
       const goalProgressData = this.generateGoalProgressData(detailedData);
-
       const transactionCountPieChart =
         this.generateTransactionCountPieChart(detailedData);
       const statusDistribution = this.generateStatusDistribution(detailedData);
       const categoryTypeBarChart =
         this.generateCategoryTypeBarChart(detailedData);
-      const customFieldValueCounts =
-        this.generateCustomFieldValueCounts(detailedData);
+      const customFieldAggregates =
+        this.generateCustomFieldAggregates(detailedData);
       const transactionDateHistogram = this.generateTransactionDateHistogram(
         detailedData,
         data.groupBy || "month"
       );
-
+      const customChartsData = this.generateCustomChartsData(
+        detailedData,
+        summary,
+        transactionCountPieChart,
+        categoryTypeBarChart,
+        customFieldAggregates,
+        barChartData,
+        statusDistribution,
+        transactionDateHistogram,
+        transactionHistogram,
+        timeSeriesData,
+        scatterData,
+        goalProgressData
+      );
       return {
         summary,
         pieChartData,
@@ -128,7 +130,7 @@ export class GetDashboardCategoryUseCase
         transactionCountPieChart,
         statusDistribution,
         categoryTypeBarChart,
-        customFieldValueCounts,
+        customFieldValueCounts: customFieldAggregates,
         transactionDateHistogram,
         detailedData,
         filters: {
@@ -137,16 +139,15 @@ export class GetDashboardCategoryUseCase
           endDate: data.endDate,
           groupBy: data.groupBy || "month",
         },
+        customChartsData,
       };
     } catch (error: any) {
       if (error.name === "ValidationError") {
         throw error;
       }
-
       if (error instanceof NotFoundError) {
         throw error;
       }
-
       const errorMessage =
         error.message || "Erro interno do servidor durante a busca";
       throw new ServerError(
@@ -154,7 +155,6 @@ export class GetDashboardCategoryUseCase
       );
     }
   }
-
   private filterRecordsByDate(
     records: any[],
     startDate?: string,
@@ -162,41 +162,34 @@ export class GetDashboardCategoryUseCase
   ): any[] {
     return records.filter((record) => {
       const recordDate = new Date(record.year, record.month - 1);
-
       if (startDate) {
         const start = new Date(startDate);
         if (recordDate < new Date(start.getFullYear(), start.getMonth())) {
           return false;
         }
       }
-
       if (endDate) {
         const end = new Date(endDate);
         if (recordDate > new Date(end.getFullYear(), end.getMonth())) {
           return false;
         }
       }
-
       return true;
     });
   }
-
   private async buildDetailedData(
     categories: any[],
     monthlyRecords: any[],
     userId: string
   ): Promise<DashboardData["detailedData"]> {
     const detailedData: DashboardData["detailedData"] = [];
-
     for (const category of categories) {
       const categoryRecords = monthlyRecords.filter(
         (r) => r.category_id === category!.id
       );
-
       const enrichedRecords = await Promise.all(
         categoryRecords.map(async (record) => {
           const transactions = record.transactions || [];
-
           const enrichedTransactions = await Promise.all(
             transactions.map(async (transaction: any) => {
               const customFieldValues =
@@ -206,7 +199,6 @@ export class GetDashboardCategoryUseCase
                     user_id: userId,
                   }
                 );
-
               let customFields: any[] = [];
               if (customFieldValues.length > 0) {
                 const { customFields: customFieldDefs } =
@@ -215,7 +207,6 @@ export class GetDashboardCategoryUseCase
                     category_id: category!.id,
                     user_id: userId,
                   });
-
                 customFields = customFieldValues.map((value) => {
                   const cfDef = customFieldDefs.find(
                     (cf) => cf.id === value.custom_field_id
@@ -227,7 +218,6 @@ export class GetDashboardCategoryUseCase
                   };
                 });
               }
-
               return {
                 id: transaction.id,
                 title: transaction.title,
@@ -239,12 +229,10 @@ export class GetDashboardCategoryUseCase
               };
             })
           );
-
           const amounts = enrichedTransactions.map((t) => t.amount);
           const dates = enrichedTransactions
             .map((t) => t.transactionDate)
             .sort();
-
           return {
             id: record.id,
             title: record.title,
@@ -270,7 +258,6 @@ export class GetDashboardCategoryUseCase
           };
         })
       );
-
       detailedData.push({
         category: {
           id: category!.id,
@@ -283,17 +270,14 @@ export class GetDashboardCategoryUseCase
         monthlyRecords: enrichedRecords,
       });
     }
-
     return detailedData;
   }
-
   private calculateSummary(
     detailedData: DashboardData["detailedData"]
   ): DashboardData["summary"] {
     let totalMonthlyRecords = 0;
     let totalTransactions = 0;
     let totalAmount = 0;
-
     const categoryBreakdown = detailedData.map((item) => {
       const recordCount = item.monthlyRecords.length;
       const transactionCount = item.monthlyRecords.reduce(
@@ -304,11 +288,9 @@ export class GetDashboardCategoryUseCase
         (sum, r) => sum + r.transactionsSummary.totalAmount,
         0
       );
-
       totalMonthlyRecords += recordCount;
       totalTransactions += transactionCount;
       totalAmount += categoryAmount;
-
       return {
         categoryId: item.category.id,
         categoryName: item.category.name,
@@ -321,12 +303,10 @@ export class GetDashboardCategoryUseCase
         percentage: 0,
       };
     });
-
     categoryBreakdown.forEach((item) => {
       item.percentage =
         totalAmount > 0 ? (item.totalAmount / totalAmount) * 100 : 0;
     });
-
     return {
       totalCategories: detailedData.length,
       totalMonthlyRecords,
@@ -337,7 +317,6 @@ export class GetDashboardCategoryUseCase
       categoryBreakdown,
     };
   }
-
   private generatePieChartData(
     detailedData: DashboardData["detailedData"]
   ): DashboardData["pieChartData"] {
@@ -350,13 +329,11 @@ export class GetDashboardCategoryUseCase
         ),
       0
     );
-
     return detailedData.map((item) => {
       const value = item.monthlyRecords.reduce(
         (sum, r) => sum + r.transactionsSummary.totalAmount,
         0
       );
-
       return {
         name: item.category.name,
         value: parseFloat(value.toFixed(2)),
@@ -364,7 +341,6 @@ export class GetDashboardCategoryUseCase
       };
     });
   }
-
   private generateBarChartData(
     detailedData: DashboardData["detailedData"]
   ): DashboardData["barChartData"] {
@@ -381,13 +357,11 @@ export class GetDashboardCategoryUseCase
       records: item.monthlyRecords.length,
     }));
   }
-
   private generateTimeSeriesData(
     detailedData: DashboardData["detailedData"],
     groupBy: "day" | "week" | "month" | "year"
   ): DashboardData["timeSeriesData"] {
     const periodsMap = new Map<string, any>();
-
     detailedData.forEach((item) => {
       item.monthlyRecords.forEach((record) => {
         record.transactions.forEach((transaction) => {
@@ -399,7 +373,6 @@ export class GetDashboardCategoryUseCase
             transaction.transactionDate,
             groupBy
           );
-
           if (!periodsMap.has(period)) {
             periodsMap.set(period, {
               period,
@@ -409,11 +382,9 @@ export class GetDashboardCategoryUseCase
               categories: new Map<string, any>(),
             });
           }
-
           const periodData = periodsMap.get(period);
           periodData.totalAmount += transaction.amount;
           periodData.totalTransactions += 1;
-
           if (!periodData.categories.has(item.category.id)) {
             periodData.categories.set(item.category.id, {
               categoryId: item.category.id,
@@ -422,14 +393,12 @@ export class GetDashboardCategoryUseCase
               transactions: 0,
             });
           }
-
           const catData = periodData.categories.get(item.category.id);
           catData.amount += transaction.amount;
           catData.transactions += 1;
         });
       });
     });
-
     return Array.from(periodsMap.values())
       .map((p) => ({
         ...p,
@@ -437,7 +406,6 @@ export class GetDashboardCategoryUseCase
       }))
       .sort((a, b) => a.period.localeCompare(b.period));
   }
-
   private generateScatterData(
     detailedData: DashboardData["detailedData"]
   ): DashboardData["scatterData"] {
@@ -450,7 +418,6 @@ export class GetDashboardCategoryUseCase
         (sum, r) => sum + r.transactionsSummary.totalAmount,
         0
       );
-
       return {
         categoryName: item.category.name,
         recordsCount: item.monthlyRecords.length,
@@ -461,12 +428,10 @@ export class GetDashboardCategoryUseCase
       };
     });
   }
-
   private generateCustomFieldPieCharts(
     detailedData: DashboardData["detailedData"]
   ): DashboardData["customFieldPieCharts"] {
     const customFieldMap = new Map<string, Map<string, number>>();
-
     detailedData.forEach((item) => {
       item.monthlyRecords.forEach((record) => {
         record.transactions.forEach((transaction) => {
@@ -474,17 +439,14 @@ export class GetDashboardCategoryUseCase
             transaction.customFields.forEach((cf: any) => {
               const label = cf.label;
               let valueKey: string;
-
               if (cf.type === "multiple" && Array.isArray(cf.value)) {
                 valueKey = cf.value.join(", ");
               } else {
                 valueKey = cf.value.toString();
               }
-
               if (!customFieldMap.has(label)) {
                 customFieldMap.set(label, new Map<string, number>());
               }
-
               const valueMap = customFieldMap.get(label)!;
               const currentAmount = valueMap.get(valueKey) || 0;
               valueMap.set(valueKey, currentAmount + transaction.amount);
@@ -493,7 +455,6 @@ export class GetDashboardCategoryUseCase
         });
       });
     });
-
     return Array.from(customFieldMap.entries()).map(([label, valueMap]) => {
       const totalForLabel = Array.from(valueMap.values()).reduce(
         (sum, v) => sum + v,
@@ -507,7 +468,6 @@ export class GetDashboardCategoryUseCase
       return { label, data };
     });
   }
-
   private generateTopTransactions(
     detailedData: DashboardData["detailedData"]
   ): DashboardData["topTransactions"] {
@@ -518,7 +478,6 @@ export class GetDashboardCategoryUseCase
       date: string;
       categoryName: string;
     }> = [];
-
     detailedData.forEach((item) => {
       item.monthlyRecords.forEach((record) => {
         record.transactions.forEach((transaction) => {
@@ -532,10 +491,8 @@ export class GetDashboardCategoryUseCase
         });
       });
     });
-
     return allTransactions.sort((a, b) => b.amount - a.amount).slice(0, 5);
   }
-
   private generateTransactionHistogram(
     detailedData: DashboardData["detailedData"]
   ): DashboardData["transactionHistogram"] {
@@ -546,13 +503,11 @@ export class GetDashboardCategoryUseCase
       { min: 100, max: 200, label: "100-200" },
       { min: 200, max: Infinity, label: "200+" },
     ];
-
     const histogram = bins.map((b) => ({
       bin: b.label,
       count: 0,
       totalAmount: 0,
     }));
-
     detailedData.forEach((item) => {
       item.monthlyRecords.forEach((record) => {
         record.transactions.forEach((transaction) => {
@@ -567,10 +522,8 @@ export class GetDashboardCategoryUseCase
         });
       });
     });
-
     return histogram;
   }
-
   private generateGoalProgressData(
     detailedData: DashboardData["detailedData"]
   ): DashboardData["goalProgressData"] {
@@ -593,7 +546,6 @@ export class GetDashboardCategoryUseCase
       })
     );
   }
-
   private generateTransactionCountPieChart(
     detailedData: DashboardData["detailedData"]
   ): DashboardData["transactionCountPieChart"] {
@@ -606,13 +558,11 @@ export class GetDashboardCategoryUseCase
         ),
       0
     );
-
     return detailedData.map((item) => {
       const count = item.monthlyRecords.reduce(
         (sum, r) => sum + r.transactionsSummary.count,
         0
       );
-
       return {
         name: item.category.name,
         count,
@@ -621,36 +571,30 @@ export class GetDashboardCategoryUseCase
       };
     });
   }
-
   private generateStatusDistribution(
     detailedData: DashboardData["detailedData"]
   ): DashboardData["statusDistribution"] {
     const statusMap = new Map<string, number>();
-
     detailedData.forEach((item) => {
       item.monthlyRecords.forEach((record) => {
         const status = record.status || "Unknown";
         statusMap.set(status, (statusMap.get(status) || 0) + 1);
       });
     });
-
     const totalRecords = Array.from(statusMap.values()).reduce(
       (sum, c) => sum + c,
       0
     );
-
     return Array.from(statusMap.entries()).map(([name, count]) => ({
       name,
       count,
       percentage: totalRecords > 0 ? (count / totalRecords) * 100 : 0,
     }));
   }
-
   private generateCategoryTypeBarChart(
     detailedData: DashboardData["detailedData"]
   ): DashboardData["categoryTypeBarChart"] {
     const typeMap = new Map<string, { count: number; categories: number }>();
-
     detailedData.forEach((item) => {
       const type = item.category.type || "Unknown";
       if (!typeMap.has(type)) {
@@ -663,54 +607,63 @@ export class GetDashboardCategoryUseCase
         0
       );
     });
-
     return Array.from(typeMap.entries()).map(([type, data]) => ({
       type,
       transactionCount: data.count,
       categoryCount: data.categories,
     }));
   }
-
-  private generateCustomFieldValueCounts(
+  private generateCustomFieldAggregates(
     detailedData: DashboardData["detailedData"]
   ): DashboardData["customFieldValueCounts"] {
-    const customFieldMap = new Map<string, Map<string, number>>();
-
+    const customFieldMap = new Map<
+      string,
+      { counts: Map<string, number>; sums: Map<string, number> }
+    >();
     detailedData.forEach((item) => {
       item.monthlyRecords.forEach((record) => {
         record.transactions.forEach((transaction) => {
           if (transaction.customFields) {
             transaction.customFields.forEach((cf: any) => {
               const label = cf.label;
+              if (!customFieldMap.has(label)) {
+                customFieldMap.set(label, {
+                  counts: new Map<string, number>(),
+                  sums: new Map<string, number>(),
+                });
+              }
+              const agg = customFieldMap.get(label)!;
               let valueKey: string;
-
               if (cf.type === "multiple" && Array.isArray(cf.value)) {
                 valueKey = cf.value.join(", ");
               } else {
                 valueKey = cf.value.toString();
               }
-
-              if (!customFieldMap.has(label)) {
-                customFieldMap.set(label, new Map<string, number>());
+              agg.counts.set(valueKey, (agg.counts.get(valueKey) || 0) + 1);
+              if (typeof cf.value === "number") {
+                agg.sums.set(
+                  valueKey,
+                  (agg.sums.get(valueKey) || 0) + cf.value
+                );
               }
-
-              const valueMap = customFieldMap.get(label)!;
-              valueMap.set(valueKey, (valueMap.get(valueKey) || 0) + 1);
             });
           }
         });
       });
     });
-
-    return Array.from(customFieldMap.entries()).map(([label, valueMap]) => {
-      const data = Array.from(valueMap.entries()).map(([name, count]) => ({
+    return Array.from(customFieldMap.entries()).map(([label, agg]) => {
+      const data = Array.from(agg.counts.entries()).map(([name, count]) => ({
         name,
         count,
       }));
-      return { label, data };
+      const sums = Array.from(agg.sums.entries()).map(([name, total]) => ({
+        name,
+        total,
+      }));
+      const totalSum = Array.from(agg.sums.values()).reduce((s, v) => s + v, 0);
+      return { label, data, sums, totalSum };
     });
   }
-
   private generateTransactionDateHistogram(
     detailedData: DashboardData["detailedData"],
     groupBy: "day" | "week" | "month" | "year"
@@ -719,7 +672,6 @@ export class GetDashboardCategoryUseCase
       string,
       { period: string; periodLabel: string; totalTransactions: number }
     >();
-
     detailedData.forEach((item) => {
       item.monthlyRecords.forEach((record) => {
         record.transactions.forEach((transaction) => {
@@ -731,7 +683,6 @@ export class GetDashboardCategoryUseCase
             transaction.transactionDate,
             groupBy
           );
-
           if (!periodsMap.has(period)) {
             periodsMap.set(period, {
               period,
@@ -739,18 +690,15 @@ export class GetDashboardCategoryUseCase
               totalTransactions: 0,
             });
           }
-
           const periodData = periodsMap.get(period)!;
           periodData.totalTransactions += 1;
         });
       });
     });
-
     return Array.from(periodsMap.values()).sort((a, b) =>
       a.period.localeCompare(b.period)
     );
   }
-
   private getPeriodKey(
     date: string,
     groupBy: "day" | "week" | "month" | "year"
@@ -759,7 +707,6 @@ export class GetDashboardCategoryUseCase
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, "0");
     const day = String(d.getDate()).padStart(2, "0");
-
     switch (groupBy) {
       case "day":
         return `${year}-${month}-${day}`;
@@ -774,7 +721,6 @@ export class GetDashboardCategoryUseCase
         return `${year}-${month}`;
     }
   }
-
   private getPeriodLabel(
     date: string,
     groupBy: "day" | "week" | "month" | "year"
@@ -794,7 +740,6 @@ export class GetDashboardCategoryUseCase
       "Nov",
       "Dez",
     ];
-
     switch (groupBy) {
       case "day":
         return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
@@ -809,7 +754,6 @@ export class GetDashboardCategoryUseCase
         return `${months[d.getMonth()]} ${d.getFullYear()}`;
     }
   }
-
   private getWeekNumber(date: Date): number {
     const d = new Date(
       Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
@@ -818,5 +762,89 @@ export class GetDashboardCategoryUseCase
     d.setUTCDate(d.getUTCDate() + 4 - dayNum);
     const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
     return Math.ceil(((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
+  }
+  private generateCustomChartsData(
+    detailedData: DashboardData["detailedData"],
+    summary: DashboardData["summary"],
+    transactionCountPieChart: DashboardData["transactionCountPieChart"],
+    categoryTypeBarChart: DashboardData["categoryTypeBarChart"],
+    customFieldAggregates: DashboardData["customFieldValueCounts"],
+    barChartData: DashboardData["barChartData"],
+    statusDistribution: DashboardData["statusDistribution"],
+    transactionDateHistogram: DashboardData["transactionDateHistogram"],
+    transactionHistogram: DashboardData["transactionHistogram"],
+    timeSeriesData: DashboardData["timeSeriesData"],
+    scatterData: DashboardData["scatterData"],
+    goalProgressData: DashboardData["goalProgressData"]
+  ) {
+    return {
+      categories: {
+        distributionRecordType: Object.entries(
+          (summary.categoryBreakdown || []).reduce(
+            (acc, cat) => {
+              if (!cat) return acc;
+              if (!acc[cat.recordTypeName]) {
+                acc[cat.recordTypeName] = {
+                  name: cat.recordTypeName,
+                  value: 0,
+                  categories: [],
+                };
+              }
+              acc[cat.recordTypeName].value += 1;
+              acc[cat.recordTypeName].categories.push(cat.categoryName);
+              return acc;
+            },
+            {} as Record<
+              string,
+              { name: string; value: number; categories: string[] }
+            >
+          )
+        ).map(([_, d]) => d),
+
+        transactionCount: (transactionCountPieChart || [])
+          .filter((d) => d.count > 0)
+          .map((d) => ({
+            name: d.name,
+            count: d.count,
+          })),
+
+        categoryType: categoryTypeBarChart || [],
+      },
+      customFields: customFieldAggregates || [],
+      transactions: {
+        transactionsByCategory: (barChartData || [])
+          .filter((d) => d.amount > 0 || d.transactions > 0)
+          .map((d) => ({
+            category: d.category,
+            transactions: d.transactions,
+          })),
+
+        statusDistribution: (statusDistribution || []).filter(
+          (d) => d.count > 0
+        ),
+
+        dateHistogram: transactionDateHistogram || [],
+
+        valueHistogram: (transactionHistogram || []).filter((d) => d.count > 0),
+      },
+      evolution: {
+        timeEvolution: (timeSeriesData || []).map((d) => ({
+          periodLabel: d.periodLabel,
+          totalAmount: d.totalAmount,
+          totalTransactions: d.totalTransactions,
+        })),
+
+        recordsVsAverage: (scatterData || [])
+          .filter((d) => d.totalAmount > 0)
+          .map((d) => ({
+            recordsCount: d.recordsCount,
+            averageAmount: d.averageAmount,
+            totalAmount: d.totalAmount,
+          })),
+      },
+      progress: {
+        progressByRecord: goalProgressData || [],
+      },
+    };
   }
 }
