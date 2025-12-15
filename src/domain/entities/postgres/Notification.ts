@@ -21,9 +21,6 @@ export class Notification extends BaseEntity {
   @Column({ type: "varchar", length: 50 })
   entity!: string;
 
-  @Column({ type: "uuid" })
-  idEntity!: string;
-
   @Column({ type: "boolean", default: false })
   isRead!: boolean;
 
@@ -32,6 +29,9 @@ export class Notification extends BaseEntity {
 
   @Column({ type: "varchar", nullable: true })
   path?: string;
+
+  @Column({ type: "uuid", nullable: true })
+  idEntity?: string;
 
   @Column("json", { nullable: true })
   payload?: Record<string, any>;
