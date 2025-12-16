@@ -1,11 +1,17 @@
 import { ServerError } from "@/data/errors/ServerError";
 import { AuthenticationRepositoryProtocol } from "@/infra/db/interfaces/authenticationRepositoryProtocol";
+import { UserMonthlyEntryRankRepositoryProtocol } from "@/infra/db/interfaces/userMonthlyEntryRankRepositoryProtocol";
 import { v4 as uuidv4 } from "uuid";
 import { ValidateTokenUseCaseProtocol } from "../interfaces/users/validateTokenUseCaseProtocol";
+import { getIo } from "@/lib/socket";
+import { logger } from "@/loaders";
+import { NotificationRepositoryProtocol } from "@/infra/db/interfaces/notificationRepositoryProtocol";
 
 export class ValidateTokenUseCase implements ValidateTokenUseCaseProtocol {
   constructor(
-    private readonly authenticationRepository: AuthenticationRepositoryProtocol
+    private readonly authenticationRepository: AuthenticationRepositoryProtocol,
+    private readonly userMonthlyEntryRankRepository: UserMonthlyEntryRankRepositoryProtocol,
+    private readonly notificationRepository: NotificationRepositoryProtocol
   ) {}
 
   /**
@@ -66,6 +72,93 @@ export class ValidateTokenUseCase implements ValidateTokenUseCaseProtocol {
           sessionId,
           isOffensive,
         });
+      }
+
+      const year = now.getFullYear();
+      const month = now.getMonth() + 1;
+
+      let previousRanks =
+        await this.userMonthlyEntryRankRepository.getAllRankedForMonth({
+          year,
+          month,
+        });
+
+      previousRanks = previousRanks.filter((pr) => pr.userId !== data.userId);
+
+      await this.userMonthlyEntryRankRepository.updateTotalForUserAndMonth({
+        userId: data.userId,
+        year,
+        month,
+      });
+
+      const usersWhoLostPositions =
+        await this.userMonthlyEntryRankRepository.findUsersWhoLostPositions({
+          year,
+          month,
+          currentTime: now,
+          userId: data.userId,
+          previousRanks,
+        });
+      if (usersWhoLostPositions && usersWhoLostPositions.length > 0) {
+        const io = getIo();
+
+        for (const user of usersWhoLostPositions) {
+          try {
+            const newNotification = await this.notificationRepository.create({
+              title: `Você perdeu ${user.positionsLost} ${
+                user.positionsLost === 1 ? "posição" : "posições"
+              } no ranking mensal. Agora você está em ${user.currentPosition}º lugar.`,
+              entity: "Ranking Mensal",
+              idEntity: undefined,
+              userId: String(user.userId),
+              path: "",
+              typeOfAction: "Atualização",
+            });
+
+            await this.userMonthlyEntryRankRepository.updateLastPositionLossNotification(
+              {
+                userId: user.userId,
+                year,
+                month,
+                currentRank: user.currentPosition,
+                notifiedAt: now,
+              }
+            );
+
+            const countNewNotification =
+              await this.notificationRepository.countNewByUserId({
+                userId: user.userId,
+              });
+
+            logger.info(
+              `Notificação de perda de posição no ranking criada para userId: ${user.userId} - Perdeu ${user.positionsLost} posições, agora está em ${user.currentPosition}º lugar`
+            );
+
+            if (io) {
+              const notificationData = {
+                id: newNotification.id,
+                title: newNotification.title,
+                entity: newNotification.entity,
+                idEntity: newNotification.idEntity,
+                typeOfAction: newNotification.typeOfAction,
+                payload: newNotification.payload,
+                createdAt: new Date(now.getTime() + 6 * 60 * 60 * 1000),
+                countNewNotification,
+              };
+              io.to(`user_${user.userId}`).emit(
+                "newNotification",
+                notificationData
+              );
+              logger.info(
+                `Notificação de perda de posição no ranking emitida via Socket.IO para userId: ${user.userId}`
+              );
+            }
+          } catch (notificationError: any) {
+            logger.error(
+              `Erro ao processar notificação para userId ${user.userId}: ${notificationError.message}`
+            );
+          }
+        }
       }
 
       return {

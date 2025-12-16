@@ -1,6 +1,7 @@
 import { AuthenticationRepositoryProtocol } from "@/infra/db/interfaces/authenticationRepositoryProtocol";
 import { ValidateTokenUseCase } from "@/data/usecases/users/validateTokenUseCase";
 import { ServerError } from "@/data/errors/ServerError";
+import { NotificationRepositoryProtocol } from "@/infra/db/interfaces/notificationRepositoryProtocol";
 
 export const makeAuthenticationRepositoryRepository =
   (): jest.Mocked<AuthenticationRepositoryProtocol> => {
@@ -14,10 +15,51 @@ export const makeAuthenticationRepositoryRepository =
     };
   };
 
+export const makeUserMonthlyEntryRankRepositoryRepository = () => {
+  return {
+    findByUserIdAndYearAndMonth: jest.fn().mockResolvedValue(null),
+    updateTotalForUserAndMonth: jest.fn().mockResolvedValue(undefined),
+    updateLastPositionLossNotification: jest.fn().mockResolvedValue(undefined),
+    getUsersWhoLostPositions: jest.fn().mockResolvedValue([]),
+    getAllRankedForMonth: jest.fn().mockResolvedValue([]),
+    findUsersWhoLostPositions: jest.fn().mockResolvedValue([]),
+    findByUserId: jest.fn().mockResolvedValue(null),
+    create: jest.fn().mockResolvedValue(undefined),
+    update: jest.fn().mockResolvedValue(undefined),
+    getAllRankedForYear: jest.fn().mockResolvedValue([]),
+    getAllRankedForMonthAndYear: jest.fn().mockResolvedValue([]),
+    getAllRankedForMonthAndYearWithPositionLoss: jest
+      .fn()
+      .mockResolvedValue([]),
+    getAllRankedForMonthAndYearWithPositionLossAndNotification: jest
+      .fn()
+      .mockResolvedValue([]),
+    getAllRankedForMonthAndYearWithNotification: jest
+      .fn()
+      .mockResolvedValue([]),
+    ...({} as any),
+  };
+};
+
+export const makeNotificationRepository =
+  (): jest.Mocked<NotificationRepositoryProtocol> => ({
+    create: jest.fn().mockResolvedValue(null),
+    countNewByUserId: jest.fn().mockResolvedValue(0),
+    ...({} as any),
+  });
+
 const makeSut = () => {
   const authenticationRepositoryRepositorySpy =
     makeAuthenticationRepositoryRepository();
-  const sut = new ValidateTokenUseCase(authenticationRepositoryRepositorySpy);
+
+  const notificationRepositoryRepositorySpy = makeNotificationRepository();
+  const userMonthlyEntryRankRepositoryRepository =
+    makeUserMonthlyEntryRankRepositoryRepository();
+  const sut = new ValidateTokenUseCase(
+    authenticationRepositoryRepositorySpy,
+    userMonthlyEntryRankRepositoryRepository,
+    notificationRepositoryRepositorySpy
+  );
 
   const validateData = {
     userId: "mock-user-id",

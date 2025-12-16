@@ -1,6 +1,6 @@
 import { UserMonthlyEntryRank } from "@/domain/entities/postgres/UserMonthlyEntryRank";
 import { Authentication } from "@/domain/entities/postgres/Authentication";
-import { Between, getRepository } from "typeorm";
+import { getRepository } from "typeorm";
 import { UserMonthlyEntryRankRepositoryProtocol } from "../interfaces/userMonthlyEntryRankRepositoryProtocol";
 
 export class UserMonthlyEntryRankRepository
@@ -139,39 +139,39 @@ export class UserMonthlyEntryRankRepository
   }
 
   /**
-   * Encontra usuários que perderam posições no rank em comparação com o mês anterior.
+   * Encontra usuários que perderam posições no rank em comparação com o processamento anterior.
+   * Compara o ranking atual do mês (até agora) com o ranking do mês até o horário anterior.
    * @param {Object} data - Dados para a verificação
    * @param {number} data.year - Ano atual
    * @param {number} data.month - Mês atual (1-12)
+   * @param {Date} data.currentTime - Horário atual do processamento
+   * @param {string} data.userId - ID do usuário que está fazendo a requisição (será excluído)
    * @returns {Promise<{ userId: string; positionsLost: number; currentPosition: number }[]>} Lista de usuários que perderam posições
    */
   async findUsersWhoLostPositions(data: {
     year: number;
     month: number;
+    currentTime: Date;
+    userId: string;
+    previousRanks: { userId: string; rank: number }[];
   }): Promise<
-    { userId: string; positionsLost: number; currentPosition: number }[]
+    {
+      userId: string;
+      positionsLost: number;
+      currentPosition: number;
+    }[]
   > {
     try {
-      // Calcular mês/ano anterior
-      let prevYear = data.year;
-      let prevMonth = data.month - 1;
-      if (prevMonth === 0) {
-        prevMonth = 12;
-        prevYear -= 1;
-      }
+      const startOfMonth = new Date(data.year, data.month - 1, 1);
+      const currentTime = data.currentTime;
 
-      const currentRanks = await this.getAllRankedForMonth({
-        year: data.year,
-        month: data.month,
-      });
-
-      const previousRanks = await this.getAllRankedForMonth({
-        year: prevYear,
-        month: prevMonth,
-      });
+      const currentRanks = await this.getRankingForPeriod(
+        startOfMonth,
+        currentTime
+      );
 
       const prevRankMap = new Map<string, number>();
-      previousRanks.forEach((r) => {
+      data.previousRanks.forEach((r) => {
         prevRankMap.set(r.userId, r.rank);
       });
 
@@ -181,23 +181,171 @@ export class UserMonthlyEntryRankRepository
         currentPosition: number;
       }[] = [];
 
-      currentRanks.forEach((current) => {
-        const prevRank = prevRankMap.get(current.userId);
-        if (prevRank !== undefined && current.rank > prevRank) {
-          // Rank maior significa posição pior
-          const positionsLost = current.rank - prevRank;
-          lostPositions.push({
-            userId: current.userId,
-            positionsLost,
-            currentPosition: current.rank,
-          });
+      for (const current of currentRanks) {
+        if (current.userId === data.userId) {
+          continue;
         }
-      });
+
+        const prevRank = prevRankMap.get(current.userId);
+
+        if (prevRank !== undefined && current.rank > prevRank) {
+          const positionsLost = current.rank - prevRank;
+
+          const wasNotified = await this.wasRecentlyNotified({
+            userId: current.userId,
+            year: data.year,
+            month: data.month,
+            currentRank: current.rank,
+            timeWindowMinutes: 5,
+          });
+
+          if (!wasNotified) {
+            lostPositions.push({
+              userId: current.userId,
+              positionsLost,
+              currentPosition: current.rank,
+            });
+          }
+        }
+      }
 
       return lostPositions;
     } catch (error: any) {
       throw new Error(
         `Erro ao encontrar usuários que perderam posições: ${error.message}`
+      );
+    }
+  }
+
+  /**
+   * Atualiza a última notificação de perda de posição
+   * @param {Object} data - Dados para atualização
+   * @param {string} data.userId - ID do usuário
+   * @param {number} data.year - Ano
+   * @param {number} data.month - Mês
+   * @param {number} data.currentRank - Posição atual no ranking
+   * @param {Date} data.notifiedAt - Data/hora da notificação
+   * @returns {Promise<void>}
+   */
+  async updateLastPositionLossNotification(data: {
+    userId: string;
+    year: number;
+    month: number;
+    currentRank: number;
+    notifiedAt: Date;
+  }): Promise<void> {
+    try {
+      const rankRepo = getRepository(UserMonthlyEntryRank);
+      await rankRepo.update(
+        {
+          userId: data.userId,
+          year: data.year,
+          month: data.month,
+        },
+        {
+          lastPositionLossNotifiedAt: data.notifiedAt,
+          lastNotifiedRank: data.currentRank,
+        }
+      );
+    } catch (error: any) {
+      throw new Error(`Erro ao atualizar última notificação: ${error.message}`);
+    }
+  }
+
+  /**
+   * Verifica se o usuário já foi notificado sobre perda de posição recentemente
+   * @param {Object} data - Dados para verificação
+   * @param {string} data.userId - ID do usuário
+   * @param {number} data.year - Ano
+   * @param {number} data.month - Mês
+   * @param {number} data.currentRank - Posição atual no ranking
+   * @param {number} [data.timeWindowMinutes=60] - Janela de tempo em minutos (padrão: 60)
+   * @returns {Promise<boolean>} true se já foi notificado recentemente
+   */
+  async wasRecentlyNotified(data: {
+    userId: string;
+    year: number;
+    month: number;
+    currentRank: number;
+    timeWindowMinutes?: number;
+  }): Promise<boolean> {
+    try {
+      const rankRepo = getRepository(UserMonthlyEntryRank);
+      const rank = await rankRepo.findOne({
+        where: {
+          userId: data.userId,
+          year: data.year,
+          month: data.month,
+        },
+      });
+
+      if (!rank || !rank.lastPositionLossNotifiedAt) {
+        return false;
+      }
+
+      if (rank.lastNotifiedRank !== data.currentRank) {
+        return false;
+      }
+
+      const timeWindow = (data.timeWindowMinutes || 60) * 60 * 1000;
+      const timeSinceLastNotification =
+        Date.now() - rank.lastPositionLossNotifiedAt.getTime();
+
+      return timeSinceLastNotification < timeWindow;
+    } catch (error: any) {
+      throw new Error(
+        `Erro ao verificar notificação recente: ${error.message}`
+      );
+    }
+  }
+
+  /**
+   * Calcula o ranking de usuários em um período específico baseado nas autenticações.
+   * @param {Date} startTime - Início do período
+   * @param {Date} endTime - Fim do período
+   * @returns {Promise<{userId: string, totalEntries: number, rank: number}[]>} Lista ranqueada
+   */
+  private async getRankingForPeriod(
+    startTime: Date,
+    endTime: Date
+  ): Promise<{ userId: string; totalEntries: number; rank: number }[]> {
+    try {
+      const authRepo = getRepository(Authentication);
+
+      const results = await authRepo
+        .createQueryBuilder("auth")
+        .select("auth.userId", "userId")
+        .addSelect("SUM(auth.entryCount)", "totalEntries")
+        .where("auth.loginAt BETWEEN :start AND :end", {
+          start: startTime,
+          end: endTime,
+        })
+        .groupBy("auth.userId")
+        .orderBy('"totalEntries"', "DESC")
+        .getRawMany();
+
+      const ranked: { userId: string; totalEntries: number; rank: number }[] =
+        [];
+      let currentRank = 1;
+      let prevTotal = -1;
+
+      for (const r of results) {
+        const totalEntries = parseInt(r.totalEntries) || 0;
+        if (totalEntries !== prevTotal) {
+          currentRank = ranked.length + 1;
+          prevTotal = totalEntries;
+        }
+        ranked.push({
+          userId: r.userId,
+          totalEntries,
+          rank: currentRank,
+        });
+      }
+
+      return ranked;
+    } catch (error: any) {
+      throw new Error(
+        `Erro ao calcular ranking para período: ${error.message}`
       );
     }
   }

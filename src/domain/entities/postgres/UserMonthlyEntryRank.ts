@@ -35,6 +35,12 @@ export class UserMonthlyEntryRank extends BaseEntity {
   @Column({ type: "int", default: 0 })
   totalEntries!: number;
 
+  @Column({ type: "timestamp", nullable: true })
+  lastPositionLossNotifiedAt!: Date | null;
+
+  @Column({ type: "int", nullable: true })
+  lastNotifiedRank!: number | null;
+
   @CreateDateColumn({ type: "timestamp" })
   createdAt!: Date;
 
