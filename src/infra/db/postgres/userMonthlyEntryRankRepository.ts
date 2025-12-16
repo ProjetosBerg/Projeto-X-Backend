@@ -9,6 +9,88 @@ export class UserMonthlyEntryRankRepository
   constructor() {}
 
   /**
+   * Obtém a lista paginada de usuários ranqueados por total de entradas em um mês/ano específico (descendente ou ascendente).
+   * @param {Object} data - Dados para o rank
+   * @param {number} data.year - Ano
+   * @param {number} data.month - Mês (1-12)
+   * @param {number} [data.page=1] - Página atual
+   * @param {number} [data.limit=10] - Limite por página
+   * @param {string} [data.order="DESC"] - Ordem (ASC ou DESC)
+   * @returns {Promise<{rankedUsers: {userId: string, totalEntries: number, rank: number}[], total: number}>} Lista paginada ranqueada e total
+   */
+
+  /**
+   * Busca um registro de rank mensal por userId, year e month.
+   * @param {Object} data - Dados para busca
+   * @param {string} data.userId - ID do usuário
+   * @param {number} data.year - Ano
+   * @param {number} data.month - Mês (1-12)
+   * @returns {Promise<UserMonthlyEntryRank | undefined>} O registro ou undefined se não encontrado
+   */
+  async findOneRankUser(data: {
+    userId: string;
+    year: number;
+    month: number;
+  }): Promise<UserMonthlyEntryRank | null> {
+    try {
+      const rankRepo = getRepository(UserMonthlyEntryRank);
+      return await rankRepo.findOne({
+        where: { userId: data.userId, year: data.year, month: data.month },
+      });
+    } catch (error: any) {
+      throw new Error(`Erro ao buscar rank: ${error.message}`);
+    }
+  }
+
+  async getAllRankedForMonthPaginated(data: {
+    year: number;
+    month: number;
+    page?: number;
+    limit?: number;
+    order?: string;
+  }): Promise<{
+    rankedUsers: { userId: string; totalEntries: number; rank: number }[];
+    total: number;
+  }> {
+    try {
+      const page = data.page || 1;
+      const limit = data.limit || 10;
+      const orderDirection = data.order === "ASC" ? "ASC" : "DESC";
+
+      const rankRepo = getRepository(UserMonthlyEntryRank);
+      const [ranks, total] = await rankRepo.findAndCount({
+        where: { year: data.year, month: data.month },
+        order: { totalEntries: orderDirection },
+        skip: (page - 1) * limit,
+        take: limit,
+      });
+
+      const ranked: { userId: string; totalEntries: number; rank: number }[] =
+        [];
+      let currentRank = (page - 1) * limit + 1;
+      let prevTotal = -1;
+
+      for (const r of ranks) {
+        if (r.totalEntries !== prevTotal) {
+          currentRank = (page - 1) * limit + ranked.length + 1;
+          prevTotal = r.totalEntries;
+        }
+        ranked.push({
+          userId: r.userId,
+          totalEntries: r.totalEntries,
+          rank: currentRank,
+        });
+      }
+
+      return { rankedUsers: ranked, total };
+    } catch (error: any) {
+      throw new Error(
+        `Erro ao obter ranking mensal paginado: ${error.message}`
+      );
+    }
+  }
+
+  /**
    * Atualiza o total de entradas para um usuário em um mês/ano específico, calculando a soma de entryCount das autenticações nesse período.
    * @param {Object} data - Dados para atualização
    * @param {string} data.userId - ID do usuário

@@ -14,6 +14,7 @@ import { makeGetPresenceUserControllerFactory } from "@/main/factories/controlle
 import { makeGetStreakUserControllerFactory } from "@/main/factories/controllers/user/getStreakUserControllerFactory";
 import { makeUploadUserMiddleware } from "../middlewares/uploadUserMiddleware";
 import { makeGetInboxControllerFactory } from "@/main/factories/controllers/user/getInboxControllerFactory";
+import { makeGetByUserIdRankControllerFactory } from "@/main/factories/controllers/user/getByUserIdRankControllerFactory";
 
 export const routesUser = (router: Router) => {
   router.get("/user/find-questions", (req: Request, res: Response) => {
@@ -33,6 +34,14 @@ export const routesUser = (router: Router) => {
     adapterMiddleware(makeGetLoginMiddleware()),
     (req: Request, res: Response) => {
       makeGetStreakUserControllerFactory().handle(req, res);
+    }
+  );
+
+  router.get(
+    "/user/rank",
+    adapterMiddleware(makeGetLoginMiddleware()),
+    (req: Request, res: Response) => {
+      makeGetByUserIdRankControllerFactory().handle(req, res);
     }
   );
 

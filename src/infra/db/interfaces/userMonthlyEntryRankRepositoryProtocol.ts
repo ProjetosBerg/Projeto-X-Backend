@@ -1,5 +1,6 @@
 import { UserMonthlyEntryRank } from "@/domain/entities/postgres/UserMonthlyEntryRank";
 import { UserMonthlyEntryRankModel } from "@/domain/models/postgres/UserMonthlyEntryRankModel";
+import { FindOneOptions } from "typeorm";
 
 export interface UserMonthlyEntryRankRepositoryProtocol {
   /**
@@ -46,6 +47,20 @@ export interface UserMonthlyEntryRankRepositoryProtocol {
   wasRecentlyNotified(
     data: UserMonthlyEntryRankRepositoryProtocol.WasRecentlyNotifiedParams
   ): Promise<boolean>;
+
+  getAllRankedForMonthPaginated(
+    data: UserMonthlyEntryRankRepositoryProtocol.GetAllRankedForMonthPaginatedParams
+  ): Promise<{
+    rankedUsers: { userId: string; totalEntries: number; rank: number }[];
+    total: number;
+  }>;
+
+  /**
+   * Busca um registro de rank mensal por userId, year e month
+   */
+  findOneRankUser(
+    data: UserMonthlyEntryRankRepositoryProtocol.FindOneRankUserParams
+  ): Promise<UserMonthlyEntryRank | null>;
 }
 
 export namespace UserMonthlyEntryRankRepositoryProtocol {
@@ -88,5 +103,18 @@ export namespace UserMonthlyEntryRankRepositoryProtocol {
     month: UserMonthlyEntryRankModel["month"];
     currentRank: number;
     timeWindowMinutes?: number;
+  };
+
+  export type GetAllRankedForMonthPaginatedParams = {
+    year: UserMonthlyEntryRankModel["year"];
+    month: UserMonthlyEntryRankModel["month"];
+    page?: UserMonthlyEntryRankModel["year"];
+    limit?: number;
+    order?: string;
+  };
+  export type FindOneRankUserParams = {
+    userId: UserMonthlyEntryRankModel["userId"];
+    year: number;
+    month: number;
   };
 }
