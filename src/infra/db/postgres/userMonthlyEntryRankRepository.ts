@@ -49,7 +49,12 @@ export class UserMonthlyEntryRankRepository
     limit?: number;
     order?: string;
   }): Promise<{
-    rankedUsers: { userId: string; totalEntries: number; rank: number }[];
+    rankedUsers: {
+      userId: string;
+      name: string;
+      totalEntries: number;
+      rank: number;
+    }[];
     total: number;
   }> {
     try {
@@ -63,10 +68,15 @@ export class UserMonthlyEntryRankRepository
         order: { totalEntries: orderDirection },
         skip: (page - 1) * limit,
         take: limit,
+        relations: ["user"],
       });
 
-      const ranked: { userId: string; totalEntries: number; rank: number }[] =
-        [];
+      const ranked: {
+        userId: string;
+        name: string;
+        totalEntries: number;
+        rank: number;
+      }[] = [];
       let currentRank = (page - 1) * limit + 1;
       let prevTotal = -1;
 
@@ -77,6 +87,7 @@ export class UserMonthlyEntryRankRepository
         }
         ranked.push({
           userId: r.userId,
+          name: r.user.name,
           totalEntries: r.totalEntries,
           rank: currentRank,
         });
