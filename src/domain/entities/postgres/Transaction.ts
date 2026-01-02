@@ -24,7 +24,7 @@ export class Transaction extends BaseEntity {
   description!: string;
 
   @Column({ type: "decimal", precision: 10, scale: 2, nullable: true })
-  amount!: number;
+  amount?: number;
 
   @Column({ type: "date" })
   transaction_date!: Date;
