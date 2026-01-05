@@ -5,18 +5,26 @@ import { NotificationRepositoryProtocol } from "@/infra/db/interfaces/notificati
 import { CreateSummaryDayNotesUseCaseProtocol } from "../interfaces/notes/createSummaryDayNotesUseCaseProtocol";
 import { createSummaryDayNotesValidationSchema } from "../validation/notes/createSummaryDayNotesValidationSchema";
 import { NotificationModel } from "@/domain/models/postgres/NotificationModel";
-
-// NOVO: Socket.IO
 import { getIo } from "@/lib/socket";
 import logger from "@/loaders/logger";
 
-/**
- * Cria um resumo do dia baseado nas notas do usuário de forma estruturada e bonita,
- * sem depender de APIs externas de IA. Suporte específico para status e prioridades.
- */
+interface TimeSlot {
+  label: string;
+  emoji: string;
+  start: number;
+  end: number;
+}
+
 export class CreateSummaryDayNotesUseCase
   implements CreateSummaryDayNotesUseCaseProtocol
 {
+  private readonly TIME_SLOTS: TimeSlot[] = [
+    { label: "Madrugada", emoji: "🌙", start: 0, end: 6 },
+    { label: "Manhã", emoji: "🌅", start: 6, end: 12 },
+    { label: "Tarde", emoji: "☀️", start: 12, end: 18 },
+    { label: "Noite", emoji: "🌆", start: 18, end: 24 },
+  ];
+
   constructor(
     private readonly notesRepository: NotesRepositoryProtocol,
     private readonly routinesRepository: RoutinesRepositoryProtocol,
@@ -45,7 +53,7 @@ export class CreateSummaryDayNotesUseCase
         return "Nenhuma nota encontrada para esta data.";
       }
 
-      const summary = this.generateStructuredSummary(notes, validatedData.date);
+      const summary = this.generateModernSummary(notes, validatedData.date);
 
       let routineId = validatedData.routine_id;
       let routineModel;
@@ -159,144 +167,402 @@ export class CreateSummaryDayNotesUseCase
     }
   }
 
-  // ... o método generateStructuredSummary permanece exatamente igual (perfeito!) ...
-  private generateStructuredSummary(notes: any[], date: string): string {
-    // ... seu código incrível de geração de resumo (não alterado) ...
+  private generateModernSummary(notes: any[], date: string): string {
     const dateParts = date.split("-");
     const year = parseInt(dateParts[0], 10);
     const month = parseInt(dateParts[1], 10) - 1;
     const day = parseInt(dateParts[2], 10);
     const localDate = new Date(year, month, day);
-    const formattedDate = localDate.toLocaleDateString("pt-BR");
-
-    const statusMap: { [key: string]: any[] } = {};
-    notes.forEach((note) => {
-      const statusKey = (note.status || "sem status").toLowerCase();
-      const originalStatus = note.status || "Sem Status";
-      if (!statusMap[statusKey]) statusMap[statusKey] = [];
-      statusMap[statusKey].push({ ...note, displayStatus: originalStatus });
+    const formattedDate = localDate.toLocaleDateString("pt-BR", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
 
-    const priorityCounts: { [key: string]: number } = {};
-    notes.forEach((note) => {
-      const priorityKey = (note.priority || "sem prioridade").toLowerCase();
-      priorityCounts[priorityKey] = (priorityCounts[priorityKey] || 0) + 1;
-    });
+    const metrics = this.calculateMetrics(notes);
 
-    const completionStatuses = ["concluído"];
-    const completedNotes = Object.values(statusMap)
-      .flat()
-      .filter((note) =>
-        completionStatuses.some((status) =>
-          note.status?.toLowerCase().includes(status)
-        )
-      );
-    const totalNotes = notes.length;
-    const completedCount = completedNotes.length;
-    const notRealizedCount = statusMap["não realizado"]?.length || 0;
-    const urgentCount = priorityCounts["urgente"] || 0;
-    const highCount = priorityCounts["alta"] || 0;
-    const productivity =
-      totalNotes > 0 ? Math.round((completedCount / totalNotes) * 100) : 0;
+    const notesByPeriod = this.organizeNotesByPeriod(notes);
 
-    let productivityMessage = `*${completedCount}/${totalNotes} atividades concluídas (${productivity}%). `;
-    if (notRealizedCount > 0) {
-      productivityMessage += `(${notRealizedCount} pendentes – considere revisão para o próximo ciclo.) `;
-    }
-    if (urgentCount > 0) {
-      productivityMessage += `Warning: ${urgentCount} itens de prioridade urgente identificados – ação imediata recomendada. `;
-    } else if (highCount > 0) {
-      productivityMessage += `Fire: ${highCount} itens de alta prioridade em foco. `;
-    }
-    productivityMessage +=
-      completedCount === totalNotes
-        ? `Excelente desempenho: dia integralmente produtivo.`
-        : completedCount === 0
-          ? `Oportunidade de avanço: todas as tarefas em fase inicial – impulsione o momentum.`
-          : `Progresso sólido alcançado; otimize para maior eficiência no dia seguinte.`;
+    let summary = ``;
 
-    const statusOrder = ["não realizado", "em andamento", "concluído"];
+    summary += this.generateMetricsDashboard(metrics);
+    summary += `\n---\n\n`;
 
-    const getEmojiForStatus = (statusKey: string): string => {
-      if (statusKey.includes("não realizado")) return "Cross Mark";
-      if (statusKey.includes("em andamento")) return "Hourglass Not Done";
-      if (statusKey.includes("concluído")) return "Check Mark Button";
-      return "Memo";
-    };
+    summary += `# ⏰ Linha do Tempo\n\n`;
 
-    const getEmojiForPriority = (priorityKey: string): string => {
-      if (priorityKey.includes("urgente")) return "Police Car Light";
-      if (priorityKey.includes("alta")) return "Fire";
-      if (priorityKey.includes("média")) return "High Voltage";
-      if (priorityKey.includes("baixa")) return "Pushpin";
-      return "Memo";
-    };
-
-    const formatNotesList = (
-      noteList: any[],
-      title: string,
-      emoji: string
-    ): string => {
-      if (noteList.length === 0) return "";
-      const listItems = noteList
-        .map((note) => {
-          const timeRange = `${note.startTime || "Não especificado"} - ${note.endTime || "Não especificado"}`;
-          const activityType = note.activityType || "Não classificada";
-          const priority = note.priority || "Não priorizada";
-          const description = note.description || "Sem detalhes adicionais.";
-          const collaborators =
-            note.collaborators?.length > 0
-              ? `Colaboradores: ${note.collaborators.join(", ")}`
-              : "";
-          const comment = note.comments?.[0]
-            ? `*Observação:* "${note.comments[0].text}" (por ${note.comments[0].author})`
-            : "";
-
-          let item = `• **${note.activity || "Atividade não nomeada"}** (${priority}, ${activityType}): ${description}.  \n`;
-          item += `  *Período:* ${timeRange}  \n`;
-          if (collaborators) item += `  *${collaborators}*  \n`;
-          if (comment) item += `  ${comment}  \n`;
-          return item;
-        })
-        .join("\n\n");
-      return `### ${emoji} ${title}\n${listItems}\n\n`;
-    };
-
-    let summary = `## Relatório Diário de Atividades - ${formattedDate}\n\n`;
-    summary += `**Panorama Executivo:** ${totalNotes} tarefas registradas. ${productivityMessage}\n\n`;
-
-    statusOrder.forEach((statusKey) => {
-      const notesGroup = statusMap[statusKey];
-      if (notesGroup && notesGroup.length > 0) {
-        const displayTitle = notesGroup[0].displayStatus;
-        const emoji = getEmojiForStatus(statusKey);
-        summary += formatNotesList(notesGroup, displayTitle, emoji);
+    this.TIME_SLOTS.forEach((slot) => {
+      const periodNotes = notesByPeriod[slot.label] || [];
+      if (periodNotes.length > 0) {
+        summary += this.generatePeriodSection(slot, periodNotes);
       }
     });
 
-    const priorityLevels = { urgente: 4, alta: 3, média: 2, baixa: 1 };
-    const priorityNotes = notes
-      .filter(
-        (note) => priorityLevels[(note.priority || "").toLowerCase()] >= 3
-      )
-      .sort(
-        (a, b) =>
-          (priorityLevels[(b.priority || "").toLowerCase()] || 0) -
-          (priorityLevels[(a.priority || "").toLowerCase()] || 0)
-      )
-      .slice(0, 5);
-    if (priorityNotes.length > 0) {
-      summary += `### Star Prioridades Estratégicas\n`;
-      priorityNotes.forEach((note) => {
-        const statusKey = (note.status || "").toLowerCase();
-        const priorityKey = (note.priority || "").toLowerCase();
-        const statusEmoji = getEmojiForStatus(statusKey);
-        const priorityEmoji = getEmojiForPriority(priorityKey);
-        summary += `- ${statusEmoji} ${priorityEmoji} **${note.activity}**: ${note.description || "Sem detalhes adicionais."} (${note.displayStatus || note.status}, ${note.priority})\n`;
-      });
-      summary += `*Recomendação:* ${priorityNotes.length} elementos de alta ou urgente relevância – inicie pelas urgentes para mitigar riscos. Itens de menor prioridade podem ser adiados com segurança.\n\n`;
-    }
+    summary += `---\n\n`;
+
+    summary += this.generateUncompletedActivities(notes);
+    summary += `\n---\n\n`;
+
+    summary += this.generateInsights(notes, metrics);
 
     return summary;
+  }
+
+  private calculateMetrics(notes: any[]) {
+    const total = notes.length;
+    const completed = notes.filter((n) =>
+      n.status?.toLowerCase().includes("concluído")
+    ).length;
+    const inProgress = notes.filter((n) =>
+      n.status?.toLowerCase().includes("em andamento")
+    ).length;
+    const notStarted = notes.filter((n) =>
+      n.status?.toLowerCase().includes("não realizado")
+    ).length;
+
+    const urgent = notes.filter((n) =>
+      n.priority?.toLowerCase().includes("urgente")
+    ).length;
+    const high = notes.filter((n) =>
+      n.priority?.toLowerCase().includes("alta")
+    ).length;
+
+    const completionRate =
+      total > 0 ? Math.round((completed / total) * 100) : 0;
+
+    const withCollaborators = notes.filter(
+      (n) => n.collaborators && n.collaborators.length > 0
+    ).length;
+
+    let totalMinutes = 0;
+    notes.forEach((note) => {
+      if (note.startTime && note.endTime) {
+        const start = this.timeToMinutes(note.startTime);
+        const end = this.timeToMinutes(note.endTime);
+        totalMinutes += end - start;
+      }
+    });
+
+    return {
+      total,
+      completed,
+      inProgress,
+      notStarted,
+      urgent,
+      high,
+      completionRate,
+      withCollaborators,
+      totalHours: Math.floor(totalMinutes / 60),
+      totalMinutes: totalMinutes % 60,
+    };
+  }
+
+  private timeToMinutes(time: string): number {
+    const [hours, minutes] = time.split(":").map(Number);
+    return hours * 60 + minutes;
+  }
+
+  private getTimeSlotForNote(note: any): string {
+    if (!note.startTime) return "Noite"; // Default
+
+    const hour = parseInt(note.startTime.split(":")[0]);
+    const slot = this.TIME_SLOTS.find((s) => hour >= s.start && hour < s.end);
+    return slot ? slot.label : "Noite";
+  }
+
+  private organizeNotesByPeriod(notes: any[]) {
+    const organized: { [key: string]: any[] } = {};
+
+    notes.forEach((note) => {
+      const period = this.getTimeSlotForNote(note);
+      if (!organized[period]) {
+        organized[period] = [];
+      }
+      organized[period].push(note);
+    });
+
+    Object.keys(organized).forEach((period) => {
+      organized[period].sort((a, b) => {
+        const timeA = a.startTime || "00:00:00";
+        const timeB = b.startTime || "00:00:00";
+        return timeA.localeCompare(timeB);
+      });
+    });
+
+    return organized;
+  }
+
+  private generateMetricsDashboard(metrics: any): string {
+    let dashboard = `## 📊 Visão Geral\n\n`;
+
+    dashboard += `| Métrica | Valor |\n`;
+    dashboard += `|---------|-------|\n`;
+    dashboard += `| 📝 **Total de Atividades** | ${metrics.total} |\n`;
+    dashboard += `| ✅ **Concluídas** | ${metrics.completed} (${metrics.completionRate}%) |\n`;
+    dashboard += `| ⏳ **Em Andamento** | ${metrics.inProgress} |\n`;
+    dashboard += `| ❌ **Não Realizadas** | ${metrics.notStarted} |\n`;
+    dashboard += `| 🔴 **Alta Prioridade** | ${metrics.high + metrics.urgent} |\n`;
+    dashboard += `| 👥 **Com Colaboradores** | ${metrics.withCollaborators} |\n`;
+    dashboard += `| ⏱️ **Tempo Total** | ${metrics.totalHours}h ${metrics.totalMinutes}min |\n\n`;
+
+    const productivityEmoji =
+      metrics.completionRate >= 80
+        ? "🔥"
+        : metrics.completionRate >= 60
+          ? "💪"
+          : metrics.completionRate >= 40
+            ? "⚡"
+            : "📊";
+
+    dashboard += `### ${productivityEmoji} Indicador de Produtividade\n\n`;
+    dashboard += this.generateProgressBar(metrics.completionRate);
+    dashboard += `\n`;
+
+    if (metrics.completionRate >= 80) {
+      dashboard += `> 🎉 **Excelente desempenho!** Você está arrasando hoje!\n\n`;
+    } else if (metrics.completionRate >= 60) {
+      dashboard += `> 💪 **Bom trabalho!** Continue mantendo o ritmo.\n\n`;
+    } else if (metrics.completionRate >= 40) {
+      dashboard += `> ⚡ **Progresso consistente.** Foco nas prioridades!\n\n`;
+    } else {
+      dashboard += `> 📊 **Dia em desenvolvimento.** Cada passo conta!\n\n`;
+    }
+
+    return dashboard;
+  }
+
+  private generateProgressBar(percentage: number): string {
+    const filled = Math.round(percentage / 5);
+    const empty = 20 - filled;
+    const bar = "█".repeat(filled) + "░".repeat(empty);
+    return `\`${bar}\` **${percentage}%**\n`;
+  }
+
+  private generateUncompletedActivities(notes: any[]): string {
+    const uncompletedNotes = notes.filter(
+      (note) => !note.status?.toLowerCase().includes("concluído")
+    );
+
+    if (uncompletedNotes.length === 0) {
+      return `# ✅ Atividades Pendentes\n\n> 🎉 **Parabéns!** Todas as atividades foram concluídas hoje!\n`;
+    }
+
+    let section = `# ⚠️ Atividades Pendentes\n\n`;
+    section += `*${uncompletedNotes.length} ${uncompletedNotes.length === 1 ? "atividade não concluída" : "atividades não concluídas"}*\n\n`;
+
+    const urgentNotes = uncompletedNotes.filter((n) =>
+      n.priority?.toLowerCase().includes("urgente")
+    );
+    const highNotes = uncompletedNotes.filter((n) =>
+      n.priority?.toLowerCase().includes("alta")
+    );
+    const mediumNotes = uncompletedNotes.filter((n) =>
+      n.priority?.toLowerCase().includes("média")
+    );
+    const lowNotes = uncompletedNotes.filter(
+      (n) =>
+        n.priority?.toLowerCase().includes("baixa") ||
+        !n.priority ||
+        n.priority === ""
+    );
+
+    if (urgentNotes.length > 0) {
+      section += `## 🚨 Prioridade Urgente\n\n`;
+      urgentNotes.forEach((note) => {
+        section += this.generateUncompletedNoteItem(note);
+      });
+      section += `\n`;
+    }
+
+    if (highNotes.length > 0) {
+      section += `## 🔴 Prioridade Alta\n\n`;
+      highNotes.forEach((note) => {
+        section += this.generateUncompletedNoteItem(note);
+      });
+      section += `\n`;
+    }
+
+    if (mediumNotes.length > 0) {
+      section += `## 🟡 Prioridade Média\n\n`;
+      mediumNotes.forEach((note) => {
+        section += this.generateUncompletedNoteItem(note);
+      });
+      section += `\n`;
+    }
+
+    if (lowNotes.length > 0) {
+      section += `## 🟢 Prioridade Baixa / Sem Prioridade\n\n`;
+      lowNotes.forEach((note) => {
+        section += this.generateUncompletedNoteItem(note);
+      });
+      section += `\n`;
+    }
+
+    return section;
+  }
+
+  private generateUncompletedNoteItem(note: any): string {
+    const statusEmoji = this.getStatusEmoji(note.status);
+    const timeRange = note.startTime
+      ? `${note.startTime.substring(0, 5)} → ${note.endTime?.substring(0, 5) || "—"}`
+      : "Sem horário definido";
+
+    let item = `### ${statusEmoji} ${note.activity}\n`;
+    item += `**⏰ ${timeRange}** · 📍 ${note.activityType || "Não especificado"}\n\n`;
+
+    if (note.description) {
+      item += `📝 ${note.description}\n\n`;
+    }
+
+    if (note.collaborators && note.collaborators.length > 0) {
+      item += `👥 **Colaboradores:** ${note.collaborators.join(", ")}\n\n`;
+    }
+
+    return item;
+  }
+
+  private generatePeriodSection(slot: TimeSlot, notes: any[]): string {
+    let section = `## ${slot.emoji} ${slot.label}\n`;
+    section += `*${notes.length} ${notes.length === 1 ? "atividade" : "atividades"}*\n\n`;
+
+    const completedNotes = notes.filter((n) =>
+      n.status?.toLowerCase().includes("concluído")
+    );
+    const inProgressNotes = notes.filter((n) =>
+      n.status?.toLowerCase().includes("em andamento")
+    );
+    const notStartedNotes = notes.filter((n) =>
+      n.status?.toLowerCase().includes("não realizado")
+    );
+    const otherNotes = notes.filter(
+      (n) =>
+        !n.status ||
+        (!n.status.toLowerCase().includes("concluído") &&
+          !n.status.toLowerCase().includes("em andamento") &&
+          !n.status.toLowerCase().includes("não realizado"))
+    );
+
+    if (completedNotes.length > 0) {
+      section += `### ✅ Concluídas (${completedNotes.length})\n\n`;
+      completedNotes.forEach((note) => {
+        section += this.generateNoteItem(note);
+      });
+      section += `\n`;
+    }
+
+    if (inProgressNotes.length > 0) {
+      section += `### ⏳ Em Andamento (${inProgressNotes.length})\n\n`;
+      inProgressNotes.forEach((note) => {
+        section += this.generateNoteItem(note);
+      });
+      section += `\n`;
+    }
+
+    if (notStartedNotes.length > 0) {
+      section += `### ❌ Não Realizadas (${notStartedNotes.length})\n\n`;
+      notStartedNotes.forEach((note) => {
+        section += this.generateNoteItem(note);
+      });
+      section += `\n`;
+    }
+
+    if (otherNotes.length > 0) {
+      section += `### 📝 Outras (${otherNotes.length})\n\n`;
+      otherNotes.forEach((note) => {
+        section += this.generateNoteItem(note);
+      });
+      section += `\n`;
+    }
+
+    return section;
+  }
+
+  private generateNoteItem(note: any): string {
+    const statusEmoji = this.getStatusEmoji(note.status);
+    const priorityEmoji = this.getPriorityEmoji(note.priority);
+    const timeRange = `${note.startTime?.substring(0, 5) || "—"} → ${note.endTime?.substring(0, 5) || "—"}`;
+
+    let item = `**${statusEmoji} ${note.activity}**\n`;
+    item += `⏰ ${timeRange} · ${priorityEmoji} ${note.priority || "Sem prioridade"} · 📍 ${note.activityType || "Não especificado"}\n\n`;
+
+    if (note.description) {
+      item += `📝 ${note.description}\n\n`;
+    }
+
+    if (note.collaborators && note.collaborators.length > 0) {
+      item += `👥 **Colaboradores:** ${note.collaborators.join(", ")}\n\n`;
+    }
+
+    if (note.comments && note.comments.length > 0) {
+      item += `💬 **Observação:** "${note.comments[0].text}" — *${note.comments[0].author}*\n\n`;
+    }
+
+    return item;
+  }
+
+  private generateInsights(notes: any[], metrics: any): string {
+    let insights = `# 💡 Insights e Recomendações\n\n`;
+
+    const criticalNotes = notes
+      .filter(
+        (n) =>
+          n.priority?.toLowerCase().includes("urgente") ||
+          n.priority?.toLowerCase().includes("alta")
+      )
+      .filter((n) => !n.status?.toLowerCase().includes("concluído"));
+
+    if (criticalNotes.length > 0) {
+      insights += `## 🚨 Atenção Necessária\n\n`;
+      criticalNotes.forEach((note) => {
+        const priorityEmoji = this.getPriorityEmoji(note.priority);
+        const statusEmoji = this.getStatusEmoji(note.status);
+        insights += `- ${statusEmoji} ${priorityEmoji} **${note.activity}**: ${note.description || "Requer atenção imediata"}\n`;
+      });
+      insights += `\n`;
+    }
+
+    if (metrics.withCollaborators > 0) {
+      insights += `## 👥 Trabalho em Equipe\n\n`;
+      insights += `${metrics.withCollaborators} ${metrics.withCollaborators === 1 ? "atividade envolveu" : "atividades envolveram"} colaboração. `;
+      insights += `O trabalho em equipe potencializa resultados!\n\n`;
+    }
+
+    insights += `## 🎯 Próximos Passos\n\n`;
+
+    if (metrics.notStarted > 0) {
+      insights += `- 📌 **${metrics.notStarted} ${metrics.notStarted === 1 ? "tarefa pendente" : "tarefas pendentes"}** — Priorize as de alta importância\n`;
+    }
+
+    if (metrics.inProgress > 0) {
+      insights += `- ⏳ **${metrics.inProgress} ${metrics.inProgress === 1 ? "atividade" : "atividades"} em andamento** — Mantenha o foco para concluir\n`;
+    }
+
+    if (metrics.completionRate < 50) {
+      insights += `- 💪 **Dica:** Divida tarefas grandes em etapas menores para aumentar a produtividade\n`;
+    }
+
+    insights += `\n---\n\n`;
+    insights += `*Resumo gerado automaticamente · Continue com o ótimo trabalho!* ✨\n`;
+
+    return insights;
+  }
+
+  private getStatusEmoji(status: string): string {
+    if (!status) return "📝";
+    const s = status.toLowerCase();
+    if (s.includes("concluído")) return "✅";
+    if (s.includes("em andamento")) return "⏳";
+    if (s.includes("não realizado")) return "❌";
+    return "📝";
+  }
+
+  private getPriorityEmoji(priority: string): string {
+    if (!priority) return "📌";
+    const p = priority.toLowerCase();
+    if (p.includes("urgente")) return "🚨";
+    if (p.includes("alta")) return "🔴";
+    if (p.includes("média")) return "🟡";
+    if (p.includes("baixa")) return "🟢";
+    return "📌";
   }
 }
