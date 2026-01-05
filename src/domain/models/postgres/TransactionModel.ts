@@ -7,7 +7,7 @@ export interface TransactionModel extends Transaction {
   id: Transaction["id"];
   title: Transaction["title"];
   description: Transaction["description"];
-  amount: Transaction["amount"];
+  amount?: Transaction["amount"];
   transaction_date: Transaction["transaction_date"];
   monthly_record_id?: MonthlyRecordModel["id"];
   category_id?: CategoryModel["id"];
