@@ -22,8 +22,8 @@ const environments: EnvConfigs = {
   },
   production: {
     type: "mongodb",
-    url: env.get("MONGODB_URL").default("test").asString(),
-    database: env.get("MONGODB_NAME").default("test").asString(),
+    url: env.get("MONGODB_URL").required().asString(),
+    database: env.get("MONGODB_NAME").required().asString(),
     extra: {
       ssl: true,
       authSource: "admin",
